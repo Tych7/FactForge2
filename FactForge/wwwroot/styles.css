@@ -1,0 +1,125 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f5f9;
+  --card: #ffffff;
+  --text: #1c1e29;
+  --muted: #6b7080;
+  --accent: #5b5bf0;
+  --accent-text: #ffffff;
+  --error: #d1453b;
+  --correct: #2fae5f;
+  --incorrect: #d1453b;
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#app { width: 100%; max-width: 480px; }
+
+.screen {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 28px 22px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.hidden { display: none !important; }
+
+h1 { margin: 0 0 24px; font-size: 2rem; }
+h2 { margin: 0 0 12px; }
+
+label {
+  display: block;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 12px 0 4px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d8dae3;
+  font-size: 1.1rem;
+  text-transform: none;
+}
+
+#joinCode { text-transform: uppercase; letter-spacing: 3px; text-align: center; }
+
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled { opacity: 0.5; cursor: default; }
+
+.error { color: var(--error); min-height: 1.2em; margin-top: 8px; }
+.muted { color: var(--muted); }
+
+.timer-bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: #e8e9f0;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.timer-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 100%;
+  transition: width 0.2s linear;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.choices.single-column { grid-template-columns: 1fr; }
+
+.choice-btn {
+  margin: 0;
+  min-height: 72px;
+  white-space: normal;
+  word-break: break-word;
+  background: #eceeff;
+  color: var(--text);
+}
+
+.choice-btn.selected { background: var(--accent); color: var(--accent-text); }
+
+.open-answer-form { margin-top: 16px; }
+
+#finalLeaderboard {
+  text-align: left;
+  padding-left: 24px;
+}
+
+#finalLeaderboard li { margin: 6px 0; font-size: 1.1rem; }
+
+.reveal-correct { color: var(--correct); font-weight: 700; }
+.reveal-incorrect { color: var(--incorrect); font-weight: 700; }

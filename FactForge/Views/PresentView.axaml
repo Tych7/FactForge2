@@ -1,0 +1,134 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:models="using:FactForge.Models"
+             xmlns:sys="using:System"
+             xmlns:convb="using:Avalonia.Data.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             x:Class="FactForge.Views.PresentView"
+             x:DataType="vm:PresentViewModel">
+
+    <Grid Margin="24" RowDefinitions="Auto,*">
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
+            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}"/>
+            <TextBlock Grid.Column="1" Text="{Binding QuizTitle}" FontSize="22" FontWeight="Bold"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Text="{Binding SlideNumber}" Opacity="0.6"/>
+        </Grid>
+
+        <!-- Lobby: QR + join code + waiting players -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Lobby}">
+            <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                <Image Source="{Binding QrImage}" Width="280" Height="280"/>
+                <TextBlock Text="{Binding JoinUrl}" HorizontalAlignment="Center" FontSize="14" Opacity="0.7"/>
+                <TextBlock Text="{Binding JoinCode}" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold"/>
+                <Button Content="Start Quiz ▶" Classes="accent" HorizontalAlignment="Center" FontSize="18"
+                        Padding="24,10" Command="{Binding StartQuizCommand}"/>
+            </StackPanel>
+
+            <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="24,0,0,0">
+                <TextBlock Grid.Row="0" Text="{Binding Players.Count, StringFormat='Players joined: {0}'}"
+                           FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                        CornerRadius="8" Padding="12">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Players}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:PlayerInfoDto">
+                                    <TextBlock Text="{Binding Name}" Padding="4"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Text slide -->
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16" MaxWidth="900"
+                    IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=TextSlide}">
+            <TextBlock Text="{Binding CurrentSlide.Header}" FontSize="42" FontWeight="Bold"
+                       HorizontalAlignment="Center" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding CurrentSlide.SubText}" FontSize="20" Opacity="0.8"
+                       HorizontalAlignment="Center" TextWrapping="Wrap"/>
+            <Button Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,24,0,0"
+                    FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
+        </StackPanel>
+
+        <!-- Question in progress / revealed -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*,Auto">
+            <Grid.IsVisible>
+                <MultiBinding Converter="{x:Static convb:BoolConverters.Or}">
+                    <Binding Path="Phase" Converter="{StaticResource EnumEqualityConverter}" ConverterParameter="Question"/>
+                    <Binding Path="Phase" Converter="{StaticResource EnumEqualityConverter}" ConverterParameter="Revealed"/>
+                </MultiBinding>
+            </Grid.IsVisible>
+
+            <TextBlock Grid.Row="0" Text="{Binding CurrentSlide.Question}" FontSize="28" FontWeight="Bold"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding CurrentSlide.TimeSeconds}"
+                             Value="{Binding SecondsRemaining}" Height="10"/>
+                <TextBlock Grid.Column="1" Margin="12,0,0,0"
+                           Text="{Binding AnsweredCount, StringFormat='{}{0} answered'}"/>
+            </Grid>
+
+            <!-- Multiple choice options -->
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding CurrentSlide.Options}"
+                          IsVisible="{Binding CurrentSlide.Options, Converter={x:Static convb:ObjectConverters.IsNotNull}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="2"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="sys:String">
+                        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                CornerRadius="8" Margin="6" Padding="16">
+                            <TextBlock Text="{Binding}" FontSize="18" TextWrapping="Wrap"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Grid.Row="3" HorizontalAlignment="Center" Spacing="10"
+                        IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Revealed}">
+                <TextBlock Text="{Binding LastReveal.CorrectAnswer, StringFormat='Correct answer: {0}'}"
+                           FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                <ItemsControl ItemsSource="{Binding Leaderboard}" HorizontalAlignment="Center">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:LeaderboardEntryDto">
+                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+            <Button Grid.Row="3" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
+                    FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
+        </Grid>
+
+        <!-- Finished -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                    IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Finished}">
+            <TextBlock Text="Quiz complete" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <ItemsControl ItemsSource="{Binding Leaderboard}" HorizontalAlignment="Center">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:LeaderboardEntryDto">
+                        <Grid ColumnDefinitions="200,Auto" Margin="4">
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="18"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Score}" FontSize="18" FontWeight="Bold"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="Back to Library" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
+                    Command="{Binding BackCommand}"/>
+        </StackPanel>
+
+    </Grid>
+</UserControl>

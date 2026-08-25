@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.MultipleChoiceSlideEditorView"
+             x:DataType="vm:MultipleChoiceSlideEditorViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Multiple Choice Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Question"/>
+            <TextBox Text="{Binding Question}" Watermark="Question text" FontSize="18"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6" Width="160">
+            <TextBlock Text="Time limit (seconds)"/>
+            <NumericUpDown Value="{Binding TimeSeconds}" Minimum="5" Maximum="300" Increment="5"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Answers (select the correct one)"/>
+            <ItemsControl ItemsSource="{Binding Options}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OptionEditorViewModel">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <RadioButton Grid.Column="0" GroupName="CorrectOption"
+                                         IsChecked="{Binding IsCorrect}" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1" Text="{Binding Text}" Watermark="Answer text" Margin="8,0,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

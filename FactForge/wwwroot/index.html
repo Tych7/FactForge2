@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>FactForge</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+
+    <section id="screen-join" class="screen">
+      <h1>FactForge</h1>
+      <label for="joinCode">Game code</label>
+      <input id="joinCode" maxlength="5" autocomplete="off" placeholder="ABCDE" />
+      <label for="playerName">Your name</label>
+      <input id="playerName" maxlength="24" autocomplete="off" placeholder="Your name" />
+      <button id="joinBtn">Join</button>
+      <p id="joinError" class="error"></p>
+    </section>
+
+    <section id="screen-waiting" class="screen hidden">
+      <h2>You're in!</h2>
+      <p>Waiting for the host to start...</p>
+    </section>
+
+    <section id="screen-textslide" class="screen hidden">
+      <h2>👀 Look at the main screen</h2>
+    </section>
+
+    <section id="screen-question" class="screen hidden">
+      <div class="timer-bar-track"><div id="timerBar" class="timer-bar"></div></div>
+      <h2 id="questionText"></h2>
+      <div id="choices" class="choices"></div>
+    </section>
+
+    <section id="screen-locked" class="screen hidden">
+      <h2>Answer locked in</h2>
+      <p>Waiting for the reveal...</p>
+    </section>
+
+    <section id="screen-reveal" class="screen hidden">
+      <h2 id="revealTitle"></h2>
+      <p id="revealAnswer"></p>
+      <p id="revealRank" class="muted"></p>
+    </section>
+
+    <section id="screen-ended" class="screen hidden">
+      <h2>🏁 Quiz complete!</h2>
+      <ol id="finalLeaderboard"></ol>
+    </section>
+
+  </main>
+
+  <script src="signalr.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

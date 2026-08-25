@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.OpenQuestionSlideEditorView"
+             x:DataType="vm:OpenQuestionSlideEditorViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Open Question Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Question"/>
+            <TextBox Text="{Binding Question}" Watermark="Question text" FontSize="18"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Correct answer"/>
+            <TextBox Text="{Binding CorrectAnswer}" Watermark="Expected answer (matched case-insensitively)"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6" Width="160">
+            <TextBlock Text="Time limit (seconds)"/>
+            <NumericUpDown Value="{Binding TimeSeconds}" Minimum="5" Maximum="300" Increment="5"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

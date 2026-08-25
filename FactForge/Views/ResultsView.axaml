@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             x:Class="FactForge.Views.ResultsView"
+             x:DataType="vm:ResultsViewModel">
+
+    <Grid Margin="24" RowDefinitions="Auto,*">
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,0,0,16">
+            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}" Margin="0,0,12,0"/>
+            <TextBlock Grid.Column="1" Text="{Binding QuizTitle, StringFormat='Results — {0}'}"
+                       FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Sessions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="16"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SessionResultViewModel">
+                        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="(in progress)" IsVisible="{Binding !IsComplete}" Opacity="0.6"/>
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Players}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:PlayerResultViewModel">
+                                            <Grid ColumnDefinitions="200,80,120" Margin="0,2">
+                                                <TextBlock Grid.Column="0" Text="{Binding Name}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Score}" FontWeight="Bold"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding CorrectCount, StringFormat='{}{0} correct'}"
+                                                           Opacity="0.7"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>

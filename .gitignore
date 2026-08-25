@@ -1,0 +1,19 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDEs
+.vscode/
+.idea/
+
+# Local SQLite database (created at runtime under %LocalAppData%, never in-repo,
+# but ignore stray copies just in case)
+*.db
+*.db-shm
+*.db-wal

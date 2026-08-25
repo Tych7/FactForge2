@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.TextSlideEditorView"
+             x:DataType="vm:TextSlideEditorViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Text Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Header"/>
+            <TextBox Text="{Binding Header}" Watermark="Big headline text" FontSize="18"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Description"/>
+            <TextBox Text="{Binding SubText}" Watermark="Supporting description"
+                      AcceptsReturn="True" TextWrapping="Wrap" Height="160"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

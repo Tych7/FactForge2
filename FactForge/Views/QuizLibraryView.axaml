@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             x:Class="FactForge.Views.QuizLibraryView"
+             x:DataType="vm:QuizLibraryViewModel">
+
+    <Grid Margin="32" RowDefinitions="Auto,Auto,*">
+
+        <TextBlock Grid.Row="0" Text="FactForge" FontSize="32" FontWeight="Bold" Margin="0,0,0,24"/>
+
+        <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                CornerRadius="8" Padding="16" Margin="0,0,0,24">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBox Width="360" Watermark="New quiz title..." Text="{Binding NewQuizTitle}"/>
+                <Button Content="Create Quiz" Command="{Binding CreateQuizCommand}" Classes="accent"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="2">
+            <ItemsControl ItemsSource="{Binding Quizzes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="10"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:QuizListItemViewModel">
+                        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                CornerRadius="8" Padding="16">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding UpdatedAt, StringFormat='Updated {0:g}'}"
+                                               Opacity="0.6" FontSize="12"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="Edit" Margin="4,0"
+                                        Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).EditQuizCommand}"
+                                        CommandParameter="{Binding}"/>
+                                <Button Grid.Column="2" Content="Present" Margin="4,0" Classes="accent"
+                                        Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).PresentQuizCommand}"
+                                        CommandParameter="{Binding}"/>
+                                <Button Grid.Column="3" Content="Results" Margin="4,0"
+                                        Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).ViewResultsCommand}"
+                                        CommandParameter="{Binding}"/>
+                                <Button Grid.Column="4" Content="Delete" Margin="4,0"
+                                        Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).DeleteQuizCommand}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </Grid>
+</UserControl>

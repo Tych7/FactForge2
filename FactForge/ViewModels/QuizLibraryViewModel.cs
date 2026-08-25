@@ -1,0 +1,76 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using FactForge.Services;
+
+namespace FactForge.ViewModels;
+
+public partial class QuizLibraryViewModel : ViewModelBase
+{
+    private readonly QuizRepository _repository;
+    private readonly Action<int> _onEdit;
+    private readonly Action<int> _onPresent;
+    private readonly Action<int> _onResults;
+
+    public ObservableCollection<QuizListItemViewModel> Quizzes { get; } = new();
+
+    [ObservableProperty] private string _newQuizTitle = string.Empty;
+    [ObservableProperty] private QuizListItemViewModel? _selectedQuiz;
+    [ObservableProperty] private bool _isLoading;
+
+    public QuizLibraryViewModel(QuizRepository repository, Action<int> onEdit, Action<int> onPresent, Action<int> onResults)
+    {
+        _repository = repository;
+        _onEdit = onEdit;
+        _onPresent = onPresent;
+        _onResults = onResults;
+        _ = LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        IsLoading = true;
+        var quizzes = await _repository.GetAllQuizzesAsync();
+        Quizzes.Clear();
+        foreach (var quiz in quizzes)
+            Quizzes.Add(new QuizListItemViewModel(quiz));
+        IsLoading = false;
+    }
+
+    [RelayCommand]
+    private async Task CreateQuizAsync()
+    {
+        var title = string.IsNullOrWhiteSpace(NewQuizTitle) ? "Untitled Quiz" : NewQuizTitle.Trim();
+        var quiz = await _repository.CreateQuizAsync(title);
+        NewQuizTitle = string.Empty;
+        _onEdit(quiz.Id);
+    }
+
+    [RelayCommand]
+    private void EditQuiz(QuizListItemViewModel? item)
+    {
+        if (item is not null) _onEdit(item.Id);
+    }
+
+    [RelayCommand]
+    private void PresentQuiz(QuizListItemViewModel? item)
+    {
+        if (item is not null) _onPresent(item.Id);
+    }
+
+    [RelayCommand]
+    private void ViewResults(QuizListItemViewModel? item)
+    {
+        if (item is not null) _onResults(item.Id);
+    }
+
+    [RelayCommand]
+    private async Task DeleteQuizAsync(QuizListItemViewModel? item)
+    {
+        if (item is null) return;
+        await _repository.DeleteQuizAsync(item.Id);
+        await LoadAsync();
+    }
+}
