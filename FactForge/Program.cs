@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
 using FactForge.Services;
 
@@ -22,7 +23,11 @@ sealed class Program
         }
         finally
         {
-            webHost.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            // Run on a plain thread-pool thread: the Avalonia dispatcher's
+            // SynchronizationContext is still installed on this thread even though its
+            // message loop has stopped, so any await inside DisposeAsync (ours or ASP.NET
+            // Core's internals) that tries to resume on it would hang forever.
+            Task.Run(() => webHost.DisposeAsync().AsTask()).GetAwaiter().GetResult();
         }
     }
 

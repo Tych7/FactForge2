@@ -10,6 +10,21 @@
              x:Class="FactForge.Views.PresentView"
              x:DataType="vm:PresentViewModel">
 
+    <UserControl.Styles>
+        <Style Selector="ItemsControl.answerOptions ContentPresenter:nth-child(4n+1) Border.answerOption">
+            <Setter Property="Background" Value="#D3FF0400"/>
+        </Style>
+        <Style Selector="ItemsControl.answerOptions ContentPresenter:nth-child(4n+2) Border.answerOption">
+            <Setter Property="Background" Value="#1E88E5"/>
+        </Style>
+        <Style Selector="ItemsControl.answerOptions ContentPresenter:nth-child(4n+3) Border.answerOption">
+            <Setter Property="Background" Value="#D5FFD621"/>
+        </Style>
+        <Style Selector="ItemsControl.answerOptions ContentPresenter:nth-child(4n+4) Border.answerOption">
+            <Setter Property="Background" Value="#3CA101"/>
+        </Style>
+    </UserControl.Styles>
+
     <Grid Margin="24" RowDefinitions="Auto,*">
 
         <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
@@ -78,7 +93,7 @@
             </Grid>
 
             <!-- Multiple choice options -->
-            <ItemsControl Grid.Row="2" ItemsSource="{Binding CurrentSlide.Options}"
+            <ItemsControl Grid.Row="2" Classes="answerOptions" ItemsSource="{Binding CurrentSlide.Options}"
                           IsVisible="{Binding CurrentSlide.Options, Converter={x:Static convb:ObjectConverters.IsNotNull}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -87,9 +102,11 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="sys:String">
-                        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                        <Border Classes="answerOption"
                                 CornerRadius="8" Margin="6" Padding="16">
-                            <TextBlock Text="{Binding}" FontSize="18" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding}" FontSize="32" FontWeight="SemiBold" Foreground="White"
+                                       TextWrapping="Wrap" TextAlignment="Center"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

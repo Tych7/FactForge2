@@ -126,7 +126,7 @@ function onSlideStarted(slide) {
   showScreen("question");
 
   if (slide.deadlineUtc) {
-    startCountdown(new Date(slide.deadlineUtc), slide.timeSeconds);
+    startCountdown(slide.timeSeconds);
   }
 }
 
@@ -147,10 +147,15 @@ async function submitAnswer(text, sourceEl) {
   showScreen("locked");
 }
 
-function startCountdown(deadline, totalSeconds) {
+function startCountdown(totalSeconds) {
+  // Count down against the phone's own clock, started the moment the question appears,
+  // rather than comparing the server's absolute deadline to the phone's clock: those two
+  // clocks aren't guaranteed to be in sync, which threw the bar off by however much they drifted.
+  const totalMs = totalSeconds * 1000;
+  const startedAt = Date.now();
   const update = () => {
-    const remainingMs = deadline.getTime() - Date.now();
-    const pct = Math.max(0, Math.min(100, (remainingMs / (totalSeconds * 1000)) * 100));
+    const remainingMs = totalMs - (Date.now() - startedAt);
+    const pct = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
     timerBar.style.width = pct + "%";
     if (remainingMs <= 0) stopCountdown();
   };
