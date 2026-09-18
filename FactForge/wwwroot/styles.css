@@ -110,7 +110,13 @@ button:disabled { opacity: 0.5; cursor: default; }
   color: var(--text);
 }
 
-.choice-btn.selected { background: var(--accent); color: var(--accent-text); }
+/* Match the presenter screen's per-position tile colors. */
+.choices .choice-btn:nth-child(4n+1) { background: rgba(255, 4, 0, 0.83); color: #fff; }
+.choices .choice-btn:nth-child(4n+2) { background: #1e88e5; color: #fff; }
+.choices .choice-btn:nth-child(4n+3) { background: rgba(255, 214, 33, 0.84); color: #fff; }
+.choices .choice-btn:nth-child(4n+4) { background: #3ca101; color: #fff; }
+
+.choice-btn.selected { outline: 4px solid var(--text); outline-offset: -4px; }
 
 .open-answer-form { margin-top: 16px; }
 

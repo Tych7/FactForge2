@@ -16,7 +16,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _quizRepository = quizRepository;
         _presentationService = presentationService;
         _qrCodeService = qrCodeService;
-        _currentPage = CreateLibraryPage();
+        _currentPage = new StartViewModel(NavigateToLibrary);
     }
 
     private QuizLibraryViewModel CreateLibraryPage() =>

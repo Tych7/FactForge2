@@ -106,6 +106,7 @@ public partial class EditorViewModel : ViewModelBase
             SlideType.Text => new TextSlideEditorViewModel(slide),
             SlideType.MultipleChoice => new MultipleChoiceSlideEditorViewModel(slide),
             SlideType.OpenQuestion => new OpenQuestionSlideEditorViewModel(slide),
+            SlideType.Leaderboard => new LeaderboardSlideEditorViewModel(slide),
             _ => null
         };
     }
@@ -117,6 +118,7 @@ public partial class EditorViewModel : ViewModelBase
             TextSlideEditorViewModel t => t.ToEntity(),
             MultipleChoiceSlideEditorViewModel m => m.ToEntity(),
             OpenQuestionSlideEditorViewModel o => o.ToEntity(),
+            LeaderboardSlideEditorViewModel l => l.ToEntity(),
             _ => null
         };
         if (entity is null) return;
@@ -142,10 +144,13 @@ public partial class EditorViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddOpenQuestionSlideAsync() => await AddSlideAsync(SlideType.OpenQuestion);
 
+    [RelayCommand]
+    private async Task AddLeaderboardSlideAsync() => await AddSlideAsync(SlideType.Leaderboard);
+
     private async Task AddSlideAsync(SlideType type)
     {
-        await SaveCurrentSlideEditorAsync();
         var insertAt = SelectedSlide is null ? Slides.Count : Slides.IndexOf(SelectedSlide) + 1;
+        await SaveCurrentSlideEditorAsync();
         var slide = await _repository.AddSlideAsync(_quizId, type, insertAt);
         await LoadAsync(slide.Id);
     }
@@ -164,9 +169,13 @@ public partial class EditorViewModel : ViewModelBase
         if (SelectedSlide is null) return;
         var index = Slides.IndexOf(SelectedSlide);
         if (index <= 0) return;
+        var slideId = SelectedSlide.Id;
+        // Capture the id before saving: SaveCurrentSlideEditorAsync replaces the selected
+        // slide's list entry with a new instance, which drops the ListBox's selection
+        // (and nulls SelectedSlide) since it's bound to the old object by reference.
         await SaveCurrentSlideEditorAsync();
-        await _repository.ReorderSlideAsync(_quizId, SelectedSlide.Id, index - 1);
-        await LoadAsync(SelectedSlide.Id);
+        await _repository.ReorderSlideAsync(_quizId, slideId, index - 1);
+        await LoadAsync(slideId);
     }
 
     [RelayCommand]
@@ -175,9 +184,10 @@ public partial class EditorViewModel : ViewModelBase
         if (SelectedSlide is null) return;
         var index = Slides.IndexOf(SelectedSlide);
         if (index < 0 || index >= Slides.Count - 1) return;
+        var slideId = SelectedSlide.Id;
         await SaveCurrentSlideEditorAsync();
-        await _repository.ReorderSlideAsync(_quizId, SelectedSlide.Id, index + 1);
-        await LoadAsync(SelectedSlide.Id);
+        await _repository.ReorderSlideAsync(_quizId, slideId, index + 1);
+        await LoadAsync(slideId);
     }
 
     [RelayCommand]

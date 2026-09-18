@@ -50,11 +50,11 @@ public class LocalWebHost : IAsyncDisposable
         using (var scope = app.Services.CreateScope())
         {
             var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
-            await using var db = await dbFactory.CreateDbContextAsync();
-            await db.Database.MigrateAsync();
+            await using var db = await dbFactory.CreateDbContextAsync().ConfigureAwait(false);
+            await db.Database.MigrateAsync().ConfigureAwait(false);
         }
 
-        await app.StartAsync();
+        await app.StartAsync().ConfigureAwait(false);
         _app = app;
     }
 
@@ -64,11 +64,11 @@ public class LocalWebHost : IAsyncDisposable
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-            await _app.StopAsync(cts.Token);
+            await _app.StopAsync(cts.Token).ConfigureAwait(false);
         }
         finally
         {
-            await _app.DisposeAsync();
+            await _app.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             x:Class="FactForge.Views.StartView"
+             x:DataType="vm:StartViewModel">
+
+    <Viewbox Stretch="Uniform" Margin="80">
+        <StackPanel HorizontalAlignment="Center" Spacing="40">
+            <Image Source="avares://FactForge/Assets/bigLogo.png" Width="900" Stretch="Uniform"/>
+            <Button Content="Play ▶" Classes="accent" HorizontalAlignment="Center"
+                    FontSize="24" Padding="48,16" Command="{Binding PlayCommand}"/>
+        </StackPanel>
+    </Viewbox>
+</UserControl>

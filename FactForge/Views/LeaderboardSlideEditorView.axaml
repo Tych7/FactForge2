@@ -1,0 +1,12 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.LeaderboardSlideEditorView"
+             x:DataType="vm:LeaderboardSlideEditorViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Leaderboard Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        <TextBlock Text="Shows the current standings when presented. Nothing to configure."
+                   TextWrapping="Wrap" Opacity="0.8"/>
+    </StackPanel>
+</UserControl>

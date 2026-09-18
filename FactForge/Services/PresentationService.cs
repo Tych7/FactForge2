@@ -148,7 +148,7 @@ public class PresentationService : IAsyncDisposable
         var slide = active.Slides[position];
         DateTime? deadline = null;
 
-        if (slide.Type != SlideType.Text)
+        if (slide.Type is not SlideType.Text and not SlideType.Leaderboard)
         {
             deadline = DateTime.UtcNow.AddSeconds(slide.TimeSeconds);
             active.CurrentSlideDeadlineUtc = deadline;
@@ -173,6 +173,10 @@ public class PresentationService : IAsyncDisposable
             slide.TimeSeconds, deadline);
 
         await _hub.Clients.All.SendAsync("SlideStarted", dto);
+
+        if (slide.Type == SlideType.Leaderboard)
+            await BroadcastLeaderboardAsync();
+
         return dto;
     }
 

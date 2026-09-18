@@ -27,6 +27,8 @@
                                 Command="{Binding AddMultipleChoiceSlideCommand}"/>
                         <Button Content="+ Open Question" HorizontalAlignment="Stretch"
                                 Command="{Binding AddOpenQuestionSlideCommand}"/>
+                        <Button Content="+ Leaderboard" HorizontalAlignment="Stretch"
+                                Command="{Binding AddLeaderboardSlideCommand}"/>
                     </StackPanel>
                 </StackPanel>
 

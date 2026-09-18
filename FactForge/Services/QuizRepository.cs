@@ -81,8 +81,8 @@ public class QuizRepository
             Type = type,
             Header = type == SlideType.Text ? string.Empty : null,
             SubText = type == SlideType.Text ? string.Empty : null,
-            Question = type == SlideType.Text ? null : string.Empty,
-            CorrectAnswer = type == SlideType.Text ? null : string.Empty,
+            Question = type is SlideType.MultipleChoice or SlideType.OpenQuestion ? string.Empty : null,
+            CorrectAnswer = type is SlideType.MultipleChoice or SlideType.OpenQuestion ? string.Empty : null,
             TimeSeconds = 20
         };
 
