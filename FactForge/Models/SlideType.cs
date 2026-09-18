@@ -4,5 +4,6 @@ public enum SlideType
 {
     Text,
     MultipleChoice,
-    OpenQuestion
+    OpenQuestion,
+    Leaderboard
 }

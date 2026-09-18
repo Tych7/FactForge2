@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,7 +13,9 @@ using FactForge.Services;
 
 namespace FactForge.ViewModels;
 
-public enum PresentPhase { Lobby, Question, Revealed, TextSlide, Finished }
+public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Finished }
+
+public sealed record AnswerOptionDisplay(string Text, IBrush Background);
 
 public partial class PresentViewModel : ViewModelBase, IDisposable
 {
@@ -22,6 +25,17 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     private readonly int _quizId;
     private readonly Action _onBack;
     private readonly DispatcherTimer _countdownTimer;
+
+    // Same per-position palette as the player-facing page's .choice-btn:nth-child rules,
+    // so the host screen and players' phones always agree on which tile is which color.
+    private static readonly IBrush[] AnswerColors =
+    {
+        new SolidColorBrush(Color.Parse("#D3FF0400")),
+        new SolidColorBrush(Color.Parse("#1E88E5")),
+        new SolidColorBrush(Color.Parse("#D5FFD621")),
+        new SolidColorBrush(Color.Parse("#3CA101")),
+    };
+    private static readonly IBrush DimmedAnswerColor = new SolidColorBrush(Color.Parse("#333333"));
 
     private QuizSession? _session;
 
@@ -39,6 +53,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private double _secondsRemaining;
     [ObservableProperty] private int _answeredCount;
     [ObservableProperty] private RevealDto? _lastReveal;
+    [ObservableProperty] private System.Collections.Generic.List<AnswerOptionDisplay>? _displayOptions;
 
     public ObservableCollection<PlayerInfoDto> Players { get; } = new();
     public ObservableCollection<LeaderboardEntryDto> Leaderboard { get; } = new();
@@ -106,6 +121,18 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             LastReveal = reveal;
             Phase = PresentPhase.Revealed;
             _countdownTimer.Stop();
+
+            var correct = reveal.CorrectAnswer;
+            if (CurrentSlide?.Options is { } options && correct is not null)
+            {
+                DisplayOptions = options
+                    .Select((o, i) => new AnswerOptionDisplay(
+                        o,
+                        string.Equals(o.Trim(), correct.Trim(), StringComparison.OrdinalIgnoreCase)
+                            ? AnswerColors[i % AnswerColors.Length]
+                            : DimmedAnswerColor))
+                    .ToList();
+            }
         });
     }
 
@@ -147,7 +174,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         await AdvanceAsync();
     }
 
-    private bool CanAdvance() => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide;
+    private bool CanAdvance() => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.Leaderboard or PresentPhase.TextSlide;
 
     private async Task AdvanceAsync()
     {
@@ -163,7 +190,15 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
         CurrentSlide = slide;
         SlideNumber++;
-        Phase = slide.Type == SlideType.Text ? PresentPhase.TextSlide : PresentPhase.Question;
+        Phase = slide.Type switch
+        {
+            SlideType.Text => PresentPhase.TextSlide,
+            SlideType.Leaderboard => PresentPhase.Leaderboard,
+            _ => PresentPhase.Question
+        };
+        DisplayOptions = slide.Options?
+            .Select((o, i) => new AnswerOptionDisplay(o, AnswerColors[i % AnswerColors.Length]))
+            .ToList();
 
         if (slide.DeadlineUtc is not null)
         {

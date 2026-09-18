@@ -1,4 +1,4 @@
-const SlideType = { Text: 0, MultipleChoice: 1, OpenQuestion: 2 };
+const SlideType = { Text: 0, MultipleChoice: 1, OpenQuestion: 2, Leaderboard: 3 };
 
 const screens = {
   join: document.getElementById("screen-join"),
@@ -86,7 +86,7 @@ function onSlideStarted(slide) {
   selectedAnswer = null;
   stopCountdown();
 
-  if (slide.type === SlideType.Text) {
+  if (slide.type === SlideType.Text || slide.type === SlideType.Leaderboard) {
     showScreen("textSlide");
     return;
   }
