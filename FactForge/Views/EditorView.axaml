@@ -1,11 +1,22 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
+             xmlns:convb="using:Avalonia.Data.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.EditorView"
              x:DataType="vm:EditorViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Border.optionTile">
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Border.optionTile.correct">
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="5"/>
+        </Style>
+    </UserControl.Styles>
 
     <Grid Margin="24" RowDefinitions="Auto,*">
 
@@ -16,7 +27,7 @@
             <Button Grid.Column="3" Content="Present ▶" Classes="accent" Command="{Binding PresentCommand}" Margin="12,0,0,0"/>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnDefinitions="280,16,*">
+        <Grid Grid.Row="1" ColumnDefinitions="240,16,*,16,760">
 
             <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto">
                 <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,10">
@@ -58,6 +69,108 @@
                     CornerRadius="8" Padding="24">
                 <ContentControl Content="{Binding CurrentSlideEditor}"
                                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top"/>
+            </Border>
+
+            <Border Grid.Column="4" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                    CornerRadius="8" Padding="16">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Preview" FontWeight="SemiBold" Opacity="0.7"/>
+
+                    <!-- Fixed 16:9 frame: the content inside is laid out at the same 1280x720
+                         proportions and font sizes as the real presenter screen (PresentView),
+                         then uniformly scaled down to fit here — so this is a true miniature,
+                         not an approximation. -->
+                    <Border Background="Black" CornerRadius="10" Width="720" Height="405"
+                            HorizontalAlignment="Left" ClipToBounds="True">
+                        <Grid>
+                            <TextBlock Text="No slide selected" Foreground="#777777" FontSize="14"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       IsVisible="{Binding CurrentSlideEditor, Converter={x:Static convb:ObjectConverters.IsNull}}"/>
+
+                            <Viewbox Stretch="Uniform"
+                                     IsVisible="{Binding CurrentSlideEditor, Converter={x:Static convb:ObjectConverters.IsNotNull}}">
+                                <ContentControl Width="1280" Height="720" Content="{Binding CurrentSlideEditor}"
+                                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                    <ContentControl.DataTemplates>
+
+                                        <DataTemplate x:DataType="vm:TextSlideEditorViewModel">
+                                            <StackPanel Margin="24" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                        Spacing="16" MaxWidth="900">
+                                                <Viewbox StretchDirection="DownOnly">
+                                                    <TextBlock Text="{Binding Header}" FontSize="42" FontWeight="Bold"
+                                                               Foreground="White" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+                                                </Viewbox>
+                                                <Viewbox StretchDirection="DownOnly">
+                                                    <TextBlock Text="{Binding SubText}" FontSize="20" Foreground="#CCCCCC"
+                                                               HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+                                                </Viewbox>
+                                            </StackPanel>
+                                        </DataTemplate>
+
+                                        <DataTemplate x:DataType="vm:MultipleChoiceSlideEditorViewModel">
+                                            <Grid Margin="24" RowDefinitions="Auto,Auto,*">
+                                                <Viewbox Grid.Row="0" StretchDirection="DownOnly" Margin="0,0,0,12">
+                                                    <TextBlock Text="{Binding Question}" FontSize="40" FontWeight="Bold"
+                                                               Foreground="White" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+                                                </Viewbox>
+                                                <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                                                    <Border Grid.Column="0" Height="10" Background="#333333" CornerRadius="5">
+                                                        <Border Height="10" Background="#1E88E5" CornerRadius="5"
+                                                                HorizontalAlignment="Stretch"/>
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1" Margin="12,0,0,0" Foreground="White" FontSize="16"
+                                                               Text="{Binding TimeSeconds, StringFormat='{}{0}s'}"/>
+                                                </Grid>
+                                                <ItemsControl Grid.Row="2" ItemsSource="{Binding Options}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <UniformGrid Columns="2"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:OptionEditorViewModel">
+                                                            <Border Classes="optionTile" Classes.correct="{Binding IsCorrect}"
+                                                                    Background="{Binding PreviewColor}"
+                                                                    Margin="6" Padding="16" CornerRadius="8">
+                                                                <Viewbox StretchDirection="DownOnly">
+                                                                    <TextBlock Text="{Binding Text}" FontSize="48" FontWeight="SemiBold"
+                                                                               Foreground="White" TextWrapping="NoWrap" TextAlignment="Center"/>
+                                                                </Viewbox>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Grid>
+                                        </DataTemplate>
+
+                                        <DataTemplate x:DataType="vm:OpenQuestionSlideEditorViewModel">
+                                            <Grid Margin="24" RowDefinitions="*,Auto,Auto,*">
+                                                <Viewbox Grid.Row="1" StretchDirection="DownOnly" Margin="0,0,0,16">
+                                                    <TextBlock Text="{Binding Question}" FontSize="44" FontWeight="Bold"
+                                                               Foreground="White" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+                                                </Viewbox>
+                                                <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                                                    <Border Grid.Column="0" Height="10" Background="#333333" CornerRadius="5">
+                                                        <Border Height="10" Background="#1E88E5" CornerRadius="5"
+                                                                HorizontalAlignment="Stretch"/>
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1" Margin="12,0,0,0" Foreground="White" FontSize="16"
+                                                               Text="{Binding TimeSeconds, StringFormat='{}{0}s'}"/>
+                                                </Grid>
+                                            </Grid>
+                                        </DataTemplate>
+
+                                        <DataTemplate x:DataType="vm:LeaderboardSlideEditorViewModel">
+                                            <TextBlock Text="Leaderboard" FontSize="36" FontWeight="Bold" Foreground="White"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+
+                                    </ContentControl.DataTemplates>
+                                </ContentControl>
+                            </Viewbox>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
         </Grid>

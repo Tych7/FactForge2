@@ -26,15 +26,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     private readonly Action _onBack;
     private readonly DispatcherTimer _countdownTimer;
 
-    // Same per-position palette as the player-facing page's .choice-btn:nth-child rules,
-    // so the host screen and players' phones always agree on which tile is which color.
-    private static readonly IBrush[] AnswerColors =
-    {
-        new SolidColorBrush(Color.Parse("#D3FF0400")),
-        new SolidColorBrush(Color.Parse("#1E88E5")),
-        new SolidColorBrush(Color.Parse("#D5FFD621")),
-        new SolidColorBrush(Color.Parse("#3CA101")),
-    };
+    private static readonly IBrush[] AnswerColors = AnswerColorPalette.Colors;
     private static readonly IBrush DimmedAnswerColor = new SolidColorBrush(Color.Parse("#333333"));
 
     private QuizSession? _session;
@@ -54,6 +46,23 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private int _answeredCount;
     [ObservableProperty] private RevealDto? _lastReveal;
     [ObservableProperty] private System.Collections.Generic.List<AnswerOptionDisplay>? _displayOptions;
+
+    // Split so the view can lay out multiple-choice tiles and an open question's empty
+    // answer area differently (the latter centers its question+timer instead of pinning them to the top).
+    public bool IsOptionsPhaseActive => Phase is PresentPhase.Question or PresentPhase.Revealed && DisplayOptions is not null;
+    public bool IsOpenQuestionPhaseActive => Phase is PresentPhase.Question or PresentPhase.Revealed && DisplayOptions is null;
+
+    partial void OnPhaseChanged(PresentPhase value)
+    {
+        OnPropertyChanged(nameof(IsOptionsPhaseActive));
+        OnPropertyChanged(nameof(IsOpenQuestionPhaseActive));
+    }
+
+    partial void OnDisplayOptionsChanged(System.Collections.Generic.List<AnswerOptionDisplay>? value)
+    {
+        OnPropertyChanged(nameof(IsOptionsPhaseActive));
+        OnPropertyChanged(nameof(IsOpenQuestionPhaseActive));
+    }
 
     public ObservableCollection<PlayerInfoDto> Players { get; } = new();
     public ObservableCollection<LeaderboardEntryDto> Leaderboard { get; } = new();
