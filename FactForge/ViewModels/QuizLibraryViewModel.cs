@@ -10,6 +10,7 @@ namespace FactForge.ViewModels;
 public partial class QuizLibraryViewModel : ViewModelBase
 {
     private readonly QuizRepository _repository;
+    private readonly IDialogService _dialogService;
     private readonly Action<int> _onEdit;
     private readonly Action<int> _onPresent;
     private readonly Action<int> _onResults;
@@ -20,9 +21,10 @@ public partial class QuizLibraryViewModel : ViewModelBase
     [ObservableProperty] private QuizListItemViewModel? _selectedQuiz;
     [ObservableProperty] private bool _isLoading;
 
-    public QuizLibraryViewModel(QuizRepository repository, Action<int> onEdit, Action<int> onPresent, Action<int> onResults)
+    public QuizLibraryViewModel(QuizRepository repository, IDialogService dialogService, Action<int> onEdit, Action<int> onPresent, Action<int> onResults)
     {
         _repository = repository;
+        _dialogService = dialogService;
         _onEdit = onEdit;
         _onPresent = onPresent;
         _onResults = onResults;
@@ -70,6 +72,13 @@ public partial class QuizLibraryViewModel : ViewModelBase
     private async Task DeleteQuizAsync(QuizListItemViewModel? item)
     {
         if (item is null) return;
+
+        var confirmed = await _dialogService.ConfirmAsync(
+            "Delete quiz",
+            $"Delete \"{item.Title}\"? This can't be undone.");
+
+        if (!confirmed) return;
+
         await _repository.DeleteQuizAsync(item.Id);
         await LoadAsync();
     }

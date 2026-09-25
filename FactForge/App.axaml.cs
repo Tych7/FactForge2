@@ -31,7 +31,8 @@ public partial class App : Application
             var mainWindowViewModel = new MainWindowViewModel(
                 services.GetRequiredService<QuizRepository>(),
                 services.GetRequiredService<PresentationService>(),
-                services.GetRequiredService<QrCodeService>());
+                services.GetRequiredService<QrCodeService>(),
+                services.GetRequiredService<IDialogService>());
 
             desktop.MainWindow = new MainWindow { DataContext = mainWindowViewModel };
         }

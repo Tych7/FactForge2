@@ -23,8 +23,19 @@
         <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,16">
             <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}" Margin="0,0,12,0"/>
             <TextBox Grid.Column="1" Text="{Binding Title}" FontSize="22" FontWeight="Bold" Watermark="Quiz title"/>
-            <Button Grid.Column="2" Content="Save Title" Command="{Binding SaveTitleCommand}" Margin="12,0,0,0"/>
-            <Button Grid.Column="3" Content="Present ▶" Classes="accent" Command="{Binding PresentCommand}" Margin="12,0,0,0"/>
+
+            <!-- Save: disk/floppy icon -->
+            <Button Grid.Column="2" Margin="12,0,0,0" Padding="8" ToolTip.Tip="Save Title"
+                    Command="{Binding SaveTitleCommand}">
+                <PathIcon Width="25" Height="25"
+                        Data="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zM15 9H5V5h10v4z"/>
+            </Button>
+
+            <!-- Present: play icon -->
+            <Button Grid.Column="3" Margin="12,0,0,0" Padding="8" Classes="accent" ToolTip.Tip="Present"
+                    Command="{Binding PresentCommand}">
+                <PathIcon Width="25" Height="25" Data="M8 5v14l11-7z"/>
+            </Button>
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="240,16,*,16,760">

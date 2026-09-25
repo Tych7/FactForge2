@@ -34,20 +34,39 @@
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"/>
                                     <TextBlock Text="{Binding UpdatedAt, StringFormat='Updated {0:g}'}"
-                                               Opacity="0.6" FontSize="12"/>
+                                            Opacity="0.6" FontSize="12"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" Content="Edit" Margin="4,0"
+
+                                <!-- Edit: pencil -->
+                                <Button Grid.Column="1" Margin="4,0" Padding="8" ToolTip.Tip="Edit"
                                         Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).EditQuizCommand}"
-                                        CommandParameter="{Binding}"/>
-                                <Button Grid.Column="2" Content="Present" Margin="4,0" Classes="accent"
+                                        CommandParameter="{Binding}">
+                                    <PathIcon Width="25" Height="25"
+                                            Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                </Button>
+
+                                <!-- Present: play -->
+                                <Button Grid.Column="2" Margin="4,0" Padding="8" Classes="accent" ToolTip.Tip="Present"
                                         Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).PresentQuizCommand}"
-                                        CommandParameter="{Binding}"/>
-                                <Button Grid.Column="3" Content="Results" Margin="4,0"
+                                        CommandParameter="{Binding}">
+                                    <PathIcon Width="25" Height="25" Data="M8 5v14l11-7z"/>
+                                </Button>
+
+                                <!-- Results: bar chart -->
+                                <Button Grid.Column="3" Margin="4,0" Padding="8" ToolTip.Tip="Results"
                                         Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).ViewResultsCommand}"
-                                        CommandParameter="{Binding}"/>
-                                <Button Grid.Column="4" Content="Delete" Margin="4,0"
+                                        CommandParameter="{Binding}">
+                                    <PathIcon Width="25" Height="25"
+                                            Data="M5 21h3V10H5v11zM10.5 21h3V3h-3v18zM16 21h3v-7h-3v7z"/>
+                                </Button>
+
+                                <!-- Delete: trash can -->
+                                <Button Grid.Column="4" Margin="4,0" Padding="8" ToolTip.Tip="Delete"
                                         Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).DeleteQuizCommand}"
-                                        CommandParameter="{Binding}"/>
+                                        CommandParameter="{Binding}">
+                                    <PathIcon Width="25" Height="25"
+                                            Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
