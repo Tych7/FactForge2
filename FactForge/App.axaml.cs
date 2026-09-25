@@ -18,6 +18,7 @@ public partial class App : Application
 
     public override void Initialize()
     {
+        GC.KeepAlive(typeof(Avalonia.Svg.Skia.SvgImageExtension).Assembly);
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -28,14 +29,25 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
 
             var services = WebHost?.Services ?? throw new InvalidOperationException("Web host not started.");
+
+            var settingsService = services.GetRequiredService<ISettingsService>();
+            RequestedThemeVariant = settingsService.Current.IsDarkMode
+                ? Avalonia.Styling.ThemeVariant.Dark
+                : Avalonia.Styling.ThemeVariant.Light;
+
             var mainWindowViewModel = new MainWindowViewModel(
                 services.GetRequiredService<QuizRepository>(),
                 services.GetRequiredService<PresentationService>(),
                 services.GetRequiredService<QrCodeService>(),
                 services.GetRequiredService<IDialogService>(),
-                services.GetRequiredService<IWindowService>());
+                services.GetRequiredService<IWindowService>(),
+                services.GetRequiredService<ISettingsService>());
 
-            desktop.MainWindow = new MainWindow { DataContext = mainWindowViewModel };
+            var mainWindow = new MainWindow { DataContext = mainWindowViewModel };
+            desktop.MainWindow = mainWindow;
+
+            if (settingsService.Current.IsFullScreen)
+                mainWindow.WindowState = Avalonia.Controls.WindowState.FullScreen;
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -3,6 +3,7 @@
              xmlns:vm="using:FactForge.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.QuizLibraryView"
              x:DataType="vm:QuizLibraryViewModel">
@@ -10,7 +11,11 @@
     <Grid Margin="32" RowDefinitions="Auto,Auto,*">
 
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
-            <TextBlock Grid.Column="0" Text="FactForge" FontSize="32" FontWeight="Bold"/>
+            <Image Grid.Column="0" Height="100" HorizontalAlignment="Left" Stretch="Uniform">
+                <Image.Source>
+                    <svg:SvgImage Source="avares://FactForge/Assets/horizontalLogo.svg"/>
+                </Image.Source>
+            </Image>
 
             <Button Grid.Column="1" Padding="8" ToolTip.Tip="Menu" Command="{Binding OpenMenuCommand}">
                 <PathIcon Width="22" Height="22" Data="M3 5h18v2H3zM3 11h18v2H3zM3 17h18v2H3z"/>
