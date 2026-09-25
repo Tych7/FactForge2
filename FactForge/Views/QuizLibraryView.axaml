@@ -9,8 +9,14 @@
 
     <Grid Margin="32" RowDefinitions="Auto,Auto,*">
 
-        <TextBlock Grid.Row="0" Text="FactForge" FontSize="32" FontWeight="Bold" Margin="0,0,0,24"/>
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+            <TextBlock Grid.Column="0" Text="FactForge" FontSize="32" FontWeight="Bold"/>
 
+            <Button Grid.Column="1" Padding="8" ToolTip.Tip="Menu" Command="{Binding OpenMenuCommand}">
+                <PathIcon Width="22" Height="22" Data="M3 5h18v2H3zM3 11h18v2H3zM3 17h18v2H3z"/>
+            </Button>
+        </Grid>
+        
         <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
                 CornerRadius="8" Padding="16" Margin="0,0,0,24">
             <StackPanel Orientation="Horizontal" Spacing="12">

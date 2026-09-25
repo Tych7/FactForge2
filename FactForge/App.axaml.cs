@@ -32,7 +32,8 @@ public partial class App : Application
                 services.GetRequiredService<QuizRepository>(),
                 services.GetRequiredService<PresentationService>(),
                 services.GetRequiredService<QrCodeService>(),
-                services.GetRequiredService<IDialogService>());
+                services.GetRequiredService<IDialogService>(),
+                services.GetRequiredService<IWindowService>());
 
             desktop.MainWindow = new MainWindow { DataContext = mainWindowViewModel };
         }

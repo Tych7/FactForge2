@@ -8,26 +8,28 @@
         TransparencyLevelHint="Transparent"
         WindowStartupLocation="Manual">
 
-    <Grid Background="#99000000">
-        <Border Background="#1E1E1E"
-                BorderBrush="#1E88E5"
-                BorderThickness="2"
-                CornerRadius="12"
-                Padding="32"
-                Width="480"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                BoxShadow="0 8 24 0 #60000000">
-            <StackPanel Spacing="16">
-                <TextBlock x:Name="TitleText" FontSize="24" FontWeight="Bold" Foreground="White"
-                           HorizontalAlignment="Center" TextAlignment="Center"/>
-                <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="17" Foreground="#CCCCCC"
-                           HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,12"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
-                    <Button Content="Cancel" FontSize="15" Padding="16,8" Click="OnCancel"/>
-                    <Button Content="Delete" FontSize="15" Padding="16,8" Classes="accent" Click="OnConfirm"/>
+        <Grid Background="{DynamicResource DialogOverlayBrush}">
+            <Border Background="{DynamicResource DialogBackgroundBrush}"
+                    BorderBrush="#1E88E5"
+                    BorderThickness="2"
+                    CornerRadius="12"
+                    Padding="32"
+                    Width="480"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    BoxShadow="0 8 24 0 #60000000">
+                <StackPanel Spacing="16">
+                    <TextBlock x:Name="TitleText" FontSize="24" FontWeight="Bold"
+                            Foreground="{DynamicResource DialogTitleBrush}"
+                            HorizontalAlignment="Center" TextAlignment="Center"/>
+                    <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="17"
+                            Foreground="{DynamicResource DialogTextBrush}"
+                            HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                        <Button Content="Cancel" FontSize="15" Padding="16,8" Click="OnCancel"/>
+                        <Button Content="Delete" FontSize="15" Padding="16,8" Classes="accent" Click="OnConfirm"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </Border>
-    </Grid>
+            </Border>
+        </Grid>
 </Window>

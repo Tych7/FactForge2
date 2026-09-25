@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FactForge.Services;
+using FactForge.Views;
 
 namespace FactForge.ViewModels;
 
@@ -11,9 +12,12 @@ public partial class QuizLibraryViewModel : ViewModelBase
 {
     private readonly QuizRepository _repository;
     private readonly IDialogService _dialogService;
+    private readonly IWindowService _windowService;
     private readonly Action<int> _onEdit;
     private readonly Action<int> _onPresent;
     private readonly Action<int> _onResults;
+    private readonly Action _onSettings;
+
 
     public ObservableCollection<QuizListItemViewModel> Quizzes { get; } = new();
 
@@ -21,13 +25,22 @@ public partial class QuizLibraryViewModel : ViewModelBase
     [ObservableProperty] private QuizListItemViewModel? _selectedQuiz;
     [ObservableProperty] private bool _isLoading;
 
-    public QuizLibraryViewModel(QuizRepository repository, IDialogService dialogService, Action<int> onEdit, Action<int> onPresent, Action<int> onResults)
+    public QuizLibraryViewModel(
+        QuizRepository repository, 
+        IDialogService dialogService, 
+        IWindowService windowService, 
+        Action<int> onEdit, 
+        Action<int> onPresent, 
+        Action<int> onResults,
+        Action onSettings)
     {
         _repository = repository;
         _dialogService = dialogService;
+        _windowService = windowService;
         _onEdit = onEdit;
         _onPresent = onPresent;
         _onResults = onResults;
+        _onSettings = onSettings;
         _ = LoadAsync();
     }
 
@@ -82,4 +95,25 @@ public partial class QuizLibraryViewModel : ViewModelBase
         await _repository.DeleteQuizAsync(item.Id);
         await LoadAsync();
     }
+
+    [RelayCommand]
+    private async Task OpenMenuAsync()
+    {
+        var result = await _dialogService.ShowMenuAsync();
+        switch (result)
+        {
+            case AppMenuResult.Options:
+                _onSettings();
+                break;
+            case AppMenuResult.Exit:
+                _windowService.Exit();
+                break;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenSettings() => _onSettings();
+
+    [RelayCommand]
+    private void Exit() => _windowService.Exit();
 }

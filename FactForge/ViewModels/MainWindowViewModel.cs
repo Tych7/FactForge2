@@ -9,20 +9,27 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly PresentationService _presentationService;
     private readonly QrCodeService _qrCodeService;
     private readonly IDialogService _dialogService;
+    private readonly IWindowService _windowService;
 
     [ObservableProperty] private ViewModelBase _currentPage;
 
-    public MainWindowViewModel(QuizRepository quizRepository, PresentationService presentationService, QrCodeService qrCodeService, IDialogService dialogService)
+    public MainWindowViewModel(
+        QuizRepository quizRepository,
+        PresentationService presentationService, 
+        QrCodeService qrCodeService, 
+        IDialogService dialogService, 
+        IWindowService windowService)
     {
         _quizRepository = quizRepository;
         _presentationService = presentationService;
         _qrCodeService = qrCodeService;
         _dialogService = dialogService;
+        _windowService = windowService;
         _currentPage = new StartViewModel(NavigateToLibrary);
     }
 
     private QuizLibraryViewModel CreateLibraryPage() =>
-        new(_quizRepository, _dialogService, NavigateToEditor, NavigateToPresent, NavigateToResults);
+        new(_quizRepository, _dialogService, _windowService, NavigateToEditor, NavigateToPresent, NavigateToResults, NavigateToSettings);
 
     public void NavigateToLibrary() => CurrentPage = CreateLibraryPage();
 
@@ -34,4 +41,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void NavigateToResults(int quizId) =>
         CurrentPage = new ResultsViewModel(_quizRepository, quizId, NavigateToLibrary);
+
+    public void NavigateToSettings() =>
+        CurrentPage = new SettingsViewModel(_windowService, NavigateToLibrary);
 }
