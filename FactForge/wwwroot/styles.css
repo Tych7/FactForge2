@@ -103,7 +103,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .choice-btn {
   margin: 0;
-  min-height: 72px;
+  min-height: 100px;
   white-space: normal;
   word-break: break-word;
   background: #eceeff;
@@ -153,4 +153,11 @@ button:disabled { opacity: 0.5; cursor: default; }
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+.big-logo {
+  width: min(80vw, 400px);
+  height: auto;
+  display: block;
+  margin: 0 auto 2rem;
 }
