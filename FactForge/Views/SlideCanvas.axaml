@@ -15,8 +15,13 @@
     </Style>
   </UserControl.Styles>
 
-    <!-- Column widths are set in SlideCanvas.axaml.cs: "3*,2*" with an image, "*,0" without. -->
-  <Grid x:Name="Root" ColumnDefinitions="*,0">
+    <!-- Column widths come from SlideDisplay: 3*/2* with an image, * / 0 without. -->
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="{Binding ContentColumnWidth}"/>
+      <ColumnDefinition Width="{Binding ImageColumnWidth}"/>
+    </Grid.ColumnDefinitions>
+
 
     <!-- Image, right -->
     <Border Grid.Column="1" IsVisible="{Binding HasImage}"

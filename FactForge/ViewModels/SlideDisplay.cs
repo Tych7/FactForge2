@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,9 +22,11 @@ public partial class SlideDisplay : ObservableObject
     public string? Question { get; init; }
     public int TimeSeconds { get; init; }
 
-    /// <summary>Optional picture shown on the left; all other content shrinks into the remaining width.</summary>
+    /// <summary>Optional picture shown on the right; other content uses the remaining width.</summary>
     public Bitmap? Image { get; init; }
     public bool HasImage => Image is not null;
+    public GridLength ContentColumnWidth => HasImage ? new GridLength(3, GridUnitType.Star) : new GridLength(1, GridUnitType.Star);
+    public GridLength ImageColumnWidth => HasImage ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
 
     // Live values: the presenter updates these, the editor leaves them static.
     [ObservableProperty] private double _secondsRemaining;
