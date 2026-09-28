@@ -15,7 +15,7 @@ namespace FactForge.ViewModels;
 
 public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Finished }
 
-public sealed record AnswerOptionDisplay(string Text, IBrush Background);
+// AnswerOptionDisplay now lives in SlideDisplay.cs
 
 public partial class PresentViewModel : ViewModelBase, IDisposable
 {
@@ -26,15 +26,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     private readonly Action _onBack;
     private readonly DispatcherTimer _countdownTimer;
 
-    // Same per-position palette as the player-facing page's .choice-btn:nth-child rules,
-    // so the host screen and players' phones always agree on which tile is which color.
-    private static readonly IBrush[] AnswerColors =
-    {
-        new SolidColorBrush(Color.Parse("#D3FF0400")),
-        new SolidColorBrush(Color.Parse("#1E88E5")),
-        new SolidColorBrush(Color.Parse("#D5FFD621")),
-        new SolidColorBrush(Color.Parse("#3CA101")),
-    };
+    private static readonly IBrush[] AnswerColors = AnswerColorPalette.Colors;
     private static readonly IBrush DimmedAnswerColor = new SolidColorBrush(Color.Parse("#333333"));
 
     private QuizSession? _session;
@@ -47,13 +39,20 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [NotifyCanExecuteChangedFor(nameof(NextCommand))]
     private PresentPhase _phase = PresentPhase.Lobby;
 
+    // Wire data for the current slide (deadline, options, etc.)
     [ObservableProperty] private SlideDto? _currentSlide;
+    // What SlideCanvas renders; built from CurrentSlide in AdvanceAsync
+    [ObservableProperty] private SlideDisplay? _slide;
+
     [ObservableProperty] private int _slideNumber;
     [ObservableProperty] private int _totalSlides;
-    [ObservableProperty] private double _secondsRemaining;
-    [ObservableProperty] private int _answeredCount;
     [ObservableProperty] private RevealDto? _lastReveal;
-    [ObservableProperty] private System.Collections.Generic.List<AnswerOptionDisplay>? _displayOptions;
+
+    // The shared SlideCanvas is shown for text slides and for question/revealed phases.
+    // Lobby, Leaderboard and Finished keep their own presenter-only layouts.
+    public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide;
+
+    partial void OnPhaseChanged(PresentPhase value) => OnPropertyChanged(nameof(IsSlideVisible));
 
     public ObservableCollection<PlayerInfoDto> Players { get; } = new();
     public ObservableCollection<LeaderboardEntryDto> Leaderboard { get; } = new();
@@ -111,7 +110,10 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private void OnAnswerTallyChanged(AnswerTallyDto tally)
     {
-        Dispatcher.UIThread.Post(() => AnsweredCount = tally.Answered);
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (Slide is { } slide) slide.StatusText = $"{tally.Answered} answered";
+        });
     }
 
     private void OnSlideRevealed(RevealDto reveal)
@@ -122,15 +124,22 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             Phase = PresentPhase.Revealed;
             _countdownTimer.Stop();
 
+            if (Slide is not { } slide) return;
+
             var correct = reveal.CorrectAnswer;
+            slide.CorrectAnswer = correct;
+
             if (CurrentSlide?.Options is { } options && correct is not null)
             {
-                DisplayOptions = options
-                    .Select((o, i) => new AnswerOptionDisplay(
-                        o,
-                        string.Equals(o.Trim(), correct.Trim(), StringComparison.OrdinalIgnoreCase)
-                            ? AnswerColors[i % AnswerColors.Length]
-                            : DimmedAnswerColor))
+                slide.Options = options
+                    .Select((o, i) =>
+                    {
+                        var isCorrect = string.Equals(o.Trim(), correct.Trim(), StringComparison.OrdinalIgnoreCase);
+                        return new AnswerOptionDisplay(
+                            o,
+                            isCorrect ? AnswerColors[i % AnswerColors.Length] : DimmedAnswerColor,
+                            isCorrect);
+                    })
                     .ToList();
             }
         });
@@ -156,8 +165,8 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private void TickCountdown()
     {
-        if (CurrentSlide?.DeadlineUtc is not { } deadline) return;
-        SecondsRemaining = Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+        if (Slide is null || CurrentSlide?.DeadlineUtc is not { } deadline) return;
+        Slide.SecondsRemaining = Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
     }
 
     [RelayCommand]
@@ -178,7 +187,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async Task AdvanceAsync()
     {
-        AnsweredCount = 0;
         LastReveal = null;
         var slide = await _presentation.NextSlideAsync();
         if (slide is null)
@@ -190,19 +198,30 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
         CurrentSlide = slide;
         SlideNumber++;
+
+        Slide = new SlideDisplay
+        {
+            Type = slide.Type,
+            Header = slide.Header,
+            SubText = slide.SubText,
+            Question = slide.Question,
+            TimeSeconds = slide.TimeSeconds,
+            SecondsRemaining = slide.TimeSeconds,
+            StatusText = slide.DeadlineUtc is not null ? "0 answered" : string.Empty,
+            Options = slide.Options?
+                .Select((o, i) => new AnswerOptionDisplay(o, AnswerColors[i % AnswerColors.Length]))
+                .ToList()
+        };
+
         Phase = slide.Type switch
         {
             SlideType.Text => PresentPhase.TextSlide,
             SlideType.Leaderboard => PresentPhase.Leaderboard,
             _ => PresentPhase.Question
         };
-        DisplayOptions = slide.Options?
-            .Select((o, i) => new AnswerOptionDisplay(o, AnswerColors[i % AnswerColors.Length]))
-            .ToList();
 
         if (slide.DeadlineUtc is not null)
         {
-            SecondsRemaining = slide.TimeSeconds;
             _countdownTimer.Start();
         }
     }

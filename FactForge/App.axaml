@@ -11,7 +11,23 @@
     </Application.DataTemplates>
 
     <Application.Resources>
-        <conv:EnumEqualityConverter x:Key="EnumEqualityConverter"/>
+        <ResourceDictionary>
+            <conv:EnumEqualityConverter x:Key="EnumEqualityConverter"/>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="DialogBackgroundBrush">#1E1E1E</SolidColorBrush>
+                    <SolidColorBrush x:Key="DialogTitleBrush">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="DialogTextBrush">#CCCCCC</SolidColorBrush>
+                    <SolidColorBrush x:Key="DialogOverlayBrush">#99000000</SolidColorBrush>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="DialogBackgroundBrush">#FFFFFF</SolidColorBrush>
+                    <SolidColorBrush x:Key="DialogTitleBrush">#1A1A1A</SolidColorBrush>
+                    <SolidColorBrush x:Key="DialogTextBrush">#555555</SolidColorBrush>
+                    <SolidColorBrush x:Key="DialogOverlayBrush">#66000000</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 
     <Application.Styles>

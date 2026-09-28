@@ -37,6 +37,9 @@ public class LocalWebHost : IAsyncDisposable
         builder.Services.AddSingleton<QuizRepository>();
         builder.Services.AddSingleton<PresentationService>();
         builder.Services.AddSingleton<QrCodeService>();
+        builder.Services.AddSingleton<IDialogService, DialogService>();
+        builder.Services.AddSingleton<IWindowService, WindowService>();
+        builder.Services.AddSingleton<ISettingsService, SettingsService>();
         builder.Services.AddSignalR();
 
         var app = builder.Build();

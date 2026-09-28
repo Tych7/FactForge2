@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
+             xmlns:views="using:FactForge.Views"
              xmlns:models="using:FactForge.Models"
-             xmlns:convb="using:Avalonia.Data.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
@@ -46,69 +46,11 @@
             </Grid>
         </Grid>
 
-        <!-- Text slide -->
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16" MaxWidth="900"
-                    IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=TextSlide}">
-            <TextBlock Text="{Binding CurrentSlide.Header}" FontSize="42" FontWeight="Bold"
-                       HorizontalAlignment="Center" TextWrapping="Wrap"/>
-            <TextBlock Text="{Binding CurrentSlide.SubText}" FontSize="20" Opacity="0.8"
-                       HorizontalAlignment="Center" TextWrapping="Wrap"/>
-            <Button Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,24,0,0"
-                    FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
-        </StackPanel>
-
-        <!-- Question in progress / revealed -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*,Auto">
-            <Grid.IsVisible>
-                <MultiBinding Converter="{x:Static convb:BoolConverters.Or}">
-                    <Binding Path="Phase" Converter="{StaticResource EnumEqualityConverter}" ConverterParameter="Question"/>
-                    <Binding Path="Phase" Converter="{StaticResource EnumEqualityConverter}" ConverterParameter="Revealed"/>
-                </MultiBinding>
-            </Grid.IsVisible>
-
-            <TextBlock Grid.Row="0" Text="{Binding CurrentSlide.Question}" FontSize="28" FontWeight="Bold"
-                       HorizontalAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,12"/>
-
-            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
-                <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding CurrentSlide.TimeSeconds}"
-                             Value="{Binding SecondsRemaining}" Height="10"/>
-                <TextBlock Grid.Column="1" Margin="12,0,0,0"
-                           Text="{Binding AnsweredCount, StringFormat='{}{0} answered'}"/>
-            </Grid>
-
-            <!-- Open question: no tiles, so the reveal just states the correct answer -->
-            <TextBlock Grid.Row="2" Text="{Binding LastReveal.CorrectAnswer, StringFormat='Correct answer: {0}'}"
-                       FontSize="32" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center"
-                       HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock.IsVisible>
-                    <MultiBinding Converter="{x:Static convb:BoolConverters.And}">
-                        <Binding Path="Phase" Converter="{StaticResource EnumEqualityConverter}" ConverterParameter="Revealed"/>
-                        <Binding Path="DisplayOptions" Converter="{x:Static convb:ObjectConverters.IsNull}"/>
-                    </MultiBinding>
-                </TextBlock.IsVisible>
-            </TextBlock>
-
-            <!-- Multiple choice options -->
-            <ItemsControl Grid.Row="2" ItemsSource="{Binding DisplayOptions}"
-                          IsVisible="{Binding DisplayOptions, Converter={x:Static convb:ObjectConverters.IsNotNull}}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="2"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:AnswerOptionDisplay">
-                        <Border Background="{Binding Background}"
-                                CornerRadius="8" Margin="6" Padding="16">
-                            <TextBlock Text="{Binding Text}" FontSize="32" FontWeight="SemiBold" Foreground="White"
-                                       TextWrapping="Wrap" TextAlignment="Center"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <Button Grid.Row="3" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
+        <!-- Text slide / multiple choice / open question (in progress or revealed).
+             All three are rendered by the shared SlideCanvas, the same control the editor preview uses. -->
+        <Grid Grid.Row="1" RowDefinitions="*,Auto" IsVisible="{Binding IsSlideVisible}">
+            <views:SlideCanvas Grid.Row="0" DataContext="{Binding Slide}"/>
+            <Button Grid.Row="1" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
                     FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
         </Grid>
 

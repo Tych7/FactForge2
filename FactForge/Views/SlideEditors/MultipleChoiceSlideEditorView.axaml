@@ -18,6 +18,18 @@
         </StackPanel>
 
         <StackPanel Spacing="6">
+            <TextBlock Text="Number of answers"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <RadioButton GroupName="OptionCount" Content="2 answers"
+                             IsChecked="{Binding OptionCount, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=2, Mode=OneWay}"
+                             Command="{Binding UseTwoAnswersCommand}"/>
+                <RadioButton GroupName="OptionCount" Content="4 answers"
+                             IsChecked="{Binding OptionCount, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=4, Mode=OneWay}"
+                             Command="{Binding UseFourAnswersCommand}"/>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
             <TextBlock Text="Answers (select the correct one)"/>
             <ItemsControl ItemsSource="{Binding Options}">
                 <ItemsControl.ItemsPanel>
