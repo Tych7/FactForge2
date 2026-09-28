@@ -20,6 +20,7 @@ public class Slide
     public string? Question { get; set; }
     public string? CorrectAnswer { get; set; }
     public int TimeSeconds { get; set; } = 20;
+    public string? ImagePath { get; set; }
 
     public List<SlideOption> Options { get; set; } = new();
 }

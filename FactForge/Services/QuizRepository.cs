@@ -152,6 +152,7 @@ public class QuizRepository
         existing.Question = slide.Question;
         existing.CorrectAnswer = slide.CorrectAnswer;
         existing.TimeSeconds = slide.TimeSeconds;
+        existing.ImagePath = slide.ImagePath;
 
         db.SlideOptions.RemoveRange(existing.Options);
         existing.Options = slide.Options

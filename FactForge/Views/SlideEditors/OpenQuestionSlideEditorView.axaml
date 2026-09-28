@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
+             xmlns:views="using:FactForge.Views"
              x:Class="FactForge.Views.OpenQuestionSlideEditorView"
              x:DataType="vm:OpenQuestionSlideEditorViewModel">
 
@@ -21,5 +22,7 @@
             <TextBlock Text="Time limit (seconds)"/>
             <NumericUpDown Value="{Binding TimeSeconds}" Minimum="5" Maximum="300" Increment="5"/>
         </StackPanel>
+
+        <views:ImagePicker DataContext="{Binding Image}"/>
     </StackPanel>
 </UserControl>

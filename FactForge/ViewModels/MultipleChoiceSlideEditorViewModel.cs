@@ -25,9 +25,11 @@ public partial class OptionEditorViewModel : ViewModelBase
     }
 }
 
-public partial class MultipleChoiceSlideEditorViewModel : ViewModelBase
+public partial class MultipleChoiceSlideEditorViewModel : ViewModelBase, IHasSlideImage
 {
     public int SlideId { get; }
+
+    public SlideImageEditorViewModel Image { get; }
 
     [ObservableProperty] private string _question;
     [ObservableProperty] private int _timeSeconds;
@@ -38,6 +40,7 @@ public partial class MultipleChoiceSlideEditorViewModel : ViewModelBase
     public MultipleChoiceSlideEditorViewModel(Slide slide)
     {
         SlideId = slide.Id;
+        Image = new SlideImageEditorViewModel(slide.ImagePath);
         _question = slide.Question ?? string.Empty;
         _timeSeconds = slide.TimeSeconds;
 
@@ -81,6 +84,7 @@ public partial class MultipleChoiceSlideEditorViewModel : ViewModelBase
         Type = SlideType.MultipleChoice,
         Question = Question,
         TimeSeconds = TimeSeconds,
+        ImagePath = Image.FileName,
         Options = Options.Select(o => new SlideOption { Text = o.Text, IsCorrect = o.IsCorrect }).ToList()
     };
 }

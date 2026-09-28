@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
+             xmlns:views="using:FactForge.Views"
              x:Class="FactForge.Views.TextSlideEditorView"
              x:DataType="vm:TextSlideEditorViewModel">
 
@@ -17,5 +18,7 @@
             <TextBox Text="{Binding SubText}" Watermark="Supporting description"
                       AcceptsReturn="True" TextWrapping="Wrap" Height="160"/>
         </StackPanel>
+
+        <views:ImagePicker DataContext="{Binding Image}"/>
     </StackPanel>
 </UserControl>
