@@ -170,7 +170,7 @@ public class PresentationService : IAsyncDisposable
         var dto = new SlideDto(
             slide.Id, slide.Type, slide.Header, slide.SubText, slide.Question,
             slide.Type == SlideType.MultipleChoice ? slide.Options.Select(o => o.Text).ToList() : null,
-            slide.TimeSeconds, deadline, slide.ImagePath);
+            slide.TimeSeconds, deadline);
 
         await _hub.Clients.All.SendAsync("SlideStarted", dto);
 
@@ -281,6 +281,20 @@ public class PresentationService : IAsyncDisposable
 
         var reveal = new RevealDto(slide.Id, correctAnswerText, optionTallies);
         await _hub.Clients.All.SendAsync("SlideRevealed", reveal);
+
+        foreach (var player in active.PlayersById.Values)
+        {
+            if (player.ConnectionId is null) continue;
+
+            var points = answers
+                .Where(a => a.PlayerId == player.Id)
+                .Select(a => a.PointsAwarded)
+                .FirstOrDefault();
+
+            await _hub.Clients.Client(player.ConnectionId)
+                .SendAsync("QuestionPoints", points);
+        }
+
         SlideRevealedEvent?.Invoke(reveal);
         await BroadcastLeaderboardAsync();
         return reveal;

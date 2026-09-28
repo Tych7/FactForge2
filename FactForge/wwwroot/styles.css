@@ -103,7 +103,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .choice-btn {
   margin: 0;
-  min-height: 72px;
+  min-height: 100px;
   white-space: normal;
   word-break: break-word;
   background: #eceeff;
@@ -127,5 +127,37 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 #finalLeaderboard li { margin: 6px 0; font-size: 1.1rem; }
 
-.reveal-correct { color: var(--correct); font-weight: 700; }
-.reveal-incorrect { color: var(--incorrect); font-weight: 700; }
+.reveal-icon {
+  width: 110px;
+  height: 110px;
+  margin: 10px auto 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.reveal-icon.correct {
+  background: var(--correct);
+}
+
+.reveal-icon.incorrect {
+  background: var(--incorrect);
+}
+
+.reveal-score {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.big-logo {
+  width: min(80vw, 400px);
+  height: auto;
+  display: block;
+  margin: 0 auto 2rem;
+}

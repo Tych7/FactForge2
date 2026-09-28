@@ -21,8 +21,7 @@ const joinError = document.getElementById("joinError");
 const questionText = document.getElementById("questionText");
 const choicesEl = document.getElementById("choices");
 const timerBar = document.getElementById("timerBar");
-const revealTitle = document.getElementById("revealTitle");
-const revealAnswer = document.getElementById("revealAnswer");
+const revealIcon = document.getElementById("revealIcon");
 const revealRank = document.getElementById("revealRank");
 const finalLeaderboard = document.getElementById("finalLeaderboard");
 
@@ -33,6 +32,7 @@ let connection = null;
 let myName = "";
 let selectedAnswer = null;
 let countdownHandle = null;
+let questionPoints = 0;
 
 joinBtn.addEventListener("click", joinGame);
 
@@ -78,12 +78,20 @@ function registerHandlers() {
   connection.on("SlideRevealed", onSlideRevealed);
   connection.on("LeaderboardUpdated", onLeaderboardUpdated);
   connection.on("SessionEnded", onSessionEnded);
+  connection.on("QuestionPoints", (points) => {
+    questionPoints = points ?? 0;
+
+    if (!screens.reveal.classList.contains("hidden")) {
+      revealRank.textContent = `+${questionPoints} points`;
+    }
+  });
 }
 
 let lastLeaderboard = [];
 
 function onSlideStarted(slide) {
   selectedAnswer = null;
+  questionPoints = 0;
   stopCountdown();
 
   if (slide.type === SlideType.Text || slide.type === SlideType.Leaderboard) {
@@ -172,27 +180,25 @@ function stopCountdown() {
 
 function onSlideRevealed(reveal) {
   stopCountdown();
+
   const correctAnswer = reveal.correctAnswer;
   const wasCorrect =
     selectedAnswer !== null &&
     correctAnswer !== null &&
-    selectedAnswer.trim().toLowerCase() === String(correctAnswer).trim().toLowerCase();
+    selectedAnswer.trim().toLowerCase() ===
+      String(correctAnswer).trim().toLowerCase();
 
-  if (selectedAnswer === null) {
-    revealTitle.textContent = "Time's up!";
-    revealTitle.className = "";
-  } else if (wasCorrect) {
-    revealTitle.textContent = "Correct! 🎉";
-    revealTitle.className = "reveal-correct";
+  revealIcon.className = "reveal-icon";
+
+  if (wasCorrect) {
+    revealIcon.classList.add("correct");
+    revealIcon.textContent = "✓";
   } else {
-    revealTitle.textContent = "Not quite";
-    revealTitle.className = "reveal-incorrect";
+    revealIcon.classList.add("incorrect");
+    revealIcon.textContent = "✕";
   }
 
-  revealAnswer.textContent = correctAnswer ? `Correct answer: ${correctAnswer}` : "";
-
-  const mine = lastLeaderboard.find((p) => p.name === myName);
-  revealRank.textContent = mine ? `Your score: ${mine.score}` : "";
+  revealRank.textContent = `+${questionPoints} points`;
 
   showScreen("reveal");
 }
