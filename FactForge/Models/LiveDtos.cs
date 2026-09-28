@@ -16,7 +16,8 @@ public record SlideDto(
     string? Question,
     List<string>? Options,
     int TimeSeconds,
-    DateTime? DeadlineUtc);
+    DateTime? DeadlineUtc,
+    string? ImagePath = null);
 
 public record AnswerTallyDto(int Answered, int TotalPlayers);
 

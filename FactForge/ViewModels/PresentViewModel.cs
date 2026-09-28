@@ -208,6 +208,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             TimeSeconds = slide.TimeSeconds,
             SecondsRemaining = slide.TimeSeconds,
             StatusText = slide.DeadlineUtc is not null ? "0 answered" : string.Empty,
+            Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?
                 .Select((o, i) => new AnswerOptionDisplay(o, AnswerColors[i % AnswerColors.Length]))
                 .ToList()

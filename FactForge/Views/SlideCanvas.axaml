@@ -15,79 +15,91 @@
     </Style>
   </UserControl.Styles>
 
-  <Panel>
+    <!-- Column widths are set in SlideCanvas.axaml.cs: "3*,2*" with an image, "*,0" without. -->
+  <Grid x:Name="Root" ColumnDefinitions="*,0">
 
-    <!-- Text slide -->
-    <StackPanel IsVisible="{Binding IsText}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                Spacing="16" MaxWidth="900" Margin="24">
-      <Viewbox StretchDirection="DownOnly">
-        <TextBlock Text="{Binding Header}" FontSize="42" FontWeight="Bold"
-                   HorizontalAlignment="Center" TextWrapping="NoWrap"/>
-      </Viewbox>
-      <Viewbox StretchDirection="DownOnly">
-        <TextBlock Text="{Binding SubText}" FontSize="20" Opacity="0.8"
-                   HorizontalAlignment="Center" TextWrapping="NoWrap"/>
-      </Viewbox>
-    </StackPanel>
+    <!-- Image, right -->
+    <Border Grid.Column="1" IsVisible="{Binding HasImage}"
+            Margin="0,24,24,24" CornerRadius="12" ClipToBounds="True">
+      <Image Source="{Binding Image}" Stretch="Uniform"
+             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Border>
 
-    <!-- Multiple choice: question + timer pinned to the top, tiles fill the rest -->
-    <Grid IsVisible="{Binding IsMultipleChoice}" RowDefinitions="Auto,Auto,*" Margin="24">
-      <Viewbox Grid.Row="0" StretchDirection="DownOnly" Margin="0,0,0,12">
-        <TextBlock Text="{Binding Question}" FontSize="40" FontWeight="Bold"
-                   HorizontalAlignment="Center" TextWrapping="NoWrap"/>
-      </Viewbox>
+    <!-- All slide content in the left column -->
+    <Panel Grid.Column="0">
 
-      <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
-        <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}"
-                     Value="{Binding SecondsRemaining}" Height="10"/>
-        <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusText}"/>
+      <!-- Text slide -->
+      <StackPanel IsVisible="{Binding IsText}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                  Spacing="16" MaxWidth="900" Margin="24">
+        <Viewbox StretchDirection="DownOnly">
+          <TextBlock Text="{Binding Header}" FontSize="42" FontWeight="Bold"
+                     HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+        </Viewbox>
+        <Viewbox StretchDirection="DownOnly">
+          <TextBlock Text="{Binding SubText}" FontSize="20" Opacity="0.8"
+                     HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+        </Viewbox>
+      </StackPanel>
+
+      <!-- Multiple choice: question + timer pinned to the top, tiles fill the rest -->
+      <Grid IsVisible="{Binding IsMultipleChoice}" RowDefinitions="Auto,Auto,*" Margin="24">
+        <Viewbox Grid.Row="0" StretchDirection="DownOnly" Margin="0,0,0,12">
+          <TextBlock Text="{Binding Question}" FontSize="40" FontWeight="Bold"
+                     HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+        </Viewbox>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+          <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}"
+                       Value="{Binding SecondsRemaining}" Height="10"/>
+          <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusText}"/>
+        </Grid>
+
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Options}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="2"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:AnswerOptionDisplay">
+              <Border Classes="optionTile" Classes.correct="{Binding IsCorrect}"
+                      Background="{Binding Background}"
+                      Margin="6" Padding="16" CornerRadius="8">
+                <Viewbox StretchDirection="DownOnly">
+                  <TextBlock Text="{Binding Text}" FontSize="48" FontWeight="SemiBold"
+                             Foreground="White" TextWrapping="NoWrap" TextAlignment="Center"/>
+                </Viewbox>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
       </Grid>
 
-      <ItemsControl Grid.Row="2" ItemsSource="{Binding Options}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <UniformGrid Columns="2"/>
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:AnswerOptionDisplay">
-            <Border Classes="optionTile" Classes.correct="{Binding IsCorrect}"
-                    Background="{Binding Background}"
-                    Margin="6" Padding="16" CornerRadius="8">
-              <Viewbox StretchDirection="DownOnly">
-                <TextBlock Text="{Binding Text}" FontSize="48" FontWeight="SemiBold"
-                           Foreground="White" TextWrapping="NoWrap" TextAlignment="Center"/>
-              </Viewbox>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </Grid>
+      <!-- Open question: no tiles, so question + timer are centered -->
+      <Grid IsVisible="{Binding IsOpenQuestion}" RowDefinitions="*,Auto,Auto,Auto,*" Margin="24">
+        <Viewbox Grid.Row="1" StretchDirection="DownOnly" Margin="0,0,0,16">
+          <TextBlock Text="{Binding Question}" FontSize="44" FontWeight="Bold"
+                     HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+        </Viewbox>
 
-    <!-- Open question: no tiles, so question + timer are centered -->
-    <Grid IsVisible="{Binding IsOpenQuestion}" RowDefinitions="*,Auto,Auto,Auto,*" Margin="24">
-      <Viewbox Grid.Row="1" StretchDirection="DownOnly" Margin="0,0,0,16">
-        <TextBlock Text="{Binding Question}" FontSize="44" FontWeight="Bold"
-                   HorizontalAlignment="Center" TextWrapping="NoWrap"/>
-      </Viewbox>
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+          <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}"
+                       Value="{Binding SecondsRemaining}" Height="10"/>
+          <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusText}"/>
+        </Grid>
 
-      <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
-        <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}"
-                     Value="{Binding SecondsRemaining}" Height="10"/>
-        <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusText}"/>
+        <!-- Correct answer, shown once the slide is revealed -->
+        <Viewbox Grid.Row="3" StretchDirection="DownOnly"
+                 IsVisible="{Binding CorrectAnswer, Converter={x:Static convb:StringConverters.IsNotNullOrEmpty}}">
+          <TextBlock Text="{Binding CorrectAnswer, StringFormat='Correct answer: {0}'}"
+                     FontSize="32" FontWeight="SemiBold" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+        </Viewbox>
       </Grid>
 
-      <!-- Correct answer, shown once the slide is revealed -->
-      <Viewbox Grid.Row="3" StretchDirection="DownOnly"
-               IsVisible="{Binding CorrectAnswer, Converter={x:Static convb:StringConverters.IsNotNullOrEmpty}}">
-        <TextBlock Text="{Binding CorrectAnswer, StringFormat='Correct answer: {0}'}"
-                   FontSize="32" FontWeight="SemiBold" HorizontalAlignment="Center" TextWrapping="NoWrap"/>
-      </Viewbox>
-    </Grid>
+      <!-- Leaderboard placeholder (editor preview). The live leaderboard list stays in PresentView. -->
+      <TextBlock IsVisible="{Binding IsLeaderboard}" Text="Leaderboard" FontSize="36" FontWeight="Bold"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
-    <!-- Leaderboard placeholder (editor preview). The live leaderboard list stays in PresentView. -->
-    <TextBlock IsVisible="{Binding IsLeaderboard}" Text="Leaderboard" FontSize="36" FontWeight="Bold"
-               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-  </Panel>
+    </Panel>
+  </Grid>
 </UserControl>

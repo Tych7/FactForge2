@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.ImagePicker"
+             x:DataType="vm:SlideImageEditorViewModel">
+
+  <!-- Usage inside a slide editor view:  <views:ImagePicker DataContext="{Binding Image}"/> -->
+  <StackPanel Spacing="8">
+    <TextBlock Text="Image" FontWeight="SemiBold" Opacity="0.7"/>
+
+    <Border Width="160" Height="90" CornerRadius="6" ClipToBounds="True"
+            Background="#22000000" HorizontalAlignment="Left"
+            IsVisible="{Binding HasImage}">
+      <Image Source="{Binding Bitmap}" Stretch="Uniform"/>
+    </Border>
+
+    <StackPanel Orientation="Horizontal" Spacing="6">
+      <Button Content="Choose image…" Command="{Binding ChooseCommand}"/>
+      <Button Content="Remove" Command="{Binding RemoveCommand}" IsVisible="{Binding HasImage}"/>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

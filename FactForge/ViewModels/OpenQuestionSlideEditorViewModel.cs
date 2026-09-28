@@ -4,9 +4,11 @@ using FactForge.Models;
 
 namespace FactForge.ViewModels;
 
-public partial class OpenQuestionSlideEditorViewModel : ViewModelBase
+public partial class OpenQuestionSlideEditorViewModel : ViewModelBase, IHasSlideImage
 {
     public int SlideId { get; }
+
+    public SlideImageEditorViewModel Image { get; }
 
     [ObservableProperty] private string _question;
     [ObservableProperty] private string _correctAnswer;
@@ -15,6 +17,7 @@ public partial class OpenQuestionSlideEditorViewModel : ViewModelBase
     public OpenQuestionSlideEditorViewModel(Slide slide)
     {
         SlideId = slide.Id;
+        Image = new SlideImageEditorViewModel(slide.ImagePath);
         _question = slide.Question ?? string.Empty;
         _correctAnswer = slide.CorrectAnswer ?? string.Empty;
         _timeSeconds = slide.TimeSeconds;
@@ -26,6 +29,7 @@ public partial class OpenQuestionSlideEditorViewModel : ViewModelBase
         Type = SlideType.OpenQuestion,
         Question = Question,
         CorrectAnswer = CorrectAnswer,
-        TimeSeconds = TimeSeconds
+        TimeSeconds = TimeSeconds,
+        ImagePath = Image.FileName,
     };
 }
