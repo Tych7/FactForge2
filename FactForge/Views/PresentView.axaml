@@ -55,40 +55,22 @@
         </Grid>
 
         <!-- Leaderboard slide, shown between the reveal and the next question -->
-        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16" MinWidth="360"
-                    IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Leaderboard}">
+        <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto"
+              IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Leaderboard}">
             <TextBlock Text="Leaderboard" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <ItemsControl ItemsSource="{Binding Leaderboard}" HorizontalAlignment="Center">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="models:LeaderboardEntryDto">
-                        <Grid ColumnDefinitions="240,Auto" Margin="4">
-                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="20"/>
-                            <TextBlock Grid.Column="1" Text="{Binding Score}" FontSize="20" FontWeight="Bold"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Button Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,24,0,0"
+            <views:LeaderboardChart Grid.Row="1" Items="{Binding Leaderboard}" Margin="0,16"/>
+            <Button Grid.Row="2" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
                     FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
-        </StackPanel>
+        </Grid>
 
         <!-- Finished -->
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
-                    IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Finished}">
+        <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto"
+              IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Finished}">
             <TextBlock Text="Quiz complete" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <ItemsControl ItemsSource="{Binding Leaderboard}" HorizontalAlignment="Center">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="models:LeaderboardEntryDto">
-                        <Grid ColumnDefinitions="200,Auto" Margin="4">
-                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="18"/>
-                            <TextBlock Grid.Column="1" Text="{Binding Score}" FontSize="18" FontWeight="Bold"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Button Content="Back to Library" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
+            <views:LeaderboardChart Grid.Row="1" Items="{Binding Leaderboard}" Margin="0,16"/>
+            <Button Grid.Row="2" Content="Back to Library" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
                     Command="{Binding BackCommand}"/>
-        </StackPanel>
+        </Grid>
 
     </Grid>
 </UserControl>

@@ -55,7 +55,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     partial void OnPhaseChanged(PresentPhase value) => OnPropertyChanged(nameof(IsSlideVisible));
 
     public ObservableCollection<PlayerInfoDto> Players { get; } = new();
-    public ObservableCollection<LeaderboardEntryDto> Leaderboard { get; } = new();
+    public ObservableCollection<LeaderboardBarItem> Leaderboard { get; } = new();
 
     public PresentViewModel(PresentationService presentation, QrCodeService qrCodeService, QuizRepository quizRepository, int quizId, Action onBack)
     {
@@ -150,7 +150,9 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         Dispatcher.UIThread.Post(() =>
         {
             Leaderboard.Clear();
-            foreach (var entry in leaderboard) Leaderboard.Add(entry);
+            var maxScore = leaderboard.Count == 0 ? 0 : leaderboard.Max(e => e.Score);
+            for (var i = 0; i < leaderboard.Count; i++)
+                Leaderboard.Add(new LeaderboardBarItem(leaderboard[i], maxScore, i));
         });
     }
 

@@ -170,7 +170,7 @@ public class PresentationService : IAsyncDisposable
         var dto = new SlideDto(
             slide.Id, slide.Type, slide.Header, slide.SubText, slide.Question,
             slide.Type == SlideType.MultipleChoice ? slide.Options.Select(o => o.Text).ToList() : null,
-            slide.TimeSeconds, deadline);
+            slide.TimeSeconds, deadline, slide.ImagePath);
 
         await _hub.Clients.All.SendAsync("SlideStarted", dto);
 
