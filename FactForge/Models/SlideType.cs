@@ -5,5 +5,6 @@ public enum SlideType
     Text,
     MultipleChoice,
     OpenQuestion,
+    MusicQuestion,
     Leaderboard
 }

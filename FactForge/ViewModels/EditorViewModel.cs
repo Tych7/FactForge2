@@ -106,6 +106,7 @@ public partial class EditorViewModel : ViewModelBase
             SlideType.Text => new TextSlideEditorViewModel(slide),
             SlideType.MultipleChoice => new MultipleChoiceSlideEditorViewModel(slide),
             SlideType.OpenQuestion => new OpenQuestionSlideEditorViewModel(slide),
+            SlideType.MusicQuestion => new MusicQuestionSlideEditorViewModel(slide),
             SlideType.Leaderboard => new LeaderboardSlideEditorViewModel(slide),
             _ => null
         };
@@ -118,6 +119,7 @@ public partial class EditorViewModel : ViewModelBase
             TextSlideEditorViewModel t => t.ToEntity(),
             MultipleChoiceSlideEditorViewModel m => m.ToEntity(),
             OpenQuestionSlideEditorViewModel o => o.ToEntity(),
+            MusicQuestionSlideEditorViewModel m => m.ToEntity(),
             LeaderboardSlideEditorViewModel l => l.ToEntity(),
             _ => null
         };
@@ -143,6 +145,9 @@ public partial class EditorViewModel : ViewModelBase
 
     [RelayCommand]
     private async Task AddOpenQuestionSlideAsync() => await AddSlideAsync(SlideType.OpenQuestion);
+
+    [RelayCommand]
+    private async Task AddMusicQuestionSlideAsync() => await AddSlideAsync(SlideType.MusicQuestion);
 
     [RelayCommand]
     private async Task AddLeaderboardSlideAsync() => await AddSlideAsync(SlideType.Leaderboard);

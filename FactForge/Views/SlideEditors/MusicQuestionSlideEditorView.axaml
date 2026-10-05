@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:views="using:FactForge.Views"
+             x:Class="FactForge.Views.MusicQuestionSlideEditorView"
+             x:DataType="vm:MusicQuestionSlideEditorViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Music Question Slide"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Opacity="0.6"/>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Song title"/>
+            <TextBox Text="{Binding Title}"
+                     Watermark="Correct song title"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Artist"/>
+            <TextBox Text="{Binding Artist}"
+                     Watermark="Correct artist"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Time limit (seconds)"/>
+            <NumericUpDown Value="{Binding TimeSeconds}"
+                           Minimum="5"
+                           Maximum="300"
+                           Increment="5"/>
+        </StackPanel>
+
+        <views:AudioPicker DataContext="{Binding Audio}"/>
+
+        <views:ImagePicker DataContext="{Binding Image}"/>
+    </StackPanel>
+</UserControl>

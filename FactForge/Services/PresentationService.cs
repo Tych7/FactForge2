@@ -67,6 +67,17 @@ public class PresentationService : IAsyncDisposable
 
             _active?.DeadlineTimer?.Dispose();
             _active = new ActiveSession { Session = session, Slides = quiz.Slides };
+
+            foreach (var slide in quiz.Slides)
+            {
+                Console.WriteLine(
+                    $"SESSION Slide {slide.Id}: " +
+                    $"Type={slide.Type}, " +
+                    $"MusicFilePath='{slide.MusicFilePath}', " +
+                    $"Title='{slide.Title}', " +
+                    $"Artist='{slide.Artist}'");
+            }
+
             return (session, quiz.Slides);
         }
         finally
@@ -168,9 +179,20 @@ public class PresentationService : IAsyncDisposable
         }
 
         var dto = new SlideDto(
-            slide.Id, slide.Type, slide.Header, slide.SubText, slide.Question,
-            slide.Type == SlideType.MultipleChoice ? slide.Options.Select(o => o.Text).ToList() : null,
-            slide.TimeSeconds, deadline, slide.ImagePath);
+            slide.Id,
+            slide.Type,
+            slide.Header,
+            slide.SubText,
+            slide.Question,
+            slide.Type == SlideType.MultipleChoice
+                ? slide.Options.Select(o => o.Text).ToList()
+                : null,
+            slide.TimeSeconds,
+            deadline,
+            slide.MusicFilePath,
+            slide.Title,
+            slide.Artist,
+            slide.ImagePath);
 
         await _hub.Clients.All.SendAsync("SlideStarted", dto);
 

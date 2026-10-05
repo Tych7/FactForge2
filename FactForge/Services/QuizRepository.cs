@@ -153,6 +153,11 @@ public class QuizRepository
         existing.CorrectAnswer = slide.CorrectAnswer;
         existing.TimeSeconds = slide.TimeSeconds;
         existing.ImagePath = slide.ImagePath;
+        existing.MusicFilePath = slide.MusicFilePath;
+        existing.Title = slide.Title;
+        existing.Artist = slide.Artist;
+
+        existing.ImagePath = slide.ImagePath;
 
         db.SlideOptions.RemoveRange(existing.Options);
         existing.Options = slide.Options

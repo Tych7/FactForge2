@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.AudioPicker"
+             x:DataType="vm:SlideAudioEditorViewModel">
+
+  <!-- Usage inside a slide editor view:  <views:AudioPicker DataContext="{Binding Audio}"/> -->
+  <StackPanel Spacing="8">
+    <TextBlock Text="Audio" FontWeight="SemiBold" Opacity="0.7"/>
+
+    <Border Width="160" Height="90" CornerRadius="6" ClipToBounds="True"
+            Background="#22000000" HorizontalAlignment="Left"
+            IsVisible="{Binding HasAudio}">
+      <TextBlock Text="{Binding FileName}" VerticalAlignment="Center" Margin="12,0" TextTrimming="CharacterEllipsis"/>
+    </Border>
+
+    <StackPanel Orientation="Horizontal" Spacing="6">
+      <Button Content="Choose audio…" Command="{Binding ChooseCommand}"/>
+      <Button Content="Remove" Command="{Binding RemoveCommand}" IsVisible="{Binding HasAudio}"/>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

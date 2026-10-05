@@ -13,7 +13,7 @@ using FactForge.Services;
 
 namespace FactForge.ViewModels;
 
-public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Finished }
+public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Music, Finished }
 
 // AnswerOptionDisplay now lives in SlideDisplay.cs
 
@@ -50,7 +50,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     // The shared SlideCanvas is shown for text slides and for question/revealed phases.
     // Lobby, Leaderboard and Finished keep their own presenter-only layouts.
-    public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide;
+    public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide or PresentPhase.Music;
 
     partial void OnPhaseChanged(PresentPhase value) => OnPropertyChanged(nameof(IsSlideVisible));
 
@@ -185,11 +185,14 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         await AdvanceAsync();
     }
 
-    private bool CanAdvance() => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.Leaderboard or PresentPhase.TextSlide;
+    private bool CanAdvance() => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.Leaderboard or PresentPhase.TextSlide or PresentPhase.Music;
 
     private async Task AdvanceAsync()
     {
         LastReveal = null;
+
+        await AudioPlaybackService.Shared.StopAsync();
+
         var slide = await _presentation.NextSlideAsync();
         if (slide is null)
         {
@@ -212,7 +215,9 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             StatusText = slide.DeadlineUtc is not null ? "0 answered" : string.Empty,
             Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?
-                .Select((o, i) => new AnswerOptionDisplay(o, AnswerColors[i % AnswerColors.Length]))
+                .Select((o, i) => new AnswerOptionDisplay(
+                    o,
+                    AnswerColors[i % AnswerColors.Length]))
                 .ToList()
         };
 
@@ -220,13 +225,20 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         {
             SlideType.Text => PresentPhase.TextSlide,
             SlideType.Leaderboard => PresentPhase.Leaderboard,
+            SlideType.MusicQuestion => PresentPhase.Music,
             _ => PresentPhase.Question
         };
 
-        if (slide.DeadlineUtc is not null)
+        if (slide.Type == SlideType.MusicQuestion)
         {
-            _countdownTimer.Start();
+            var path = SlideAudioService.Shared.GetPath(slide.MusicFilePath);
+
+            if (path is not null)
+                await AudioPlaybackService.Shared.PlayAsync(path);
         }
+
+        if (slide.DeadlineUtc is not null)
+            _countdownTimer.Start();
     }
 
     [RelayCommand]
