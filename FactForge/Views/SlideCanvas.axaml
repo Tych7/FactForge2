@@ -126,7 +126,7 @@
                       FontWeight="SemiBold"
                       HorizontalAlignment="Center"/>
 
-            <TextBlock Text="{Binding MusicArtist}"
+            <TextBlock Text="{Binding MusicArtistDisplay}"
                       FontSize="24"
                       Opacity="0.8"
                       HorizontalAlignment="Center"/>

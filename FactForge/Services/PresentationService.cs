@@ -304,11 +304,11 @@ public class PresentationService : IAsyncDisposable
             _gate.Release();
         }
 
-        var artistCorrect =
-            string.Equals(
-                slide.Artist?.Trim(),
-                artist?.Trim(),
-                StringComparison.OrdinalIgnoreCase);
+        var artistCorrect = slide.Artist?
+            .Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim())
+            .Any(a => artist?.Contains(a, StringComparison.OrdinalIgnoreCase) == true)
+            ?? false;
 
         var titleCorrect =
             string.Equals(

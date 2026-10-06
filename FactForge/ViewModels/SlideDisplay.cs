@@ -81,4 +81,13 @@ public partial class SlideDisplay : ObservableObject
     public bool IsOpenQuestion => Type == SlideType.OpenQuestion;
     public bool IsMusicQuestion => Type == SlideType.MusicQuestion;
 
+    partial void OnIsMusicRevealedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(MusicArtistDisplay));
+    }
+
+    public string MusicArtistDisplay =>
+        IsMusicRevealed
+            ? MusicArtist?.Replace(";", " & ") ?? string.Empty
+            : MusicArtist ?? string.Empty;
 }
