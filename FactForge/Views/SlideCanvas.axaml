@@ -101,6 +101,90 @@
         </Viewbox>
       </Grid>
 
+      <!-- Music question -->
+      <Grid IsVisible="{Binding IsMusicQuestion}"
+            RowDefinitions="*,Auto,*"
+            Margin="24">
+
+        <!-- Question / revealed answer -->
+        <StackPanel Grid.Row="0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Spacing="12">
+
+          <TextBlock Text="Guess the song!"
+                    FontSize="44"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"/>
+
+          <StackPanel IsVisible="{Binding IsMusicRevealed}"
+                      HorizontalAlignment="Center"
+                      Spacing="4">
+
+            <TextBlock Text="{Binding MusicTitle}"
+                      FontSize="32"
+                      FontWeight="SemiBold"
+                      HorizontalAlignment="Center"/>
+
+            <TextBlock Text="{Binding MusicArtist}"
+                      FontSize="24"
+                      Opacity="0.8"
+                      HorizontalAlignment="Center"/>
+          </StackPanel>
+
+        </StackPanel>
+
+        <!-- Progress bars -->
+        <StackPanel Grid.Row="1"
+                    Spacing="14"
+                    Margin="0,16,0,16">
+
+            <!-- Answer timer -->
+            <Grid ColumnDefinitions="*,Auto">
+
+                <ProgressBar Grid.Column="0"
+                            Minimum="0"
+                            Maximum="{Binding TimeSeconds}"
+                            Value="{Binding SecondsRemaining}"
+                            Height="10"/>
+
+                <TextBlock Grid.Column="1"
+                          Margin="12,0,0,0"
+                          Text="{Binding StatusText}"/>
+
+            </Grid>
+
+            <!-- Music progress -->
+            <Grid ColumnDefinitions="*,Auto"
+                  Margin="0,50,0,16">
+
+                <ProgressBar Grid.Column="0"
+                            Minimum="0"
+                            Maximum="{Binding MusicDurationSeconds}"
+                            Value="{Binding MusicPositionSeconds}"
+                            Height="5"
+                            VerticalAlignment="Center"
+                            Foreground="#5BC0EB"/>
+
+                <TextBlock Grid.Column="1"
+                          Margin="12,0,0,0"
+                          Text="{Binding MusicTimeText}"
+                          VerticalAlignment="Center"
+                          FontSize="16"
+                          Opacity="0.8"/>
+
+            </Grid>
+
+            <Button Content="Replay"
+                    Command="{Binding ReplayMusicCommand}"
+                    HorizontalAlignment="Center"
+                    Padding="24,10"
+                    FontSize="18"/>
+                        
+        </StackPanel>
+
+      </Grid>
+
       <!-- Leaderboard placeholder (editor preview). The live leaderboard list stays in PresentView. -->
       <TextBlock IsVisible="{Binding IsLeaderboard}" Text="Leaderboard" FontSize="36" FontWeight="Bold"
                  HorizontalAlignment="Center" VerticalAlignment="Center"/>

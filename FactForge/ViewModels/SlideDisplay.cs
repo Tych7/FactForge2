@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using FactForge.Models;
 
 namespace FactForge.ViewModels;
@@ -22,6 +24,41 @@ public partial class SlideDisplay : ObservableObject
     public string? Question { get; init; }
     public int TimeSeconds { get; init; }
 
+    // Music question
+    public string? MusicTitle { get; init; }
+    public string? MusicArtist { get; init; }
+    public IAsyncRelayCommand? ReplayMusicCommand { get; init; }
+
+    /// <summary>
+    /// Total duration of the music in seconds.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MusicTimeText))]
+    private double _musicDurationSeconds;
+
+    /// <summary>
+    /// Current playback position of the music in seconds.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MusicTimeText))]
+    private double _musicPositionSeconds;
+    
+    public string MusicTimeText =>
+    $"{FormatTime(MusicPositionSeconds)} / {FormatTime(MusicDurationSeconds)}";
+
+    private static string FormatTime(double seconds)
+    {
+        var time = TimeSpan.FromSeconds(Math.Max(0, seconds));
+
+        return $"{(int)time.TotalMinutes:00}:{time.Seconds:00}";
+    }
+    
+    /// <summary>
+    /// Whether the music title and artist have been revealed.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isMusicRevealed;
+
     /// <summary>Optional picture shown on the right; other content uses the remaining width.</summary>
     public Bitmap? Image { get; init; }
     public bool HasImage => Image is not null;
@@ -40,6 +77,8 @@ public partial class SlideDisplay : ObservableObject
 
     public bool IsText => Type == SlideType.Text;
     public bool IsLeaderboard => Type == SlideType.Leaderboard;
-    public bool IsMultipleChoice => !IsText && !IsLeaderboard && Options is not null;
-    public bool IsOpenQuestion => !IsText && !IsLeaderboard && Options is null;
+    public bool IsMultipleChoice => Type == SlideType.MultipleChoice;
+    public bool IsOpenQuestion => Type == SlideType.OpenQuestion;
+    public bool IsMusicQuestion => Type == SlideType.MusicQuestion;
+
 }
