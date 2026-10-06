@@ -36,4 +36,9 @@ public record RevealDto(
 
 public record LeaderboardEntryDto(string Name, int Score);
 
-public record SubmitAnswerResultDto(bool Accepted, bool IsCorrect, int PointsAwarded);
+public record SubmitAnswerResultDto(
+    bool Accepted,
+    bool IsCorrect,
+    int PointsAwarded,
+    bool ArtistCorrect = false,
+    bool TitleCorrect = false);

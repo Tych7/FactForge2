@@ -1,10 +1,11 @@
-const SlideType = { Text: 0, MultipleChoice: 1, OpenQuestion: 2, Leaderboard: 3 };
+const SlideType = { Text: 0, MultipleChoice: 1, OpenQuestion: 2, MusicQuestion: 3, Leaderboard: 4 };
 
 const screens = {
   join: document.getElementById("screen-join"),
   waiting: document.getElementById("screen-waiting"),
   textSlide: document.getElementById("screen-textslide"),
   question: document.getElementById("screen-question"),
+  musicQuestion: document.getElementById("screen-music-question"),
   locked: document.getElementById("screen-locked"),
   reveal: document.getElementById("screen-reveal"),
   ended: document.getElementById("screen-ended"),
@@ -24,6 +25,13 @@ const timerBar = document.getElementById("timerBar");
 const revealIcon = document.getElementById("revealIcon");
 const revealRank = document.getElementById("revealRank");
 const finalLeaderboard = document.getElementById("finalLeaderboard");
+const musicArtistInput = document.getElementById("musicArtist");
+const musicTitleInput = document.getElementById("musicTitle");
+const musicSubmitBtn = document.getElementById("musicSubmitBtn");
+const musicTimerBar = document.getElementById("musicTimerBar");
+const musicRevealResults = document.getElementById("musicRevealResults");
+const musicArtistResult = document.getElementById("musicArtistResult");
+const musicTitleResult = document.getElementById("musicTitleResult");
 
 const params = new URLSearchParams(window.location.search);
 if (params.get("code")) joinCodeInput.value = params.get("code").toUpperCase();
@@ -33,6 +41,10 @@ let myName = "";
 let selectedAnswer = null;
 let countdownHandle = null;
 let questionPoints = 0;
+let currentSlideType = null;
+let musicAnswerCorrect  = false;
+let musicArtistCorrect = false;
+let musicTitleCorrect = false;
 
 joinBtn.addEventListener("click", joinGame);
 
@@ -92,49 +104,88 @@ let lastLeaderboard = [];
 function onSlideStarted(slide) {
   selectedAnswer = null;
   questionPoints = 0;
+  musicAnswerCorrect = false;
+  musicArtistCorrect = false;
+  musicTitleCorrect = false;
   stopCountdown();
+  currentSlideType = slide.type;
 
-  if (slide.type === SlideType.Text || slide.type === SlideType.Leaderboard) {
+  if (slide.type === SlideType.Text ||
+      slide.type === SlideType.Leaderboard) {
     showScreen("textSlide");
     return;
   }
 
+  // Music question
+  if (slide.type === SlideType.MusicQuestion) {
+    musicArtistInput.value = "";
+    musicTitleInput.value = "";
+
+    musicArtistInput.disabled = false;
+    musicTitleInput.disabled = false;
+    musicSubmitBtn.disabled = false;
+
+    musicTimerBar.style.width = "100%";
+
+    showScreen("musicQuestion");
+
+    if (slide.deadlineUtc) {
+      startMusicCountdown(slide.timeSeconds);
+    }
+
+    return;
+  }
+
+  // Normal question
   questionText.textContent = slide.question || "";
   choicesEl.innerHTML = "";
 
   if (slide.type === SlideType.MultipleChoice) {
     choicesEl.classList.remove("single-column");
+
     (slide.options || []).forEach((option) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn";
       btn.textContent = option;
-      btn.addEventListener("click", () => submitAnswer(option, btn));
+
+      btn.addEventListener("click", () =>
+        submitAnswer(option, btn)
+      );
+
       choicesEl.appendChild(btn);
     });
   } else {
     choicesEl.classList.add("single-column");
+
     const form = document.createElement("form");
     form.className = "open-answer-form";
+
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Type your answer";
+
     const submit = document.createElement("button");
     submit.type = "submit";
     submit.textContent = "Submit";
+
     form.appendChild(input);
     form.appendChild(submit);
+
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      if (input.value.trim()) submitAnswer(input.value.trim(), submit);
+
+      if (input.value.trim())
+        submitAnswer(input.value.trim(), submit);
     });
+
     choicesEl.appendChild(form);
   }
 
   showScreen("question");
 
   if (slide.deadlineUtc) {
-    startCountdown(slide.timeSeconds);
+    startTimerCountdown(slide.timeSeconds);
   }
 }
 
@@ -155,18 +206,78 @@ async function submitAnswer(text, sourceEl) {
   showScreen("locked");
 }
 
-function startCountdown(totalSeconds) {
-  // Count down against the phone's own clock, started the moment the question appears,
-  // rather than comparing the server's absolute deadline to the phone's clock: those two
-  // clocks aren't guaranteed to be in sync, which threw the bar off by however much they drifted.
+async function submitMusicAnswer() {
+  if (selectedAnswer !== null) return;
+
+  const artist = musicArtistInput.value.trim();
+  const title = musicTitleInput.value.trim();
+
+  if (!artist || !title) return;
+
+  selectedAnswer = `${artist}|${title}`;
+
+  musicArtistInput.disabled = true;
+  musicTitleInput.disabled = true;
+  musicSubmitBtn.disabled = true;
+
+  try {
+    const result = await connection.invoke(
+      "SubmitMusicAnswer",
+      artist,
+      title
+    );
+
+    musicAnswerCorrect = result.isCorrect;
+    musicArtistCorrect = result.artistCorrect;
+    musicTitleCorrect = result.titleCorrect;
+    questionPoints = result.pointsAwarded ?? 0;
+
+    stopCountdown();
+    showScreen("locked");
+  } catch (err) {
+    console.error(err);
+
+    selectedAnswer = null;
+    musicArtistInput.disabled = false;
+    musicTitleInput.disabled = false;
+    musicSubmitBtn.disabled = false;
+  }
+}
+
+musicSubmitBtn.addEventListener("click", submitMusicAnswer);
+
+function startTimerCountdown(totalSeconds) {
+  startCountdown(totalSeconds, timerBar);
+}
+
+function startMusicCountdown(totalSeconds) {
+  startCountdown(totalSeconds, musicTimerBar);
+}
+
+function startCountdown(totalSeconds, progressBar) {
+  stopCountdown();
+
   const totalMs = totalSeconds * 1000;
   const startedAt = Date.now();
+
   const update = () => {
-    const remainingMs = totalMs - (Date.now() - startedAt);
-    const pct = Math.max(0, Math.min(100, (remainingMs / totalMs) * 100));
-    timerBar.style.width = pct + "%";
-    if (remainingMs <= 0) stopCountdown();
+    const remainingMs = Math.max(
+      0,
+      totalMs - (Date.now() - startedAt)
+    );
+
+    const pct = Math.max(
+      0,
+      Math.min(100, (remainingMs / totalMs) * 100)
+    );
+
+    progressBar.style.width = `${pct}%`;
+
+    if (remainingMs <= 0) {
+      stopCountdown();
+    }
   };
+
   update();
   countdownHandle = setInterval(update, 200);
 }
@@ -181,14 +292,46 @@ function stopCountdown() {
 function onSlideRevealed(reveal) {
   stopCountdown();
 
+  revealIcon.className = "reveal-icon";
+  revealIcon.classList.remove("hidden");
+
+  musicRevealResults.classList.add("hidden");
+
+  // Music question
+  if (currentSlideType === SlideType.MusicQuestion) {
+    // Hide the big correct/incorrect icon.
+    revealIcon.classList.add("hidden");
+
+    musicRevealResults.classList.remove("hidden");
+
+    musicArtistResult.innerHTML = `
+      <span class="music-result-icon ${musicArtistCorrect ? "correct" : "incorrect"}">
+        ${musicArtistCorrect ? "✓" : "✕"}
+      </span>
+      <span>Artist</span>
+    `;
+
+    musicTitleResult.innerHTML = `
+      <span class="music-result-icon ${musicTitleCorrect ? "correct" : "incorrect"}">
+        ${musicTitleCorrect ? "✓" : "✕"}
+      </span>
+      <span>Title</span>
+    `;
+
+    revealRank.textContent = `+${questionPoints} points`;
+
+    showScreen("reveal");
+    return;
+  }
+
+  // Normal question
   const correctAnswer = reveal.correctAnswer;
+
   const wasCorrect =
     selectedAnswer !== null &&
     correctAnswer !== null &&
     selectedAnswer.trim().toLowerCase() ===
       String(correctAnswer).trim().toLowerCase();
-
-  revealIcon.className = "reveal-icon";
 
   if (wasCorrect) {
     revealIcon.classList.add("correct");

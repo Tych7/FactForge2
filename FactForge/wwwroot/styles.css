@@ -149,6 +149,36 @@ button:disabled { opacity: 0.5; cursor: default; }
   background: var(--incorrect);
 }
 
+.music-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.music-result-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.music-result-icon.correct {
+  background: var(--correct);
+}
+
+.music-result-icon.incorrect {
+  background: var(--incorrect);
+}
+
 .reveal-score {
   margin: 0;
   font-size: 1.5rem;

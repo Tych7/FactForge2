@@ -34,6 +34,38 @@
       <div id="choices" class="choices"></div>
     </section>
 
+    <section id="screen-music-question" class="screen hidden">
+      <div class="timer-bar-track">
+        <div id="musicTimerBar" class="timer-bar"></div>
+      </div>
+
+      <h2>🎵 Guess the song!</h2>
+
+      <div class="music-answer-form">
+        <label for="musicArtist">Artist</label>
+        <input
+          id="musicArtist"
+          type="text"
+          maxlength="100"
+          autocomplete="off"
+          placeholder="Artist"
+        />
+
+        <label for="musicTitle">Title</label>
+        <input
+          id="musicTitle"
+          type="text"
+          maxlength="100"
+          autocomplete="off"
+          placeholder="Song title"
+        />
+
+        <button id="musicSubmitBtn" type="button">
+          Submit answer
+        </button>
+      </div>
+    </section>
+
     <section id="screen-locked" class="screen hidden">
       <h2>Answer locked in</h2>
       <p>Waiting for the reveal...</p>
@@ -41,6 +73,12 @@
 
     <section id="screen-reveal" class="screen hidden">
       <div id="revealIcon" class="reveal-icon"></div>
+
+      <div id="musicRevealResults" class="music-reveal-results hidden">
+        <div id="musicArtistResult" class="music-result"></div>
+        <div id="musicTitleResult" class="music-result"></div>
+      </div>
+
       <p id="revealRank" class="reveal-score"></p>
     </section>
 
