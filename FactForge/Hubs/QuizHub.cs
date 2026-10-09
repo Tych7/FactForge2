@@ -29,6 +29,16 @@ public class QuizHub : Hub
         return await _presentation.SubmitAnswerAsync(Context.ConnectionId, answerText ?? string.Empty);
     }
 
+    public async Task<SubmitAnswerResultDto> SubmitMusicAnswer(
+        string artist,
+        string title)
+    {
+        return await _presentation.SubmitMusicAnswerAsync(
+            Context.ConnectionId,
+            artist ?? string.Empty,
+            title ?? string.Empty);
+    }
+
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         _presentation.PlayerDisconnected(Context.ConnectionId);

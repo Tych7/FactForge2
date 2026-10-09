@@ -5,7 +5,7 @@
              x:DataType="vm:LeaderboardSlideEditorViewModel">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Leaderboard Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        <TextBlock Text="Leaderboard" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
         <TextBlock Text="Shows the current standings when presented. Nothing to configure."
                    TextWrapping="Wrap" Opacity="0.8"/>
     </StackPanel>

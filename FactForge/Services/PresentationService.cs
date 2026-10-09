@@ -67,6 +67,17 @@ public class PresentationService : IAsyncDisposable
 
             _active?.DeadlineTimer?.Dispose();
             _active = new ActiveSession { Session = session, Slides = quiz.Slides };
+
+            foreach (var slide in quiz.Slides)
+            {
+                Console.WriteLine(
+                    $"SESSION Slide {slide.Id}: " +
+                    $"Type={slide.Type}, " +
+                    $"MusicFilePath='{slide.MusicFilePath}', " +
+                    $"Title='{slide.Title}', " +
+                    $"Artist='{slide.Artist}'");
+            }
+
             return (session, quiz.Slides);
         }
         finally
@@ -168,9 +179,20 @@ public class PresentationService : IAsyncDisposable
         }
 
         var dto = new SlideDto(
-            slide.Id, slide.Type, slide.Header, slide.SubText, slide.Question,
-            slide.Type == SlideType.MultipleChoice ? slide.Options.Select(o => o.Text).ToList() : null,
-            slide.TimeSeconds, deadline, slide.ImagePath);
+            slide.Id,
+            slide.Type,
+            slide.Header,
+            slide.SubText,
+            slide.Question,
+            slide.Type == SlideType.MultipleChoice
+                ? slide.Options.Select(o => o.Text).ToList()
+                : null,
+            slide.TimeSeconds,
+            deadline,
+            slide.MusicFilePath,
+            slide.Title,
+            slide.Artist,
+            slide.ImagePath);
 
         await _hub.Clients.All.SendAsync("SlideStarted", dto);
 
@@ -236,6 +258,109 @@ public class PresentationService : IAsyncDisposable
         await _hub.Clients.All.SendAsync("AnswerTally", tally);
         AnswerTallyChanged?.Invoke(tally);
         return new SubmitAnswerResultDto(true, false, 0);
+    }
+
+    public async Task<SubmitAnswerResultDto> SubmitMusicAnswerAsync(
+        string connectionId,
+        string artist,
+        string title)
+    {
+        await _gate.WaitAsync();
+
+        ActiveSession active;
+        Slide slide;
+        Player player;
+        double elapsedMs;
+
+        try
+        {
+            active = _active ?? throw new InvalidOperationException("No active session.");
+
+            if (!active.ConnectionToPlayerId.TryGetValue(connectionId, out var playerId))
+                return new SubmitAnswerResultDto(false, false, 0);
+
+            if (active.Revealed || active.CurrentSlidePosition < 0)
+                return new SubmitAnswerResultDto(false, false, 0);
+
+            if (!active.AnsweredPlayerIds.Add(playerId))
+                return new SubmitAnswerResultDto(false, false, 0);
+
+            slide = active.Slides[active.CurrentSlidePosition];
+            player = active.PlayersById[playerId];
+
+            if (slide.Type != SlideType.MusicQuestion)
+                return new SubmitAnswerResultDto(false, false, 0);
+
+            var deadline = active.CurrentSlideDeadlineUtc ?? DateTime.UtcNow;
+            var totalMs = slide.TimeSeconds * 1000.0;
+
+            elapsedMs = Math.Clamp(
+                totalMs - (deadline - DateTime.UtcNow).TotalMilliseconds,
+                0,
+                totalMs);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+
+        var artistCorrect = slide.Artist?
+            .Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim())
+            .Any(a => artist?.Contains(a, StringComparison.OrdinalIgnoreCase) == true)
+            ?? false;
+
+        var titleCorrect =
+            string.Equals(
+                slide.Title?.Trim(),
+                title?.Trim(),
+                StringComparison.OrdinalIgnoreCase);
+
+        var remainingFraction = Math.Clamp(
+            1.0 - elapsedMs / (slide.TimeSeconds * 1000.0),
+            0,
+            1);
+
+        var maxPoints = 500 + 500 * remainingFraction;
+
+        var points = (int)Math.Round(
+            maxPoints *
+            ((artistCorrect ? 0.5 : 0.0) +
+            (titleCorrect ? 0.5 : 0.0)));
+
+        var isCorrect = artistCorrect && titleCorrect;
+
+        await using var db = await _contextFactory.CreateDbContextAsync();
+
+        db.PlayerAnswers.Add(new PlayerAnswer
+        {
+            PlayerId = player.Id,
+            SlideId = slide.Id,
+            AnswerText = $"Artist: {artist} | Title: {title}",
+            IsCorrect = isCorrect,
+            AnswerMs = (int)elapsedMs,
+            PointsAwarded = points,
+            SubmittedAt = DateTime.UtcNow
+        });
+
+        var dbPlayer = await db.Players.FindAsync(player.Id);
+
+        if (dbPlayer is not null)
+        {
+            dbPlayer.Score += points;
+            player.Score = dbPlayer.Score;
+        }
+
+        await db.SaveChangesAsync();
+
+        var tally = new AnswerTallyDto(
+            active.AnsweredPlayerIds.Count,
+            active.PlayersById.Count);
+
+        await _hub.Clients.All.SendAsync("AnswerTally", tally);
+        AnswerTallyChanged?.Invoke(tally);
+
+        return new SubmitAnswerResultDto(true, isCorrect, points, artistCorrect, titleCorrect);
     }
 
     public async Task<RevealDto?> RevealCurrentSlideAsync()

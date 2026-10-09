@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -13,7 +14,7 @@ using FactForge.Services;
 
 namespace FactForge.ViewModels;
 
-public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Finished }
+public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Music, Finished }
 
 // AnswerOptionDisplay now lives in SlideDisplay.cs
 
@@ -50,7 +51,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     // The shared SlideCanvas is shown for text slides and for question/revealed phases.
     // Lobby, Leaderboard and Finished keep their own presenter-only layouts.
-    public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide;
+    public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide or PresentPhase.Music;
 
     partial void OnPhaseChanged(PresentPhase value) => OnPropertyChanged(nameof(IsSlideVisible));
 
@@ -71,7 +72,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         _presentation.LeaderboardUpdatedEvent += OnLeaderboardUpdated;
         _presentation.SessionEndedEvent += OnSessionEnded;
 
-        _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+        _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(33) };
         _countdownTimer.Tick += (_, _) => TickCountdown();
 
         _ = InitializeAsync();
@@ -79,6 +80,9 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
+        // Initialize the native audio player before the first music slide.
+        await AudioPlaybackService.Shared.InitializeAsync();
+
         var quiz = await _quizRepository.GetQuizWithSlidesAsync(_quizId);
         if (quiz is null) { _onBack(); return; }
         QuizTitle = quiz.Title;
@@ -116,8 +120,10 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         });
     }
 
-    private void OnSlideRevealed(RevealDto reveal)
+    private async void OnSlideRevealed(RevealDto reveal)
     {
+        await AudioPlaybackService.Shared.StopAsync();
+
         Dispatcher.UIThread.Post(() =>
         {
             LastReveal = reveal;
@@ -128,6 +134,11 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
             var correct = reveal.CorrectAnswer;
             slide.CorrectAnswer = correct;
+
+            if (CurrentSlide?.Type == SlideType.MusicQuestion)
+            {
+                slide.IsMusicRevealed = true;
+}
 
             if (CurrentSlide?.Options is { } options && correct is not null)
             {
@@ -165,10 +176,39 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         });
     }
 
-    private void TickCountdown()
+    private async void TickCountdown()
     {
-        if (Slide is null || CurrentSlide?.DeadlineUtc is not { } deadline) return;
-        Slide.SecondsRemaining = Math.Max(0, (deadline - DateTime.UtcNow).TotalSeconds);
+        if (Slide is null)
+            return;
+
+        if (CurrentSlide?.Type == SlideType.MusicQuestion)
+        {
+            Slide.MusicPositionSeconds = AudioPlaybackService.Shared.PositionSeconds;
+
+            Slide.MusicDurationSeconds = AudioPlaybackService.Shared.DurationSeconds;
+
+            // Make absolutely sure the bar reaches the end.
+            if (Slide.MusicDurationSeconds > 0 &&
+                Slide.MusicPositionSeconds >= Slide.MusicDurationSeconds - 0.05)
+            {
+                Slide.MusicPositionSeconds = Slide.MusicDurationSeconds;
+            }
+        }
+
+        if (CurrentSlide?.DeadlineUtc is { } deadline)
+        {
+            Slide.SecondsRemaining = Math.Max(
+                0,
+                (deadline - DateTime.UtcNow).TotalSeconds);
+
+            if (Slide.SecondsRemaining <= 0)
+            {
+                _countdownTimer.Stop();
+
+                if (Phase == PresentPhase.Question)
+                    await _presentation.RevealCurrentSlideAsync();
+            }
+        }
     }
 
     [RelayCommand]
@@ -177,19 +217,24 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [RelayCommand(CanExecute = nameof(CanAdvance))]
     private async Task NextAsync()
     {
-        if (Phase == PresentPhase.Question)
+        if (Phase == PresentPhase.Question ||
+            Phase == PresentPhase.Music)
         {
             await _presentation.RevealCurrentSlideAsync();
             return;
         }
+
         await AdvanceAsync();
     }
 
-    private bool CanAdvance() => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.Leaderboard or PresentPhase.TextSlide;
+    private bool CanAdvance() => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.Leaderboard or PresentPhase.TextSlide or PresentPhase.Music;
 
     private async Task AdvanceAsync()
     {
         LastReveal = null;
+
+        await AudioPlaybackService.Shared.StopAsync();
+
         var slide = await _presentation.NextSlideAsync();
         if (slide is null)
         {
@@ -209,10 +254,17 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             Question = slide.Question,
             TimeSeconds = slide.TimeSeconds,
             SecondsRemaining = slide.TimeSeconds,
+            MusicTitle = slide.Title,
+            MusicArtist = slide.Artist,
+            MusicDurationSeconds = 0,
+            MusicPositionSeconds = 0,
+            ReplayMusicCommand = ReplayMusicCommand,
             StatusText = slide.DeadlineUtc is not null ? "0 answered" : string.Empty,
             Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?
-                .Select((o, i) => new AnswerOptionDisplay(o, AnswerColors[i % AnswerColors.Length]))
+                .Select((o, i) => new AnswerOptionDisplay(
+                    o,
+                    AnswerColors[i % AnswerColors.Length]))
                 .ToList()
         };
 
@@ -220,13 +272,38 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         {
             SlideType.Text => PresentPhase.TextSlide,
             SlideType.Leaderboard => PresentPhase.Leaderboard,
+            SlideType.MusicQuestion => PresentPhase.Music,
             _ => PresentPhase.Question
         };
 
-        if (slide.DeadlineUtc is not null)
+        if (slide.Type == SlideType.MusicQuestion)
+        {
+            var path = SlideAudioService.Shared.GetPath(slide.MusicFilePath);
+
+            if (path is not null)
+                await AudioPlaybackService.Shared.PlayAsync(path);
+        }
+
+        if (slide.DeadlineUtc is not null || slide.Type == SlideType.MusicQuestion)
         {
             _countdownTimer.Start();
         }
+    }
+
+    [RelayCommand]
+    private async Task ReplayMusicAsync()
+    {
+        if (CurrentSlide?.Type != SlideType.MusicQuestion)
+            return;
+
+        var path = SlideAudioService.Shared.GetPath(CurrentSlide.MusicFilePath);
+
+        if (path is null)
+            return;
+
+        Slide!.MusicPositionSeconds = 0;
+
+        await AudioPlaybackService.Shared.PlayAsync(path);
     }
 
     [RelayCommand]
@@ -234,13 +311,16 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     {
         if (_presentation.HasActiveSession)
             await _presentation.EndSessionAsync();
+        
+        await AudioPlaybackService.Shared.StopAsync();
         Phase = PresentPhase.Finished;
     }
 
     [RelayCommand]
-    private void Back()
+    private async Task Back()
     {
         Dispose();
+        await AudioPlaybackService.Shared.StopAsync();
         _onBack();
     }
 

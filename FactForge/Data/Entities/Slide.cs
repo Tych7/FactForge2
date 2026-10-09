@@ -22,5 +22,10 @@ public class Slide
     public int TimeSeconds { get; set; } = 20;
     public string? ImagePath { get; set; }
 
+    // MusicQuestion slides
+    public string? MusicFilePath { get; set; }
+    public string? Title { get; set; }
+    public string? Artist { get; set; }
+
     public List<SlideOption> Options { get; set; } = new();
 }

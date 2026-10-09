@@ -6,7 +6,7 @@
              x:DataType="vm:TextSlideEditorViewModel">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Text Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        <TextBlock Text="Text" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
 
         <StackPanel Spacing="6">
             <TextBlock Text="Header"/>

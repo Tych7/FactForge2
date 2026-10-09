@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:views="using:FactForge.Views"
+             x:Class="FactForge.Views.MusicQuestionSlideEditorView"
+             x:DataType="vm:MusicQuestionSlideEditorViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Music Question"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Opacity="0.6"/>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Song title"/>
+            <TextBox Text="{Binding Title}"
+                     Watermark="Correct song title"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Artist"/>
+
+            <ItemsControl ItemsSource="{Binding Artists}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*,Auto"
+                            Margin="0,0,0,6">
+
+                            <TextBox Grid.Column="0"
+                                    Text="{Binding Text}"
+                                    Watermark="Correct artist"/>
+
+                            <Button Grid.Column="1"
+                                    Content="🗑"
+                                    Margin="8,0,0,0"
+                                    IsVisible="{Binding CanRemove}"
+                                    Command="{Binding $parent[ItemsControl].DataContext.RemoveArtistCommand}"
+                                    CommandParameter="{Binding}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Button Content="+ Add artist"
+                    HorizontalAlignment="Left"
+                    Command="{Binding AddArtistCommand}"/>
+        </StackPanel>
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Time limit (seconds)"/>
+            <NumericUpDown Value="{Binding TimeSeconds}"
+                           Minimum="5"
+                           Maximum="300"
+                           Increment="5"/>
+        </StackPanel>
+
+        <views:AudioPicker DataContext="{Binding Audio}"/>
+
+        <views:ImagePicker DataContext="{Binding Image}"/>
+    </StackPanel>
+</UserControl>
