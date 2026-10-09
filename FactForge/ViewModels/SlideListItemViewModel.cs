@@ -12,9 +12,10 @@ public class SlideListItemViewModel
     public string TypeLabel => Type switch
     {
         SlideType.Text => "Text",
-        SlideType.MultipleChoice => "Multiple Choice",
+        SlideType.MultipleChoice => "Multiple Choice Question",
         SlideType.OpenQuestion => "Open Question",
         SlideType.Leaderboard => "Leaderboard",
+        SlideType.MusicQuestion => "Music Question",
         _ => "Slide"
     };
 

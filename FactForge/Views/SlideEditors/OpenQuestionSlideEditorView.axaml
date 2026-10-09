@@ -6,7 +6,7 @@
              x:DataType="vm:OpenQuestionSlideEditorViewModel">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Open Question Slide" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        <TextBlock Text="Open Question" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
 
         <StackPanel Spacing="6">
             <TextBlock Text="Question"/>

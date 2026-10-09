@@ -6,7 +6,7 @@
              x:DataType="vm:MusicQuestionSlideEditorViewModel">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Music Question Slide"
+        <TextBlock Text="Music Question"
                    FontSize="14"
                    FontWeight="SemiBold"
                    Opacity="0.6"/>
