@@ -35,18 +35,26 @@
 
             <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto">
                 <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,10">
-                    <TextBlock Text="Add slide" FontWeight="SemiBold" Opacity="0.7"/>
-                    <StackPanel Spacing="4">
-                        <Button Content="+ Text" HorizontalAlignment="Stretch" Command="{Binding AddTextSlideCommand}"/>
-                        <Button Content="+ Multiple Choice" HorizontalAlignment="Stretch"
-                                Command="{Binding AddMultipleChoiceSlideCommand}"/>
-                        <Button Content="+ Open Question" HorizontalAlignment="Stretch"
-                                Command="{Binding AddOpenQuestionSlideCommand}"/>
-                        <Button Content="+ Music Question" HorizontalAlignment="Stretch"
-                                Command="{Binding AddMusicQuestionSlideCommand}"/>
-                        <Button Content="+ Leaderboard" HorizontalAlignment="Stretch"
-                                Command="{Binding AddLeaderboardSlideCommand}"/>
-                    </StackPanel>
+                    <Button Content="Add slide"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            FontSize="25" FontWeight="SemiBold" Padding="8"
+                            Classes="accent">
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="Text"
+                                        Command="{Binding AddTextSlideCommand}"/>
+                                <MenuItem Header="Multiple Choice"
+                                        Command="{Binding AddMultipleChoiceSlideCommand}"/>
+                                <MenuItem Header="Open Question"
+                                        Command="{Binding AddOpenQuestionSlideCommand}"/>
+                                <MenuItem Header="Music Question"
+                                        Command="{Binding AddMusicQuestionSlideCommand}"/>
+                                <MenuItem Header="Leaderboard"
+                                        Command="{Binding AddLeaderboardSlideCommand}"/>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
                 </StackPanel>
 
                 <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
