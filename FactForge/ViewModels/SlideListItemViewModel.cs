@@ -30,6 +30,7 @@ public class SlideListItemViewModel
         {
             SlideType.Text => string.IsNullOrWhiteSpace(slide.Header) ? "(empty)" : slide.Header!,
             SlideType.Leaderboard => "Standings",
+            SlideType.MusicQuestion => (string.IsNullOrWhiteSpace(slide.Artist) || string.IsNullOrWhiteSpace(slide.Title)) ? "(Missing Information)" : $"{slide.Artist?.Replace(";", " & ")} - {slide.Title}",
             _ => string.IsNullOrWhiteSpace(slide.Question) ? "(empty)" : slide.Question!
         };
     }

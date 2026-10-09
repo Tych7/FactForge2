@@ -7,21 +7,21 @@
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.QuizLibraryView"
              x:DataType="vm:QuizLibraryViewModel"
-             Background="#121921">
+             Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid RowDefinitions="Auto,Auto,*" Margin="32">
 
         <!-- Header Bar -->
         <Grid Grid.Row="0" Margin="0,0,0,24">
-            <Border BorderBrush="#253342" BorderThickness="0,0,0,1" Padding="0,0,0,20">
+            <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,5" Padding="0,0,0,20">
                 <Grid>
                     <!-- Title in the absolute center across full header width -->
                     <TextBlock Text="Library" 
-                            FontSize="32" 
-                            FontWeight="Bold" 
-                            Foreground="White" 
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center"/>
+                               FontSize="32" 
+                               FontWeight="Bold" 
+                               Foreground="{DynamicResource PrimaryTextBrush}" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"/>
 
                     <!-- Left and Right Controls -->
                     <Grid ColumnDefinitions="Auto,*,Auto">
@@ -35,8 +35,8 @@
                         <!-- Menu Button -->
                         <Button Grid.Column="2" Background="Transparent" Padding="8" 
                                 Command="{Binding OpenMenuCommand}" ToolTip.Tip="Menu">
-                            <PathIcon Width="24" Height="24" Foreground="White" 
-                                    Data="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/>
+                            <PathIcon Width="40" Height="40" Foreground="{DynamicResource PrimaryTextBrush}" 
+                                      Data="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/>
                         </Button>
                     </Grid>
                 </Grid>
@@ -44,20 +44,20 @@
         </Grid>
 
         <!-- Search & Action Bar -->
-        <Border Grid.Row="1" Background="#1C2633" CornerRadius="12" Padding="16" Margin="0,0,0,24">
+        <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="16" Margin="0,0,0,24">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
 
                 <!-- Search Input with Icon -->
                 <TextBox Grid.Column="0" 
                          Watermark="Search quiz"
                          Text="{Binding NewQuizTitle, UpdateSourceTrigger=PropertyChanged}"
-                         Background="White"
-                         Foreground="#121921"
+                         Background="{DynamicResource CardSecondaryBrush}"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
                          CornerRadius="6"
                          Padding="10,8"
                          FontSize="15">
                     <TextBox.InnerLeftContent>
-                        <PathIcon Width="16" Height="16" Margin="10,0,4,0" Foreground="#666666"
+                        <PathIcon Width="16" Height="16" Margin="10,0,4,0" Foreground="{DynamicResource SecondaryTextBrush}"
                                   Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                     </TextBox.InnerLeftContent>
                 </TextBox>
@@ -66,7 +66,7 @@
                 <Button Grid.Column="1" 
                         Content="Create Quiz"
                         Command="{Binding OpenCreateQuizDialogCommand}"
-                        Background="#009BB0"
+                        Background="{DynamicResource AccentTealBrush}"
                         Foreground="White"
                         FontWeight="Bold"
                         FontSize="15"
@@ -86,25 +86,25 @@
                 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:QuizListItemViewModel">
-                        <Border Background="#2B3848" CornerRadius="12" Padding="20,16">
+                        <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="20,16">
                             <Grid ColumnDefinitions="*,Auto">
 
                                 <!-- Quiz Metadata -->
                                 <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
-                                    <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                     <TextBlock Text="{Binding UpdatedAt, StringFormat='Updated {0:dd/MM/yyyy HH:mm}'}"
-                                               Foreground="#9CA3AF" FontSize="13"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}" FontSize="13"/>
                                 </StackPanel>
 
                                 <!-- Action Buttons Container Pill -->
-                                <Border Grid.Column="1" Background="#1C2A38" CornerRadius="20" Padding="8,4">
+                                <Border Grid.Column="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="20" Padding="8,4">
                                     <StackPanel Orientation="Horizontal" Spacing="4">
 
                                         <!-- Edit -->
                                         <Button Background="Transparent" Padding="8" ToolTip.Tip="Edit"
                                                 Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).EditQuizCommand}"
                                                 CommandParameter="{Binding}">
-                                            <PathIcon Width="20" Height="20" Foreground="#A0AEC0"
+                                            <PathIcon Width="20" Height="20" Foreground="{DynamicResource SecondaryTextBrush}"
                                                       Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                                         </Button>
 
@@ -112,7 +112,7 @@
                                         <Button Background="Transparent" Padding="8" ToolTip.Tip="Present"
                                                 Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).PresentQuizCommand}"
                                                 CommandParameter="{Binding}">
-                                            <PathIcon Width="20" Height="20" Foreground="#00A8BC"
+                                            <PathIcon Width="20" Height="20" Foreground="{DynamicResource AccentTealBrush}"
                                                       Data="M8 5v14l11-7z"/>
                                         </Button>
 
@@ -120,7 +120,7 @@
                                         <Button Background="Transparent" Padding="8" ToolTip.Tip="Results"
                                                 Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).ViewResultsCommand}"
                                                 CommandParameter="{Binding}">
-                                            <PathIcon Width="20" Height="20" Foreground="#A0AEC0"
+                                            <PathIcon Width="20" Height="20" Foreground="{DynamicResource SecondaryTextBrush}"
                                                       Data="M5 21h3V10H5v11zM10.5 21h3V3h-3v18zM16 21h3v-7h-3v7z"/>
                                         </Button>
 
@@ -128,7 +128,7 @@
                                         <Button Background="Transparent" Padding="8" ToolTip.Tip="Delete"
                                                 Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).DeleteQuizCommand}"
                                                 CommandParameter="{Binding}">
-                                            <PathIcon Width="20" Height="20" Foreground="#A0AEC0"
+                                            <PathIcon Width="20" Height="20" Foreground="{DynamicResource SecondaryTextBrush}"
                                                       Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                                         </Button>
                                     </StackPanel>
@@ -143,6 +143,3 @@
 
     </Grid>
 </UserControl>
-
-
-

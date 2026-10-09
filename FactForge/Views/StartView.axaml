@@ -7,22 +7,24 @@
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.StartView"
              x:DataType="vm:StartViewModel"
-             Background="#121921">
+             Background="{DynamicResource AppBackgroundBrush}">
 
     <Viewbox Stretch="Uniform" Margin="60">
         <StackPanel HorizontalAlignment="Center" Spacing="40">
+            <!-- Big Logo -->
             <Image MaxHeight="500" Stretch="Uniform">
                 <Image.Source>
                     <svg:SvgImage Source="avares://FactForge/Assets/bigLogo.svg"/>
                 </Image.Source>
             </Image>
 
+            <!-- Play Button -->
             <Button Content="Play ►" 
                     HorizontalAlignment="Center"
                     FontSize="18" 
                     FontWeight="SemiBold"
                     Foreground="White"
-                    Background="#009BB0"
+                    Background="{DynamicResource AccentTealBrush}"
                     CornerRadius="20"
                     Padding="36,10" 
                     Command="{Binding PlayCommand}"/>

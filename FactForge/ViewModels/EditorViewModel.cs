@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FactForge.Models;
 using FactForge.Services;
+using FactForge.Views;
 
 namespace FactForge.ViewModels;
 
@@ -15,6 +16,9 @@ public partial class EditorViewModel : ViewModelBase
     private readonly int _quizId;
     private readonly Action _onBack;
     private readonly Action<int> _onPresent;
+    private readonly IDialogService _dialogService;
+    private readonly IWindowService _windowService;
+    private readonly Action _onSettings;
 
     public ObservableCollection<SlideListItemViewModel> Slides { get; } = new();
 
@@ -23,12 +27,21 @@ public partial class EditorViewModel : ViewModelBase
     [ObservableProperty] private ViewModelBase? _currentSlideEditor;
     [ObservableProperty] private bool _isLoading;
 
-    public EditorViewModel(QuizRepository repository, int quizId, Action onBack, Action<int> onPresent)
+    public EditorViewModel(
+        QuizRepository repository, 
+        int quizId, Action onBack, 
+        Action<int> onPresent, 
+        IDialogService dialogService, 
+        IWindowService windowService, 
+        Action onSettings)
     {
         _repository = repository;
         _quizId = quizId;
         _onBack = onBack;
         _onPresent = onPresent;
+        _windowService = windowService;
+        _dialogService = dialogService;
+        _onSettings = onSettings;
         _ = LoadAsync(selectSlideId: null);
     }
 
@@ -199,6 +212,21 @@ public partial class EditorViewModel : ViewModelBase
     private async Task SaveTitleAsync()
     {
         await _repository.RenameQuizAsync(_quizId, string.IsNullOrWhiteSpace(Title) ? "Untitled Quiz" : Title.Trim());
+    }
+
+    [RelayCommand]
+    private async Task OpenMenuAsync()
+    {
+        var result = await _dialogService.ShowMenuAsync();
+        switch (result)
+        {
+            case AppMenuResult.Options:
+                _onSettings();
+                break;
+            case AppMenuResult.Exit:
+                _windowService.Exit();
+                break;
+        }
     }
 
     [RelayCommand]

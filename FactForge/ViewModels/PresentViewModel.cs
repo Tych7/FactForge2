@@ -138,7 +138,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             if (CurrentSlide?.Type == SlideType.MusicQuestion)
             {
                 slide.IsMusicRevealed = true;
-}
+            }
 
             if (CurrentSlide?.Options is { } options && correct is not null)
             {

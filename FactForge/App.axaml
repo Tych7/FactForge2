@@ -3,8 +3,7 @@
              x:Class="FactForge.App"
              xmlns:local="using:FactForge"
              xmlns:conv="using:FactForge.Converters"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Dark">
 
     <Application.DataTemplates>
         <local:ViewLocator/>
@@ -13,14 +12,36 @@
     <Application.Resources>
         <ResourceDictionary>
             <conv:EnumEqualityConverter x:Key="EnumEqualityConverter"/>
+
             <ResourceDictionary.ThemeDictionaries>
+                <!-- Dark Theme Palette -->
                 <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="AppBackgroundBrush">#121921</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardBackgroundBrush">#1C2633</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardSecondaryBrush">#2B3848</SolidColorBrush>
+                    <SolidColorBrush x:Key="HeaderBorderBrush">#253342</SolidColorBrush>
+                    
+                    <SolidColorBrush x:Key="PrimaryTextBrush">#FFFFFF</SolidColorBrush>
+                    <SolidColorBrush x:Key="SecondaryTextBrush">#9CA3AF</SolidColorBrush>
+                    <SolidColorBrush x:Key="AccentTealBrush">#00A8BC</SolidColorBrush>
+
                     <SolidColorBrush x:Key="DialogBackgroundBrush">#1E1E1E</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogTitleBrush">White</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogTextBrush">#CCCCCC</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogOverlayBrush">#99000000</SolidColorBrush>
                 </ResourceDictionary>
+
+                <!-- Light Theme Palette -->
                 <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="AppBackgroundBrush">#F4F6F9</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardBackgroundBrush">#FFFFFF</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardSecondaryBrush">#E5E9F0</SolidColorBrush>
+                    <SolidColorBrush x:Key="HeaderBorderBrush">#D0D7DE</SolidColorBrush>
+                    
+                    <SolidColorBrush x:Key="PrimaryTextBrush">#121921</SolidColorBrush>
+                    <SolidColorBrush x:Key="SecondaryTextBrush">#6B7280</SolidColorBrush>
+                    <SolidColorBrush x:Key="AccentTealBrush">#00899A</SolidColorBrush>
+
                     <SolidColorBrush x:Key="DialogBackgroundBrush">#FFFFFF</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogTitleBrush">#1A1A1A</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogTextBrush">#555555</SolidColorBrush>

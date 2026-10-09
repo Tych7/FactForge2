@@ -5,99 +5,170 @@
              xmlns:convb="using:Avalonia.Data.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.EditorView"
-             x:DataType="vm:EditorViewModel">
+             x:DataType="vm:EditorViewModel"
+             Background="{DynamicResource AppBackgroundBrush}">
 
-    <!-- The optionTile styles moved to SlideCanvas.axaml along with the slide templates. -->
+    <Grid RowDefinitions="Auto,Auto,*" Margin="24">
 
-    <Grid Margin="24" RowDefinitions="Auto,*">
+        <!-- Top Header Bar -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,5" Padding="0,0,0,16">
+                <Grid>
+                    <!-- Centered Logo -->
+                    <Image Height="100" HorizontalAlignment="Center" Stretch="Uniform">
+                        <Image.Source>
+                            <svg:SvgImage Source="avares://FactForge/Assets/horizontalLogo.svg"/>
+                        </Image.Source>
+                    </Image>
 
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,16">
-            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}" Margin="0,0,12,0"/>
-            <TextBox Grid.Column="1" Text="{Binding Title}" FontSize="22" FontWeight="Bold" Watermark="Quiz title"/>
+                    <!-- Left / Right Actions -->
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <!-- Back Button -->
+                        <Button Grid.Column="0" Command="{Binding BackCommand}" 
+                                Background="{DynamicResource CardBackgroundBrush}" 
+                                Foreground="{DynamicResource AccentTealBrush}" 
+                                CornerRadius="20" Padding="6,6,16,6" FontWeight="SemiBold">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <!-- Teal Circular Icon Container -->
+                                <Border Background="{DynamicResource AccentTealBrush}" CornerRadius="15" Width="30" Height="30">
+                                    <PathIcon Width="14" Height="14" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Data="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                                </Border>
 
-            <!-- Save: disk/floppy icon -->
-            <Button Grid.Column="2" Margin="12,0,0,0" Padding="8" ToolTip.Tip="Save Title"
-                    Command="{Binding SaveTitleCommand}">
-                <PathIcon Width="25" Height="25"
-                        Data="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zM15 9H5V5h10v4z"/>
-            </Button>
+                                <TextBlock Text="Back" VerticalAlignment="Center" FontSize="15"/>
+                            </StackPanel>
+                        </Button>
 
-            <!-- Present: play icon -->
-            <Button Grid.Column="3" Margin="12,0,0,0" Padding="8" Classes="accent" ToolTip.Tip="Present"
-                    Command="{Binding PresentCommand}">
-                <PathIcon Width="25" Height="25" Data="M8 5v14l11-7z"/>
-            </Button>
+                        <!-- Menu Button -->
+                        <Button Grid.Column="2" Background="Transparent" Padding="6" 
+                                Command="{Binding OpenMenuCommand}" ToolTip.Tip="Menu">
+                            <PathIcon Width="40" Height="40" Foreground="{DynamicResource PrimaryTextBrush}" 
+                                      Data="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
         </Grid>
 
-        <Grid Grid.Row="1" ColumnDefinitions="240,16,*,16,760">
+        <!-- Sub-Header Title & Quiz Actions -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <!-- Centered Quiz Title -->
+            <TextBox Text="{Binding Title}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"
+                     Background="Transparent" BorderThickness="0"
+                     HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
 
-            <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto">
-                <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,10">
-                    <Button Content="Add slide"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center"
-                            FontSize="25" FontWeight="SemiBold" Padding="8"
-                            Classes="accent">
+            <!-- Right Quiz Action Pill -->
+            <Border HorizontalAlignment="Right" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="20" Padding="8,4">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <!-- Save Title -->
+                    <Button Background="Transparent" Padding="8" ToolTip.Tip="Save Title" Command="{Binding SaveTitleCommand}">
+                        <PathIcon Width="18" Height="18" Foreground="{DynamicResource SecondaryTextBrush}"
+                                  Data="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zM15 9H5V5h10v4z"/>
+                    </Button>
+
+                    <!-- Present -->
+                    <Button Background="Transparent" Padding="8" ToolTip.Tip="Present" Command="{Binding PresentCommand}">
+                        <PathIcon Width="18" Height="18" Foreground="{DynamicResource AccentTealBrush}" Data="M8 5v14l11-7z"/>
+                    </Button>
+
+                    <!-- Delete Quiz -->
+                    <Button Background="Transparent" Padding="8" ToolTip.Tip="Delete Quiz" Command="{Binding DeleteSlideCommand}">
+                        <PathIcon Width="18" Height="18" Foreground="{DynamicResource SecondaryTextBrush}"
+                                  Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Main Workspace (Slides List | Editor | Preview) -->
+        <Grid Grid.Row="2" ColumnDefinitions="220,16,*,16,520">
+
+            <!-- Left Panel: Slide List & Actions -->
+            <Border Grid.Column="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="12">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <!-- Add Slide Button -->
+                    <Button Grid.Row="0" Content="Add Slide"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            FontSize="16" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"
+                            Background="Transparent" BorderBrush="{DynamicResource SecondaryTextBrush}" BorderThickness="2"
+                            CornerRadius="20" Padding="10,8" Margin="0,0,0,12">
                         <Button.Flyout>
                             <MenuFlyout>
-                                <MenuItem Header="Text"
-                                        Command="{Binding AddTextSlideCommand}"/>
-                                <MenuItem Header="Multiple Choice"
-                                        Command="{Binding AddMultipleChoiceSlideCommand}"/>
-                                <MenuItem Header="Open Question"
-                                        Command="{Binding AddOpenQuestionSlideCommand}"/>
-                                <MenuItem Header="Music Question"
-                                        Command="{Binding AddMusicQuestionSlideCommand}"/>
-                                <MenuItem Header="Leaderboard"
-                                        Command="{Binding AddLeaderboardSlideCommand}"/>
+                                <MenuItem Header="Text" Command="{Binding AddTextSlideCommand}"/>
+                                <MenuItem Header="Multiple Choice" Command="{Binding AddMultipleChoiceSlideCommand}"/>
+                                <MenuItem Header="Open Question" Command="{Binding AddOpenQuestionSlideCommand}"/>
+                                <MenuItem Header="Music Question" Command="{Binding AddMusicQuestionSlideCommand}"/>
+                                <MenuItem Header="Leaderboard" Command="{Binding AddLeaderboardSlideCommand}"/>
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
-                </StackPanel>
 
-                <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                        CornerRadius="8">
-                    <ListBox ItemsSource="{Binding Slides}" SelectedItem="{Binding SelectedSlide}"
+                    <!-- Slides ListBox -->
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Slides}" SelectedItem="{Binding SelectedSlide}"
                              Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:SlideListItemViewModel">
-                                <StackPanel Margin="4">
-                                    <TextBlock Text="{Binding TypeLabel}" FontSize="11" Opacity="0.6"/>
-                                    <TextBlock Text="{Binding Preview}" TextTrimming="CharacterEllipsis"/>
-                                </StackPanel>
+                                <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,1" Padding="4,8">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding TypeLabel}" FontSize="11" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        <TextBlock Text="{Binding Preview}" FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Border>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </Border>
 
-                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6" Margin="0,10,0,0">
-                    <Button Content="↑" Command="{Binding MoveSlideUpCommand}"/>
-                    <Button Content="↓" Command="{Binding MoveSlideDownCommand}"/>
-                    <Button Content="Delete" Command="{Binding DeleteSlideCommand}"/>
-                </StackPanel>
-            </Grid>
+                    <!-- Move & Delete Controls Bar -->
+                    <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="6" Margin="0,12,0,0">
+                        <!-- Move Up -->
+                        <Button Grid.Column="0" Command="{Binding MoveSlideUpCommand}" 
+                                Background="{DynamicResource CardSecondaryBrush}" Foreground="{DynamicResource PrimaryTextBrush}" CornerRadius="6" Padding="10,6"
+                                ToolTip.Tip="Move Slide Up">
+                            <PathIcon Width="14" Height="14" Data="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+                        </Button>
 
-            <Border Grid.Column="2" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                    CornerRadius="8" Padding="24">
+                        <!-- Move Down -->
+                        <Button Grid.Column="1" Command="{Binding MoveSlideDownCommand}" 
+                                Background="{DynamicResource CardSecondaryBrush}" Foreground="{DynamicResource PrimaryTextBrush}" CornerRadius="6" Padding="10,6"
+                                ToolTip.Tip="Move Slide Down">
+                            <PathIcon Width="14" Height="14" Data="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+                        </Button>
+
+                        <!-- Delete Slide -->
+                        <Button Grid.Column="2" Command="{Binding DeleteSlideCommand}" 
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                Background="{DynamicResource CardSecondaryBrush}" Foreground="#FF6B6B" CornerRadius="6" Padding="8,6"
+                                ToolTip.Tip="Delete Selected Slide">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Width="14" Height="14" Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                <TextBlock Text="Delete" FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Middle Panel: Slide Editor Content -->
+            <Border Grid.Column="2" Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="24">
                 <ContentControl Content="{Binding CurrentSlideEditor}"
                                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Top"/>
             </Border>
 
-            <Border Grid.Column="4" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                    CornerRadius="8" Padding="16">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Preview" FontWeight="SemiBold" Opacity="0.7"/>
+            <!-- Right Panel: Live Preview -->
+            <Border Grid.Column="4" Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Preview" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}"/>
 
-                    <!-- Fixed 16:9 frame. SlideCanvas is the same control the presenter uses, laid out at
-                         1280x720 and uniformly scaled down, so this is a true miniature. The preview is
-                         always black with white text (TextElement.Foreground is inherited by the canvas). -->
-                    <Border Background="Black" CornerRadius="10" Width="720" Height="405"
-                            HorizontalAlignment="Left" ClipToBounds="True"
-                            TextElement.Foreground="White">
+                    <!-- Fixed 16:9 Live Miniature -->
+                    <Border Background="{DynamicResource AppBackgroundBrush}" CornerRadius="12" Height="300"
+                            HorizontalAlignment="Stretch" ClipToBounds="True"
+                            TextElement.Foreground="{DynamicResource PrimaryTextBrush}">
                         <Grid>
-                            <TextBlock Text="No slide selected" Foreground="#777777" FontSize="14"
+                            <TextBlock Text="No slide selected" Foreground="{DynamicResource SecondaryTextBrush}" FontSize="14"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        IsVisible="{Binding PreviewSlide, Converter={x:Static convb:ObjectConverters.IsNull}}"/>
 
