@@ -6,19 +6,34 @@
              x:DataType="vm:TextSlideEditorViewModel">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Text" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        
+        <!-- Header Section Title & Divider -->
+        <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,12">
+            <TextBlock Text="Text Slide" FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+        </Border>
 
+        <!-- Header Input -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Header"/>
-            <TextBox Text="{Binding Header}" Watermark="Big headline text" FontSize="18"/>
+            <TextBlock Text="Header" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBox Text="{Binding Header}" Watermark="Header Text" 
+                     Background="White" Foreground="#121921"
+                     CornerRadius="12" Padding="12,8" FontSize="15"/>
         </StackPanel>
 
+        <!-- Subtext Input -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Description"/>
-            <TextBox Text="{Binding SubText}" Watermark="Supporting description"
-                      AcceptsReturn="True" TextWrapping="Wrap" Height="160"/>
+            <TextBlock Text="Subtext" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBox Text="{Binding SubText}" Watermark="Subtext Text"
+                     Background="White" Foreground="#121921"
+                     CornerRadius="12" Padding="12,8" FontSize="15"/>
         </StackPanel>
 
-        <views:ImagePicker DataContext="{Binding Image}"/>
+        <!-- Image Picker Section -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Image" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <views:ImagePicker DataContext="{Binding Image}"/>
+        </StackPanel>
+
     </StackPanel>
 </UserControl>

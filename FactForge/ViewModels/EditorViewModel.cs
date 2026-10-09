@@ -230,6 +230,23 @@ public partial class EditorViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task RenameQuizAsync()
+    {
+        // Opens the dialog pre-filled with the current Title
+        var newTitle = await _dialogService.ShowRenameQuizAsync(Title);
+
+        // Guard against null, empty, or unchanged titles
+        if (string.IsNullOrWhiteSpace(newTitle) || newTitle.Trim() == Title)
+            return;
+
+        // Update the local Title property (notifies UI via INotifyPropertyChanged)
+        Title = newTitle.Trim();
+
+        // Persist changes using the existing repository method and _quizId variable
+        await _repository.RenameQuizAsync(_quizId, Title);
+    }
+
+    [RelayCommand]
     private async Task BackAsync()
     {
         await SaveCurrentSlideEditorAsync();

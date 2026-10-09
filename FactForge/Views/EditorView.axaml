@@ -56,17 +56,25 @@
         <!-- Sub-Header Title & Quiz Actions -->
         <Grid Grid.Row="1" Margin="0,0,0,20">
             <!-- Centered Quiz Title -->
-            <TextBox Text="{Binding Title}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"
-                     Background="Transparent" BorderThickness="0"
-                     HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+            <TextBlock Text="{Binding Title}" 
+                    FontSize="26" 
+                    FontWeight="Bold" 
+                    Foreground="{DynamicResource PrimaryTextBrush}"
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center"/>
 
             <!-- Right Quiz Action Pill -->
             <Border HorizontalAlignment="Right" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="20" Padding="8,4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
-                    <!-- Save Title -->
-                    <Button Background="Transparent" Padding="8" ToolTip.Tip="Save Title" Command="{Binding SaveTitleCommand}">
-                        <PathIcon Width="18" Height="18" Foreground="{DynamicResource SecondaryTextBrush}"
-                                  Data="M17 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM12 19c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zM15 9H5V5h10v4z"/>
+                    <!-- Rename Quiz Button -->
+                    <Button Background="Transparent" 
+                            Padding="8" 
+                            ToolTip.Tip="Rename Quiz" 
+                            Command="{Binding RenameQuizCommand}">
+                        <PathIcon Width="18" 
+                                Height="18" 
+                                Foreground="{DynamicResource SecondaryTextBrush}"
+                                Data="M11.75 2C11.3358 2 11 2.33579 11 2.75C11 3.16421 11.3358 3.5 11.75 3.5H13.25V24.5H11.75C11.3358 24.5 11 24.8358 11 25.25C11 25.6642 11.3358 26 11.75 26H16.25C16.6642 26 17 25.6642 17 25.25C17 24.8358 16.6642 24.5 16.25 24.5H14.75V3.5H16.25C16.6642 3.5 17 3.16421 17 2.75C17 2.33579 16.6642 2 16.25 2H11.75Z M6.25 6.01958H12.25V7.51958H6.25C5.2835 7.51958 4.5 8.30308 4.5 9.26958V18.7696C4.5 19.7361 5.2835 20.5196 6.25 20.5196H12.25V22.0196H6.25C4.45507 22.0196 3 20.5645 3 18.7696V9.26958C3 7.47465 4.45507 6.01958 6.25 6.01958Z M21.75 20.5196H15.75V22.0196H21.75C23.5449 22.0196 25 20.5645 25 18.7696V9.26958C25 7.47465 23.5449 6.01958 21.75 6.01958H15.75V7.51958H21.75C22.7165 7.51958 23.5 8.30308 23.5 9.26958V18.7696C23.5 19.7361 22.7165 20.5196 21.75 20.5196Z"/>
                     </Button>
 
                     <!-- Present -->

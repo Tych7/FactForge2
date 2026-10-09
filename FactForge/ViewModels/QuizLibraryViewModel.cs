@@ -24,7 +24,7 @@ public partial class QuizLibraryViewModel : ViewModelBase
 
     public ObservableCollection<QuizListItemViewModel> Quizzes { get; } = new();
 
-    [ObservableProperty] private string _newQuizTitle = string.Empty;
+    [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private QuizListItemViewModel? _selectedQuiz;
     [ObservableProperty] private bool _isLoading;
 
@@ -67,14 +67,14 @@ public partial class QuizLibraryViewModel : ViewModelBase
         }
     }
 
-    partial void OnNewQuizTitleChanged(string value)
+    partial void OnSearchQueryChanged(string value)
     {
         FilterQuizzes();
     }
 
     private void FilterQuizzes()
     {
-        var search = NewQuizTitle.Trim();
+        var search = SearchQuery.Trim();
 
         var filteredQuizzes = string.IsNullOrWhiteSpace(search)
             ? _allQuizzes

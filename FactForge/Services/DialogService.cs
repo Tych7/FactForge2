@@ -9,14 +9,14 @@ public interface IDialogService
     Task<bool> ConfirmAsync(string title, string message);
     Task<AppMenuResult> ShowMenuAsync();
     Task<string?> ShowCreateQuizAsync();
-
+    Task<string?> ShowRenameQuizAsync(string currentTitle);
 }
 
 public class DialogService : IDialogService
 {
     public async Task<bool> ConfirmAsync(string title, string message)
     {
-        var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        var owner = GetMainWindow();
         if (owner is null) return false;
 
         var dialog = new ConfirmDialog(title, message);
@@ -27,7 +27,7 @@ public class DialogService : IDialogService
 
     public async Task<AppMenuResult> ShowMenuAsync()
     {
-        var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        var owner = GetMainWindow();
         if (owner is null) return AppMenuResult.None;
 
         var dialog = new AppMenuDialog();
@@ -38,16 +38,29 @@ public class DialogService : IDialogService
 
     public async Task<string?> ShowCreateQuizAsync()
     {
-        var owner = (Application.Current?.ApplicationLifetime
-            as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
-
-        if (owner is null)
-            return null;
+        var owner = GetMainWindow();
+        if (owner is null) return null;
 
         var dialog = new CreateQuizDialog();
         SizeToOwner(dialog, owner);
 
         return await dialog.ShowDialog<string?>(owner);
+    }
+
+    public async Task<string?> ShowRenameQuizAsync(string currentTitle)
+    {
+        var owner = GetMainWindow();
+        if (owner is null) return null;
+
+        var dialog = new RenameQuizDialog(currentTitle);
+        SizeToOwner(dialog, owner);
+
+        return await dialog.ShowDialog<string?>(owner);
+    }
+
+    private static Window? GetMainWindow()
+    {
+        return (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
     }
 
     private static void SizeToOwner(Window dialog, Window owner)
