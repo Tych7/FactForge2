@@ -22,13 +22,25 @@
             </Button>
         </Grid>
         
-        <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                CornerRadius="8" Padding="16" Margin="0,0,0,24">
-            <StackPanel Orientation="Horizontal" Spacing="12">
-                <TextBox Width="360" Watermark="New quiz title..." Text="{Binding NewQuizTitle}"/>
-                <Button Content="Create Quiz" Command="{Binding CreateQuizCommand}" Classes="accent"/>
-            </StackPanel>
+        
+        <Border Grid.Row="1"
+                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,24">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <TextBox Grid.Column="0"
+                        Watermark="Search quizzes..."
+                        Text="{Binding NewQuizTitle, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Button Grid.Column="1"
+                    Content="Create Quiz"
+                    Command="{Binding OpenCreateQuizDialogCommand}"
+                    Classes="accent"/>
+            </Grid>
         </Border>
+
+
 
         <ScrollViewer Grid.Row="2">
             <ItemsControl ItemsSource="{Binding Quizzes}">

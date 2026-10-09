@@ -8,6 +8,7 @@ public interface IDialogService
 {
     Task<bool> ConfirmAsync(string title, string message);
     Task<AppMenuResult> ShowMenuAsync();
+    Task<string?> ShowCreateQuizAsync();
 
 }
 
@@ -33,6 +34,20 @@ public class DialogService : IDialogService
         SizeToOwner(dialog, owner);
 
         return await dialog.ShowDialog<AppMenuResult>(owner);
+    }
+
+    public async Task<string?> ShowCreateQuizAsync()
+    {
+        var owner = (Application.Current?.ApplicationLifetime
+            as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+
+        if (owner is null)
+            return null;
+
+        var dialog = new CreateQuizDialog();
+        SizeToOwner(dialog, owner);
+
+        return await dialog.ShowDialog<string?>(owner);
     }
 
     private static void SizeToOwner(Window dialog, Window owner)
