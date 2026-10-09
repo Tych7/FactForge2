@@ -1,7 +1,9 @@
+
 using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using LibVLCSharp.Shared;
-using System.Diagnostics;
 
 namespace FactForge.Services;
 
@@ -14,8 +16,12 @@ public sealed class AudioPlaybackService : IDisposable
     public static AudioPlaybackService Shared { get; } = new();
 
     private readonly LibVLC _libVlc;
-    private MediaPlayer? _mediaPlayer;
+    private readonly SemaphoreSlim _playLock = new(1, 1);
     private readonly Stopwatch _playbackClock = new();
+
+    private MediaPlayer? _mediaPlayer;
+    private bool _isPlaying;
+    private bool _disposed;
 
     private AudioPlaybackService()
     {
@@ -23,80 +29,139 @@ public sealed class AudioPlaybackService : IDisposable
         _libVlc = new LibVLC();
     }
 
-    private bool _isPlaying;
-
     public bool IsPlaying => _isPlaying;
 
     public bool IsPaused =>
-        _mediaPlayer is not null && !_mediaPlayer.IsPlaying && !_playbackClock.IsRunning;
+        _mediaPlayer is not null &&
+        !_mediaPlayer.IsPlaying &&
+        !_isPlaying;
 
     public double PositionSeconds =>
-        _mediaPlayer is null
-            ? 0
-            : Math.Min(
-                _playbackClock.Elapsed.TotalSeconds,
-                DurationSeconds);
+        _playbackClock.Elapsed.TotalSeconds;
 
     public double DurationSeconds =>
-        _mediaPlayer?.Length is long length
+        _mediaPlayer?.Length is long length && length > 0
             ? length / 1000.0
             : 0;
 
+    /// <summary>
+    /// Creates the native player before it is needed.
+    /// Call this while entering the lobby, not when the music slide appears.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        await _playLock.WaitAsync();
+
+        try
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            if (_mediaPlayer is not null)
+                return;
+
+            await Task.Run(() =>
+            {
+                _mediaPlayer = new MediaPlayer(_libVlc);
+                _mediaPlayer.EndReached += OnEndReached;
+            });
+        }
+        finally
+        {
+            _playLock.Release();
+        }
+    }
+
     public async Task PlayAsync(string filePath)
     {
-        await StopAsync();
+        await _playLock.WaitAsync();
 
-        var mediaPlayer = await Task.Run(() =>
+        try
         {
-            var media = new Media(_libVlc, filePath, FromType.FromPath);
-            var player = new MediaPlayer(media);
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-            player.Play();
-            media.Dispose();
+            if (_mediaPlayer is null)
+            {
+                _mediaPlayer = new MediaPlayer(_libVlc);
+                _mediaPlayer.EndReached += OnEndReached;
+            }
 
-            return player;
-        });
+            var player = _mediaPlayer;
 
-        _mediaPlayer = mediaPlayer;
-        _playbackClock.Restart();
-        _isPlaying = true;
+            await Task.Run(() =>
+            {
+                player.Stop();
 
-        mediaPlayer.EndReached += OnEndReached;
+                using var media = new Media(
+                    _libVlc,
+                    filePath,
+                    FromType.FromPath);
+
+                player.Media = media;
+
+                // Starts playback asynchronously in LibVLC.
+                player.Play();
+            });
+
+            _playbackClock.Restart();
+            _isPlaying = true;
+        }
+        finally
+        {
+            _playLock.Release();
+        }
     }
 
     public void Pause()
     {
-        if (_mediaPlayer is null || !_isPlaying)
+        var player = _mediaPlayer;
+
+        if (player is null || !_isPlaying)
             return;
 
-        _mediaPlayer.Pause();
+        player.Pause();
         _playbackClock.Stop();
         _isPlaying = false;
     }
 
     public void Resume()
     {
-        if (_mediaPlayer is null || _isPlaying)
+        var player = _mediaPlayer;
+
+        if (player is null || _isPlaying)
             return;
 
-        _mediaPlayer.Play();
+        player.Play();
         _playbackClock.Start();
         _isPlaying = true;
     }
 
     public async Task ReplayAsync()
     {
-        if (_mediaPlayer is null)
-            return;
+        await _playLock.WaitAsync();
 
-        await Task.Run(() =>
+        try
         {
-            _mediaPlayer.Stop();
-            _mediaPlayer.Play();
-        });
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-        _playbackClock.Restart();
-        _isPlaying = true;
+            if (_mediaPlayer?.Media is null)
+                return;
+
+            var player = _mediaPlayer;
+
+            await Task.Run(() =>
+            {
+                player.Stop();
+                player.Time = 0;
+                player.Play();
+            });
+
+            _playbackClock.Restart();
+            _isPlaying = true;
+        }
+        finally
+        {
+            _playLock.Release();
+        }
     }
 
     private void OnEndReached(object? sender, EventArgs e)
@@ -107,34 +172,62 @@ public sealed class AudioPlaybackService : IDisposable
 
     public async Task StopAsync()
     {
-        var mediaPlayer = _mediaPlayer;
-        _mediaPlayer = null;
+        await _playLock.WaitAsync();
 
-        _playbackClock.Stop();
-        _playbackClock.Reset();
-        _isPlaying = false;
-
-        if (mediaPlayer is null)
-            return;
-
-        mediaPlayer.EndReached -= OnEndReached;
-
-        await Task.Run(() =>
+        try
         {
-            mediaPlayer.Stop();
-            mediaPlayer.Dispose();
-        });
+            var player = _mediaPlayer;
+
+            _playbackClock.Stop();
+            _playbackClock.Reset();
+            _isPlaying = false;
+
+            if (player is null)
+                return;
+
+            await Task.Run(() => player.Stop());
+        }
+        finally
+        {
+            _playLock.Release();
+        }
     }
 
     public async Task DisposeAsync()
     {
-        await StopAsync();
-        _libVlc.Dispose();
+        if (_disposed)
+            return;
+
+        await _playLock.WaitAsync();
+
+        try
+        {
+            _disposed = true;
+
+            var player = _mediaPlayer;
+            _mediaPlayer = null;
+
+            if (player is not null)
+            {
+                player.EndReached -= OnEndReached;
+                await Task.Run(() =>
+                {
+                    player.Stop();
+                    player.Dispose();
+                });
+            }
+
+            _libVlc.Dispose();
+        }
+        finally
+        {
+            _playLock.Release();
+        }
     }
 
     public void Dispose()
     {
-        StopAsync().GetAwaiter().GetResult();
-        _libVlc.Dispose();
+        DisposeAsync().GetAwaiter().GetResult();
+        _playLock.Dispose();
     }
 }

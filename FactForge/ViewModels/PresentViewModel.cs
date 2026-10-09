@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -79,6 +80,9 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
+        // Initialize the native audio player before the first music slide.
+        await AudioPlaybackService.Shared.InitializeAsync();
+
         var quiz = await _quizRepository.GetQuizWithSlidesAsync(_quizId);
         if (quiz is null) { _onBack(); return; }
         QuizTitle = quiz.Title;
@@ -116,8 +120,10 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         });
     }
 
-    private void OnSlideRevealed(RevealDto reveal)
+    private async void OnSlideRevealed(RevealDto reveal)
     {
+        await AudioPlaybackService.Shared.StopAsync();
+
         Dispatcher.UIThread.Post(() =>
         {
             LastReveal = reveal;
