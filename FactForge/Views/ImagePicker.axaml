@@ -4,19 +4,32 @@
              x:Class="FactForge.Views.ImagePicker"
              x:DataType="vm:SlideImageEditorViewModel">
 
-  <!-- Usage inside a slide editor view:  <views:ImagePicker DataContext="{Binding Image}"/> -->
-  <StackPanel Spacing="8">
-    <TextBlock Text="Image" FontWeight="SemiBold" Opacity="0.7"/>
+  <StackPanel Spacing="12">
+    <!-- Image Preview Container with Side Trash Icon -->
+    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" IsVisible="{Binding HasImage}">
+      <!-- Rounded Thumbnail Preview -->
+      <Border Width="180" Height="110" CornerRadius="16" ClipToBounds="True" Background="#1A000000">
+        <Image Source="{Binding Bitmap}" Stretch="UniformToFill"/>
+      </Border>
 
-    <Border Width="160" Height="90" CornerRadius="6" ClipToBounds="True"
-            Background="#22000000" HorizontalAlignment="Left"
-            IsVisible="{Binding HasImage}">
-      <Image Source="{Binding Bitmap}" Stretch="Uniform"/>
-    </Border>
-
-    <StackPanel Orientation="Horizontal" Spacing="6">
-      <Button Content="Choose image…" Command="{Binding ChooseCommand}"/>
-      <Button Content="Remove" Command="{Binding RemoveCommand}" IsVisible="{Binding HasImage}"/>
+      <!-- Delete / Trash Icon Button -->
+      <Button Command="{Binding RemoveCommand}"
+              Background="Transparent" Padding="6" VerticalAlignment="Center"
+              ToolTip.Tip="Remove image">
+        <PathIcon Width="22" Height="22" Foreground="#FF6B6B"
+                  Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </Button>
     </StackPanel>
+
+    <!-- Teal "Choose Image..." Button -->
+    <Button Content="Choose Image..."
+            Command="{Binding ChooseCommand}"
+            Background="{DynamicResource AccentTealBrush}"
+            Foreground="White"
+            FontWeight="SemiBold"
+            FontSize="15"
+            CornerRadius="10"
+            Padding="18,10"
+            HorizontalAlignment="Left"/>
   </StackPanel>
 </UserControl>

@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.SlideDisplays.TextSlideDisplay"
+             x:DataType="vm:SlideDisplay"
+             IsVisible="{Binding IsText}">
+  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+              Spacing="16" MaxWidth="900" Margin="24">
+    <Viewbox StretchDirection="DownOnly">
+      <TextBlock Text="{Binding Header}" FontSize="42" FontWeight="Bold"
+                 HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+    </Viewbox>
+    <Viewbox StretchDirection="DownOnly">
+      <TextBlock Text="{Binding SubText}" FontSize="20" Opacity="0.8"
+                 HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+    </Viewbox>
+  </StackPanel>
+</UserControl>
