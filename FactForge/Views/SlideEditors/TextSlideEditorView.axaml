@@ -8,7 +8,7 @@
     <StackPanel Spacing="16">
         
         <!-- Header Section Title & Divider -->
-        <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,12">
+        <Border BorderBrush="{DynamicResource CardHeaderBorderBrush}" BorderThickness="0,0,0,2" Padding="0,0,0,12">
             <TextBlock Text="Text Slide" FontSize="18" FontWeight="SemiBold"
                        Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
         </Border>

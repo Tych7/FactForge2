@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.SlideDisplays.MultipleChoiceSlideDisplay"
+             x:DataType="vm:SlideDisplay"
+             IsVisible="{Binding IsMultipleChoice}">
+  <Grid RowDefinitions="Auto,Auto,*" Margin="24">
+    <Viewbox Grid.Row="0" StretchDirection="DownOnly" Margin="0,0,0,12">
+      <TextBlock Text="{Binding Question}" FontSize="40" FontWeight="Bold"
+                 HorizontalAlignment="Center" TextWrapping="NoWrap"/>
+    </Viewbox>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+      <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}"
+                   Value="{Binding SecondsRemaining}" Height="10"/>
+      <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusText}"/>
+    </Grid>
+
+    <ItemsControl Grid.Row="2" ItemsSource="{Binding Options}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <UniformGrid Columns="2"/>
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:AnswerOptionDisplay">
+          <Border Classes="optionTile" Classes.correct="{Binding IsCorrect}"
+                  Background="{Binding Background}"
+                  Margin="6" Padding="16" CornerRadius="8">
+            <Viewbox StretchDirection="DownOnly">
+              <TextBlock Text="{Binding Text}" FontSize="48" FontWeight="SemiBold"
+                         Foreground="White" TextWrapping="NoWrap" TextAlignment="Center"/>
+            </Viewbox>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+</UserControl>
