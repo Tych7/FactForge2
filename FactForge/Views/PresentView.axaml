@@ -3,11 +3,13 @@
              xmlns:vm="using:FactForge.ViewModels"
              xmlns:views="using:FactForge.Views"
              xmlns:models="using:FactForge.Models"
+             xmlns:slideDisplay="using:FactForge.Views.SlideDisplays"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.PresentView"
-             x:DataType="vm:PresentViewModel">
+             x:DataType="vm:PresentViewModel"
+             x:Name="PresentRoot">
 
     <Grid Margin="24" RowDefinitions="Auto,*">
 
@@ -46,12 +48,37 @@
             </Grid>
         </Grid>
 
-        <!-- Text slide / multiple choice / open question (in progress or revealed).
-             All three are rendered by the shared SlideCanvas, the same control the editor preview uses. -->
+        <!-- Active Slide View (Merged from SlideCanvas) -->
         <Grid Grid.Row="1" RowDefinitions="*,Auto" IsVisible="{Binding IsSlideVisible}">
-            <views:SlideCanvas Grid.Row="0" DataContext="{Binding Slide}"/>
+            
+            <!-- Slide Content & Image Layout (Bound to SlideDisplay via DataContext) -->
+            <Grid Grid.Row="0" DataContext="{Binding Slide}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding ContentColumnWidth}"/>
+                    <ColumnDefinition Width="{Binding ImageColumnWidth}"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Image, right -->
+                <Border Grid.Column="1" IsVisible="{Binding HasImage}"
+                        Margin="0,24,24,24" CornerRadius="12" ClipToBounds="True">
+                    <Image Source="{Binding Image}" Stretch="Uniform"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Slide Content Types -->
+                <Panel Grid.Column="0">
+                    <slideDisplay:TextSlideDisplay/>
+                    <slideDisplay:MultipleChoiceSlideDisplay/>
+                    <slideDisplay:OpenQuestionSlideDisplay/>
+                    <slideDisplay:MusicQuestionSlideDisplay/>
+                    <slideDisplay:LeaderboardSlideDisplay/>
+                </Panel>
+            </Grid>
+
+            <!-- Next Button (Bound to PresentViewModel using RelativeSource) -->
             <Button Grid.Row="1" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
-                    FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
+                    FontSize="16" Padding="20,8" 
+                    Command="{Binding #PresentRoot.((vm:PresentViewModel)DataContext).NextCommand}"/>
         </Grid>
 
         <!-- Leaderboard slide, shown between the reveal and the next question -->

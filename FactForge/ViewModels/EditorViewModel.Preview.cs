@@ -108,6 +108,17 @@ public partial class EditorViewModel
                 Image = image
             },
 
+            MusicQuestionSlideEditorViewModel mu => new SlideDisplay
+            {
+                Type = SlideType.MusicQuestion,
+                TimeSeconds = mu.TimeSeconds,
+                SecondsRemaining = mu.TimeSeconds,
+                StatusText = $"{mu.TimeSeconds}s",
+                Image = image,
+                MusicTitle = mu.Title,
+                MusicArtist = string.Join(", ", mu.Artists.Select(a => a.Text).Where(t => !string.IsNullOrWhiteSpace(t)))
+            },
+
             LeaderboardSlideEditorViewModel => new SlideDisplay { Type = SlideType.Leaderboard },
 
             _ => null
