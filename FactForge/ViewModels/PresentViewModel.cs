@@ -80,9 +80,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
-        // Initialize the native audio player before the first music slide.
-        await AudioPlaybackService.Shared.InitializeAsync();
-
         var quiz = await _quizRepository.GetQuizWithSlidesAsync(_quizId);
         if (quiz is null) { _onBack(); return; }
         QuizTitle = quiz.Title;

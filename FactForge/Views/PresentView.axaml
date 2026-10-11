@@ -4,42 +4,74 @@
              xmlns:views="using:FactForge.Views"
              xmlns:models="using:FactForge.Models"
              xmlns:slideDisplay="using:FactForge.Views.SlideDisplays"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.PresentView"
              x:DataType="vm:PresentViewModel"
-             x:Name="PresentRoot">
+             x:Name="PresentRoot"
+             Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid Margin="24" RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,16">
-            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}"/>
-            <TextBlock Grid.Column="1" Text="{Binding QuizTitle}" FontSize="22" FontWeight="Bold"
-                       HorizontalAlignment="Center"/>
-            <TextBlock Grid.Column="2" Text="{Binding SlideNumber}" Opacity="0.6"/>
+        <!-- Top Header Bar -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,5" Padding="0,0,0,16">
+                <Grid>
+                    <!-- Centered Quiz Title (Absolute Center) -->
+                    <TextBlock Text="{Binding QuizTitle}" FontSize="26" FontWeight="Bold" 
+                            Foreground="{DynamicResource PrimaryTextBrush}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                    <!-- Left Exit Button -->
+                    <Button Command="{Binding BackCommand}" 
+                            Background="{DynamicResource CardBackgroundBrush}" 
+                            Foreground="{DynamicResource AccentTealBrush}" 
+                            CornerRadius="20" Padding="6,6,16,6" FontWeight="SemiBold"
+                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Background="{DynamicResource AccentTealBrush}" CornerRadius="15" Width="30" Height="30">
+                                <PathIcon Width="14" Height="14" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Data="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                            </Border>
+                            <TextBlock Text="Exit" VerticalAlignment="Center" FontSize="15" Foreground="{DynamicResource AccentTealBrush}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Right Logo -->
+                    <Image Height="70" HorizontalAlignment="Right" VerticalAlignment="Center" Stretch="Uniform">
+                        <Image.Source>
+                            <svg:SvgImage Source="avares://FactForge/Assets/horizontalLogo.svg"/>
+                        </Image.Source>
+                    </Image>
+                </Grid>
+            </Border>
         </Grid>
+
 
         <!-- Lobby: QR + join code + waiting players -->
         <Grid Grid.Row="1" ColumnDefinitions="*,*" IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Lobby}">
             <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                 <Image Source="{Binding QrImage}" Width="280" Height="280"/>
-                <TextBlock Text="{Binding JoinUrl}" HorizontalAlignment="Center" FontSize="14" Opacity="0.7"/>
-                <TextBlock Text="{Binding JoinCode}" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold"/>
-                <Button Content="Start Quiz ▶" Classes="accent" HorizontalAlignment="Center" FontSize="18"
-                        Padding="24,10" Command="{Binding StartQuizCommand}"/>
+                <TextBlock Text="{Binding JoinUrl}" HorizontalAlignment="Center" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                <TextBlock Text="{Binding JoinCode}" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <Button Content="Start Quiz ▶" HorizontalAlignment="Center" FontSize="18"
+                        Background="{DynamicResource CardBackgroundBrush}" 
+                        Foreground="{DynamicResource AccentTealBrush}"
+                        CornerRadius="20" Padding="24,10" Command="{Binding StartQuizCommand}"/>
             </StackPanel>
 
             <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="24,0,0,0">
                 <TextBlock Grid.Row="0" Text="{Binding Players.Count, StringFormat='Players joined: {0}'}"
-                           FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                           FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,10"/>
+                <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}"
                         CornerRadius="8" Padding="12">
                     <ScrollViewer>
                         <ItemsControl ItemsSource="{Binding Players}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:PlayerInfoDto">
-                                    <TextBlock Text="{Binding Name}" Padding="4"/>
+                                    <TextBlock Text="{Binding Name}" Padding="4" Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -48,10 +80,10 @@
             </Grid>
         </Grid>
 
-        <!-- Active Slide View (Merged from SlideCanvas) -->
+        <!-- Active Slide View -->
         <Grid Grid.Row="1" RowDefinitions="*,Auto" IsVisible="{Binding IsSlideVisible}">
             
-            <!-- Slide Content & Image Layout (Bound to SlideDisplay via DataContext) -->
+            <!-- Slide Content & Image Layout -->
             <Grid Grid.Row="0" DataContext="{Binding Slide}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="{Binding ContentColumnWidth}"/>
@@ -60,9 +92,10 @@
 
                 <!-- Image, right -->
                 <Border Grid.Column="1" IsVisible="{Binding HasImage}"
+                        Background="{DynamicResource CardBackgroundBrush}"
                         Margin="0,24,24,24" CornerRadius="12" ClipToBounds="True">
                     <Image Source="{Binding Image}" Stretch="Uniform"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
 
                 <!-- Slide Content Types -->
@@ -75,27 +108,35 @@
                 </Panel>
             </Grid>
 
-            <!-- Next Button (Bound to PresentViewModel using RelativeSource) -->
-            <Button Grid.Row="1" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
-                    FontSize="16" Padding="20,8" 
+            <!-- Pill-styled Next Button -->
+            <Button Grid.Row="1" Content="Next ▶" HorizontalAlignment="Center"
+                    Background="{DynamicResource CardBackgroundBrush}" 
+                    Foreground="{DynamicResource PrimaryTextBrush}" 
+                    CornerRadius="20" FontSize="16" Padding="24,10" 
                     Command="{Binding #PresentRoot.((vm:PresentViewModel)DataContext).NextCommand}"/>
         </Grid>
 
-        <!-- Leaderboard slide, shown between the reveal and the next question -->
+        <!-- Leaderboard slide -->
         <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto"
               IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Leaderboard}">
-            <TextBlock Text="Leaderboard" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Leaderboard" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
             <views:LeaderboardChart Grid.Row="1" Items="{Binding Leaderboard}" Margin="0,16"/>
-            <Button Grid.Row="2" Content="Next ▶" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
-                    FontSize="16" Padding="20,8" Command="{Binding NextCommand}"/>
+            <Button Grid.Row="2" Content="Next ▶" HorizontalAlignment="Center" Margin="0,16,0,0"
+                    Background="{DynamicResource CardBackgroundBrush}" 
+                    Foreground="{DynamicResource PrimaryTextBrush}" 
+                    CornerRadius="20" FontSize="16" Padding="24,10" 
+                    Command="{Binding NextCommand}"/>
         </Grid>
 
         <!-- Finished -->
         <Grid Grid.Row="1" RowDefinitions="Auto,*,Auto"
               IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Finished}">
-            <TextBlock Text="Quiz complete" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Text="Quiz complete" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center"/>
             <views:LeaderboardChart Grid.Row="1" Items="{Binding Leaderboard}" Margin="0,16"/>
-            <Button Grid.Row="2" Content="Back to Library" Classes="accent" HorizontalAlignment="Center" Margin="0,16,0,0"
+            <Button Grid.Row="2" Content="Back to Library" HorizontalAlignment="Center" Margin="0,16,0,0"
+                    Background="{DynamicResource CardBackgroundBrush}" 
+                    Foreground="{DynamicResource PrimaryTextBrush}" 
+                    CornerRadius="20" FontSize="16" Padding="24,10" 
                     Command="{Binding BackCommand}"/>
         </Grid>
 
