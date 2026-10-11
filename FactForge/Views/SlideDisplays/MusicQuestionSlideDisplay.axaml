@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
              xmlns:controls="using:FactForge.Controls"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              x:Class="FactForge.Views.SlideDisplays.MusicQuestionSlideDisplay"
              x:DataType="vm:SlideDisplay"
              IsVisible="{Binding IsMusicQuestion}">
@@ -66,25 +67,36 @@
                          VerticalAlignment="Center" FontSize="16"/>
             </Grid>
 
-            <!-- Time to Answer Progress Bar -->
-            <ProgressBar Minimum="0" Maximum="{Binding TimeSeconds}" 
-                         Value="{Binding SecondsRemaining}" Height="12" 
-                         CornerRadius="6"
-                         Foreground="{DynamicResource AccentTealBrush}"/>
+            <!-- Thicker Segmented Time to Answer Progress Bar -->
+            <Grid Height="22">
+              <ProgressBar Minimum="0" Maximum="{Binding TimeSeconds}" 
+                           Value="{Binding SecondsRemaining}" Height="22" 
+                           CornerRadius="6"
+                           Foreground="{DynamicResource AccentTealBrush}"/>
+              
+              <!-- Vertical Segment Dividers at 1/4, 1/2, and 3/4 -->
+              <Grid ColumnDefinitions="*,*,*,*">
+                <Rectangle Grid.Column="0" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+                <Rectangle Grid.Column="1" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+                <Rectangle Grid.Column="2" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+              </Grid>
+            </Grid>
 
             <!-- Inner Audio Player Card -->
             <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="14" Padding="20,16" Margin="0,4,0,0">
               <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20" VerticalAlignment="Center">
                 
-                <!-- Replay Circular Button -->
+                <!-- Replay Circular Button with SVG Asset -->
                 <Button Grid.Column="0" Command="{Binding ReplayMusicCommand}" 
                         Background="{DynamicResource AppBackgroundBrush}" 
                         Foreground="{DynamicResource PrimaryTextBrush}"
                         Width="48" Height="48" CornerRadius="24" Padding="0"
                         HorizontalAlignment="Center" VerticalAlignment="Center">
-                  <PathIcon Width="18" Height="18" Foreground="{DynamicResource AccentTealBrush}" 
-                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                            Data="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                  <Image Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
+                    <Image.Source>
+                      <svg:SvgImage Source="avares://FactForge/Assets/Replay.svg"/>
+                    </Image.Source>
+                  </Image>
                 </Button>
                 
                 <!-- Music Track Progress Bar -->

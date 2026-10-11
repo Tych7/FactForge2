@@ -86,8 +86,6 @@ public sealed class AudioPlaybackService : IDisposable
 
     public async Task PlayAsync(string filePath)
     {
-        await InitializeAsync();
-
         await _playLock.WaitAsync();
 
         try

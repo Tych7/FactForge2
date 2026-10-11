@@ -29,6 +29,7 @@ public partial class SlideDisplay : ObservableObject
     public string? MusicArtist { get; init; }
     public IAsyncRelayCommand? ReplayMusicCommand { get; init; }
     public IReadOnlyList<float> MusicWaveformPeaks { get; init; } = Array.Empty<float>();
+    public int AnsweredCount { get; set; }  // For the "X answered" text
 
     /// <summary>
     /// Total duration of the music in seconds.

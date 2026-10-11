@@ -1,12 +1,17 @@
 // Partial of EditorViewModel (it is already `partial`, and CurrentSlideEditor is an [ObservableProperty]).
 // Now also watches each editor's Image so picking/removing a picture refreshes the preview.
 
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FactForge.Models;
+using FactForge.Services;
 
 namespace FactForge.ViewModels;
 
@@ -17,6 +22,14 @@ public partial class EditorViewModel
     private INotifyPropertyChanged? _watchedEditor;
     private INotifyPropertyChanged? _watchedImage;
     private ObservableCollection<OptionEditorViewModel>? _watchedOptions;
+
+    private INotifyPropertyChanged? _watchedAudio;
+
+    private string? _waveformRequestedFileName;
+    private IReadOnlyList<float> _previewWaveformPeaks =
+        Array.Empty<float>();
+
+    private int _waveformRequestVersion;
 
     partial void OnCurrentSlideEditorChanged(ViewModelBase? value) => WatchEditorForPreview(value);
 
@@ -43,6 +56,12 @@ public partial class EditorViewModel
             foreach (var o in _watchedOptions) o.PropertyChanged += OnWatchedEditorChanged;
         }
 
+        if (editor is IHasSlideAudio { Audio: INotifyPropertyChanged audioNpc })
+        {
+            audioNpc.PropertyChanged += OnWatchedEditorChanged;
+            _watchedAudio = audioNpc;
+        }
+
         RefreshPreview();
     }
 
@@ -60,6 +79,9 @@ public partial class EditorViewModel
             foreach (var o in _watchedOptions) o.PropertyChanged -= OnWatchedEditorChanged;
         }
         _watchedOptions = null;
+
+        if (_watchedAudio is not null) _watchedAudio.PropertyChanged -= OnWatchedEditorChanged;
+        _watchedAudio = null;
     }
 
     private void OnWatchedEditorChanged(object? sender, PropertyChangedEventArgs e) => RefreshPreview();
@@ -68,8 +90,55 @@ public partial class EditorViewModel
     private void OnWatchedOptionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
         => WatchEditorForPreview(CurrentSlideEditor);
 
-    private void RefreshPreview() => PreviewSlide = BuildPreview();
+    private void RefreshPreview()
+    {
+        var fileName =
+            (CurrentSlideEditor as MusicQuestionSlideEditorViewModel)
+            ?.Audio.FileName;
 
+        if (!string.Equals(
+                fileName,
+                _waveformRequestedFileName,
+                StringComparison.Ordinal))
+        {
+            _waveformRequestedFileName = fileName;
+            var version = ++_waveformRequestVersion;
+
+            _previewWaveformPeaks = Array.Empty<float>();
+
+            if (!string.IsNullOrWhiteSpace(fileName))
+                _ = LoadPreviewWaveformAsync(fileName, version);
+        }
+
+        PreviewSlide = BuildPreview();
+    }
+
+    private async Task LoadPreviewWaveformAsync(string fileName, int version)
+    {
+        IReadOnlyList<float> peaks;
+
+        try
+        {
+            peaks = await AudioWaveformService.Shared
+                .GetPeaksAsync(fileName);
+        }
+        catch
+        {
+            // A waveform failure should not prevent editing the quiz.
+            peaks = Array.Empty<float>();
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            // Ignore results from a slide or audio file that is no longer selected.
+            if (version != _waveformRequestVersion)
+                return;
+
+            _previewWaveformPeaks = peaks;
+            PreviewSlide = BuildPreview();
+        });
+    }
+    
     private SlideDisplay? BuildPreview()
     {
         // Bitmap is cached in the editor VM, so rebuilding the preview per keystroke doesn't reload the file.
@@ -116,7 +185,12 @@ public partial class EditorViewModel
                 StatusText = $"{mu.TimeSeconds}s",
                 Image = image,
                 MusicTitle = mu.Title,
-                MusicArtist = string.Join(", ", mu.Artists.Select(a => a.Text).Where(t => !string.IsNullOrWhiteSpace(t)))
+                MusicArtist = string.Join(
+                    ";",
+                    mu.Artists
+                        .Select(a => a.Text.Trim())
+                        .Where(t => !string.IsNullOrWhiteSpace(t))),
+                MusicWaveformPeaks = _previewWaveformPeaks
             },
 
             LeaderboardSlideEditorViewModel => new SlideDisplay { Type = SlideType.Leaderboard },

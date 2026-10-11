@@ -80,12 +80,24 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
+        // Initialize LibVLC while the quiz/session is loading,
+        // not when the first music slide appears.
+        await AudioPlaybackService.Shared.InitializeAsync();
+
         var quiz = await _quizRepository.GetQuizWithSlidesAsync(_quizId);
-        if (quiz is null) { _onBack(); return; }
+
+        if (quiz is null)
+        {
+            _onBack();
+            return;
+        }
+
         QuizTitle = quiz.Title;
         TotalSlides = quiz.Slides.Count;
 
-        var (session, _) = await _presentation.StartSessionAsync(_quizId);
+        var (session, _) =
+            await _presentation.StartSessionAsync(_quizId);
+
         _session = session;
         JoinCode = session.JoinCode;
 
@@ -113,7 +125,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     {
         Dispatcher.UIThread.Post(() =>
         {
-            if (Slide is { } slide) slide.StatusText = $"{tally.Answered} answered";
+            if (Slide is { } slide) slide.StatusText = $"{tally.Answered} / {tally.TotalPlayers} answered";
         });
     }
 
@@ -263,7 +275,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             MusicPositionSeconds = 0,
             ReplayMusicCommand = ReplayMusicCommand,
             MusicWaveformPeaks = waveformPeaks,
-            StatusText = slide.DeadlineUtc is not null ? "0 answered" : string.Empty,
+            StatusText = slide.DeadlineUtc is not null ? "0/0 answered" : string.Empty,
             Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?
                 .Select((o, i) => new AnswerOptionDisplay(
