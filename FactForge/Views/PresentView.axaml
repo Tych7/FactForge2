@@ -90,10 +90,11 @@
                     <ColumnDefinition Width="{Binding ImageColumnWidth}"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Image, right -->
+                <!-- Image, right filling the column width but wrapping tightly around the image height -->
                 <Border Grid.Column="1" IsVisible="{Binding HasImage}"
                         Background="{DynamicResource CardBackgroundBrush}"
-                        Margin="0,24,24,24" CornerRadius="12" ClipToBounds="True">
+                        Margin="0,24,24,24" Padding="16" CornerRadius="16" ClipToBounds="True"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Center">
                     <Image Source="{Binding Image}" Stretch="Uniform"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>

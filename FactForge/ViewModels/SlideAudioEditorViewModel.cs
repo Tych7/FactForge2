@@ -15,8 +15,8 @@ public interface IHasSlideAudio
 /// <summary>Audio state + commands for one slide. Composed into each slide editor VM.</summary>
 public partial class SlideAudioEditorViewModel : ViewModelBase
 {
-    /// <summary>Stored file name (what goes into Slide.AudioPath), or null for no audio.</summary>
-    public string? FileName { get; private set; }
+    [ObservableProperty]
+    private string? _fileName;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAudio))]
@@ -26,8 +26,8 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
 
     public SlideAudioEditorViewModel(string? fileName)
     {
-        FileName = fileName;
-        AudioPath = SlideAudioService.Shared.GetPath(fileName);
+        _fileName = fileName;
+        _audioPath = SlideAudioService.Shared.GetPath(fileName);
     }
 
     [RelayCommand]

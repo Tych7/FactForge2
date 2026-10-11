@@ -10,7 +10,7 @@
     <Grid RowDefinitions="Auto,*" Width="1200" Height="700">
       
       <!-- Header (Row 0) -->
-      <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,32">
+      <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,100,0,32">
         <TextBlock Text="Guess the song!" FontSize="44" FontWeight="Bold" 
                    Foreground="{DynamicResource PrimaryTextBrush}" 
                    HorizontalAlignment="Center"/>
@@ -24,20 +24,20 @@
                     IsVisible="{Binding IsMusicRevealed}">
           
           <!-- Correct Answer Pill Badge -->
-          <Border Background="Transparent" BorderBrush="#2ECC71" BorderThickness="1.5" 
+          <Border Background="Transparent" BorderBrush="{DynamicResource CorrectAnswerBrush}" BorderThickness="1.5" 
                   CornerRadius="16" Padding="16,6" HorizontalAlignment="Center">
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <Border Background="#2ECC71" CornerRadius="10" Width="20" Height="20">
+              <Border Background="{DynamicResource CorrectAnswerBrush}" CornerRadius="10" Width="20" Height="20">
                 <PathIcon Width="10" Height="10" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
                           Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
               </Border>
-              <TextBlock Text="Correct Answer" Foreground="#2ECC71" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              <TextBlock Text="Correct Answer" Foreground="{DynamicResource CorrectAnswerBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
             </StackPanel>
           </Border>
 
           <!-- Main Answer Card with Green Border -->
           <Border Background="{DynamicResource CardBackgroundBrush}" 
-                  BorderBrush="#2ECC71" 
+                  BorderBrush="{DynamicResource CorrectAnswerBrush}" 
                   BorderThickness="2" CornerRadius="20" Padding="48,40"
                   HorizontalAlignment="Center">
             <StackPanel Spacing="12" HorizontalAlignment="Center">

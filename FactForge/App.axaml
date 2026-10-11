@@ -31,6 +31,8 @@
                     <SolidColorBrush x:Key="DialogTextBrush">#CCCCCC</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogOverlayBrush">#99000000</SolidColorBrush>
 
+                    <SolidColorBrush x:Key="CorrectAnswerBrush">#2ECC71</SolidColorBrush>
+
                     <!-- TextBox Defaults -->
                     <SolidColorBrush x:Key="TextControlBackground">#FFFFFF</SolidColorBrush>
                     <SolidColorBrush x:Key="TextControlForeground">#121921</SolidColorBrush>
@@ -63,6 +65,8 @@
                     <SolidColorBrush x:Key="DialogTitleBrush">#1A1A1A</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogTextBrush">#555555</SolidColorBrush>
                     <SolidColorBrush x:Key="DialogOverlayBrush">#66000000</SolidColorBrush>
+
+                    <SolidColorBrush x:Key="CorrectAnswerBrush">#2ECC71</SolidColorBrush>
 
                     <!-- TextBox Defaults -->
                     <SolidColorBrush x:Key="TextControlBackground">#FFFFFF</SolidColorBrush>
