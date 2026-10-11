@@ -243,6 +243,12 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         CurrentSlide = slide;
         SlideNumber++;
 
+        var waveformPeaks =
+            slide.Type == SlideType.MusicQuestion
+                ? await AudioWaveformService.Shared.GetPeaksAsync(
+                    slide.MusicFilePath)
+                : Array.Empty<float>();
+
         Slide = new SlideDisplay
         {
             Type = slide.Type,
@@ -256,6 +262,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             MusicDurationSeconds = 0,
             MusicPositionSeconds = 0,
             ReplayMusicCommand = ReplayMusicCommand,
+            MusicWaveformPeaks = waveformPeaks,
             StatusText = slide.DeadlineUtc is not null ? "0 answered" : string.Empty,
             Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?

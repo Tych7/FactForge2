@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
+             xmlns:controls="using:FactForge.Controls"
              x:Class="FactForge.Views.SlideDisplays.MusicQuestionSlideDisplay"
              x:DataType="vm:SlideDisplay"
              IsVisible="{Binding IsMusicQuestion}">
@@ -51,36 +52,58 @@
         </StackPanel>
 
         <!-- Music Player Card (Disappears when IsMusicRevealed is true) -->
-        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="16" Padding="28"
+        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="20" Padding="28"
                 IsVisible="{Binding IsMusicRevealed, Converter={x:Static BoolConverters.Not}}">
-          <StackPanel Spacing="20">
+          <StackPanel Spacing="16">
             
-            <!-- Time to Answer Progress Bar -->
+            <!-- Time to Answer & Responses Labels -->
             <Grid ColumnDefinitions="*,Auto">
-              <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}" 
-                           Value="{Binding SecondsRemaining}" Height="10" 
-                           Foreground="{DynamicResource AccentTealBrush}"/>
-              <TextBlock Grid.Column="1" Margin="16,0,0,0" Text="{Binding StatusText}" 
+              <TextBlock Grid.Column="0" Text="Time to answer:" 
+                         Foreground="{DynamicResource SecondaryTextBrush}" 
+                         VerticalAlignment="Center" FontSize="16"/>
+              <TextBlock Grid.Column="1" Text="{Binding StatusText}" 
                          Foreground="{DynamicResource SecondaryTextBrush}" 
                          VerticalAlignment="Center" FontSize="16"/>
             </Grid>
 
-            <!-- Audio Track Progress & Replay Controls -->
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
-              <Button Grid.Column="0" Content="▶ Replay" Command="{Binding ReplayMusicCommand}" 
-                      Background="{DynamicResource CardSecondaryBrush}" 
-                      Foreground="{DynamicResource PrimaryTextBrush}"
-                      CornerRadius="20" Padding="24,12" FontSize="18" 
-                      VerticalAlignment="Center"/>
-              
-              <ProgressBar Grid.Column="1" Minimum="0" Maximum="{Binding MusicDurationSeconds}" 
-                           Value="{Binding MusicPositionSeconds}" Height="8" 
-                           VerticalAlignment="Center" Foreground="{DynamicResource AccentTealBrush}"/>
-              
-              <TextBlock Grid.Column="2" Text="{Binding MusicTimeText}" 
-                         VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold"
-                         Foreground="{DynamicResource SecondaryTextBrush}"/>
-            </Grid>
+            <!-- Time to Answer Progress Bar -->
+            <ProgressBar Minimum="0" Maximum="{Binding TimeSeconds}" 
+                         Value="{Binding SecondsRemaining}" Height="12" 
+                         CornerRadius="6"
+                         Foreground="{DynamicResource AccentTealBrush}"/>
+
+            <!-- Inner Audio Player Card -->
+            <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="14" Padding="20,16" Margin="0,4,0,0">
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20" VerticalAlignment="Center">
+                
+                <!-- Replay Circular Button -->
+                <Button Grid.Column="0" Command="{Binding ReplayMusicCommand}" 
+                        Background="{DynamicResource AppBackgroundBrush}" 
+                        Foreground="{DynamicResource PrimaryTextBrush}"
+                        Width="48" Height="48" CornerRadius="24" Padding="0"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <PathIcon Width="18" Height="18" Foreground="{DynamicResource AccentTealBrush}" 
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Data="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                </Button>
+                
+                <!-- Music Track Progress Bar -->
+                <controls:WaveformProgressBar
+                    Grid.Column="1"
+                    Peaks="{Binding MusicWaveformPeaks}"
+                    PositionSeconds="{Binding MusicPositionSeconds}"
+                    DurationSeconds="{Binding MusicDurationSeconds}"
+                    PlayedBrush="{DynamicResource AccentTealBrush}"
+                    UnplayedBrush="{DynamicResource SecondaryTextBrush}"
+                    Height="40"
+                    VerticalAlignment="Center"/>
+                
+                <!-- Music Time Text -->
+                <TextBlock Grid.Column="2" Text="{Binding MusicTimeText}" 
+                    VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold"
+                    Foreground="{DynamicResource PrimaryTextBrush}"/>
+              </Grid>
+            </Border>
             
           </StackPanel>
         </Border>
