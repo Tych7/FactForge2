@@ -51,34 +51,7 @@
 
 
         <!-- Lobby: QR + join code + waiting players -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Lobby}">
-            <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
-                <Image Source="{Binding QrImage}" Width="280" Height="280"/>
-                <TextBlock Text="{Binding JoinUrl}" HorizontalAlignment="Center" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                <TextBlock Text="{Binding JoinCode}" HorizontalAlignment="Center" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <Button Content="Start Quiz ▶" HorizontalAlignment="Center" FontSize="18"
-                        Background="{DynamicResource CardBackgroundBrush}" 
-                        Foreground="{DynamicResource AccentTealBrush}"
-                        CornerRadius="20" Padding="24,10" Command="{Binding StartQuizCommand}"/>
-            </StackPanel>
-
-            <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="24,0,0,0">
-                <TextBlock Grid.Row="0" Text="{Binding Players.Count, StringFormat='Players joined: {0}'}"
-                           FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,10"/>
-                <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}"
-                        CornerRadius="8" Padding="12">
-                    <ScrollViewer>
-                        <ItemsControl ItemsSource="{Binding Players}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="models:PlayerInfoDto">
-                                    <TextBlock Text="{Binding Name}" Padding="4" Foreground="{DynamicResource PrimaryTextBrush}"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Border>
-            </Grid>
-        </Grid>
+        <slideDisplay:LobbySlideDisplay Grid.Row="1" IsVisible="{Binding Phase, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Lobby}"/>
 
         <!-- Active Slide View -->
         <Grid Grid.Row="1" RowDefinitions="*,Auto" IsVisible="{Binding IsSlideVisible}">
