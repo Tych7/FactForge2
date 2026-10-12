@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+     x:Class="FactForge.Views.CreateQuizDialog"
+     SystemDecorations="None"
+     CanResize="False"
+     ShowInTaskbar="False"
+     Background="Transparent"
+     TransparencyLevelHint="Transparent"
+     WindowStartupLocation="CenterOwner"
+     Width="460"
+     Height="280">
+
+    <Grid Background="{DynamicResource DialogOverlayBrush}"
+        PointerPressed="OnBackgroundPressed">
+
+        <Border Background="{DynamicResource DialogBackgroundBrush}"
+                BorderBrush="#1E88E5"
+                BorderThickness="2"
+                CornerRadius="12"
+                Padding="28"
+                Width="400"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                BoxShadow="0 8 24 0 #60000000">
+
+            <StackPanel Spacing="18">
+                <TextBlock Text="Create a new quiz"
+                        FontSize="22"
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource DialogTitleBrush}"
+                        HorizontalAlignment="Center"/>
+
+                <TextBox x:Name="QuizTitleTextBox"
+                        Watermark="Enter quiz name..."
+                        FontSize="16"
+                        HorizontalAlignment="Stretch"/>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="10">
+
+                    <Button Content="Cancel"
+                            Padding="18,10"
+                            Click="OnCancel"/>
+
+                    <Button Content="Create"
+                            Padding="18,10"
+                            Classes="accent"
+                            Click="OnCreate"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</Window>

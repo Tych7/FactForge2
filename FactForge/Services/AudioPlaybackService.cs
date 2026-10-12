@@ -14,8 +14,8 @@ namespace FactForge.Services;
 public sealed class AudioPlaybackService : IDisposable
 {
     public static AudioPlaybackService Shared { get; } = new();
+    private LibVLC? _libVlc;
 
-    private readonly LibVLC _libVlc;
     private readonly SemaphoreSlim _playLock = new(1, 1);
     private readonly Stopwatch _playbackClock = new();
 
@@ -23,10 +23,8 @@ public sealed class AudioPlaybackService : IDisposable
     private bool _isPlaying;
     private bool _disposed;
 
-    private AudioPlaybackService()
+    public  AudioPlaybackService()
     {
-        Core.Initialize();
-        _libVlc = new LibVLC();
     }
 
     public bool IsPlaying => _isPlaying;
@@ -61,8 +59,23 @@ public sealed class AudioPlaybackService : IDisposable
 
             await Task.Run(() =>
             {
-                _mediaPlayer = new MediaPlayer(_libVlc);
-                _mediaPlayer.EndReached += OnEndReached;
+                Core.Initialize();
+
+                var libVlc = new LibVLC();
+
+                try
+                {
+                    var mediaPlayer = new MediaPlayer(libVlc);
+                    mediaPlayer.EndReached += OnEndReached;
+
+                    _libVlc = libVlc;
+                    _mediaPlayer = mediaPlayer;
+                }
+                catch
+                {
+                    libVlc.Dispose();
+                    throw;
+                }
             });
         }
         finally
@@ -73,32 +86,33 @@ public sealed class AudioPlaybackService : IDisposable
 
     public async Task PlayAsync(string filePath)
     {
+        // Wait for initialization only when audio playback is actually needed.
+        await InitializeAsync();
+
         await _playLock.WaitAsync();
 
         try
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            if (_mediaPlayer is null)
-            {
-                _mediaPlayer = new MediaPlayer(_libVlc);
-                _mediaPlayer.EndReached += OnEndReached;
-            }
+            var libVlc = _libVlc
+                ?? throw new InvalidOperationException(
+                    "LibVLC has not been initialized.");
 
-            var player = _mediaPlayer;
+            var player = _mediaPlayer
+                ?? throw new InvalidOperationException(
+                    "The media player has not been initialized.");
 
             await Task.Run(() =>
             {
                 player.Stop();
 
                 using var media = new Media(
-                    _libVlc,
+                    libVlc,
                     filePath,
                     FromType.FromPath);
 
                 player.Media = media;
-
-                // Starts playback asynchronously in LibVLC.
                 player.Play();
             });
 
@@ -170,8 +184,18 @@ public sealed class AudioPlaybackService : IDisposable
         _isPlaying = false;
     }
 
+    
     public async Task StopAsync()
     {
+        // No player means there is nothing to stop.
+        // Avoid waiting for background initialization to finish.
+        if (_mediaPlayer is null)
+        {
+            _playbackClock.Reset();
+            _isPlaying = false;
+            return;
+        }
+
         await _playLock.WaitAsync();
 
         try
@@ -192,6 +216,7 @@ public sealed class AudioPlaybackService : IDisposable
             _playLock.Release();
         }
     }
+
 
     public async Task DisposeAsync()
     {
@@ -217,7 +242,8 @@ public sealed class AudioPlaybackService : IDisposable
                 });
             }
 
-            _libVlc.Dispose();
+            _libVlc?.Dispose();
+            _libVlc = null;
         }
         finally
         {

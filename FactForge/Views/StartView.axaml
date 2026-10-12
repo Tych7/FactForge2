@@ -6,18 +6,28 @@
              xmlns:svg="using:Avalonia.Svg.Skia"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.StartView"
-             x:DataType="vm:StartViewModel">
+             x:DataType="vm:StartViewModel"
+             Background="{DynamicResource AppBackgroundBrush}">
 
-    <Viewbox Stretch="Uniform" Margin="80">
+    <Viewbox Stretch="Uniform" Margin="60">
         <StackPanel HorizontalAlignment="Center" Spacing="40">
-            <Image Grid.Column="0" Height="900" Stretch="Uniform">
+            <!-- Big Logo -->
+            <Image MaxHeight="500" Stretch="Uniform">
                 <Image.Source>
                     <svg:SvgImage Source="avares://FactForge/Assets/bigLogo.svg"/>
                 </Image.Source>
             </Image>
 
-            <Button Content="Play ▶" Classes="accent" HorizontalAlignment="Center"
-                    FontSize="24" Padding="48,16" Command="{Binding PlayCommand}"/>
+            <!-- Play Button -->
+            <Button Content="Play ►" 
+                    HorizontalAlignment="Center"
+                    FontSize="18" 
+                    FontWeight="SemiBold"
+                    Foreground="White"
+                    Background="{DynamicResource AccentTealBrush}"
+                    CornerRadius="20"
+                    Padding="36,10" 
+                    Command="{Binding PlayCommand}"/>
         </StackPanel>
     </Viewbox>
 </UserControl>

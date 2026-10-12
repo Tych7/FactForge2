@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,11 +19,12 @@ public partial class QuizLibraryViewModel : ViewModelBase
     private readonly Action<int> _onPresent;
     private readonly Action<int> _onResults;
     private readonly Action _onSettings;
+    private List<QuizListItemViewModel> _allQuizzes = new();
 
 
     public ObservableCollection<QuizListItemViewModel> Quizzes { get; } = new();
 
-    [ObservableProperty] private string _newQuizTitle = string.Empty;
+    [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private QuizListItemViewModel? _selectedQuiz;
     [ObservableProperty] private bool _isLoading;
 
@@ -47,19 +50,63 @@ public partial class QuizLibraryViewModel : ViewModelBase
     private async Task LoadAsync()
     {
         IsLoading = true;
-        var quizzes = await _repository.GetAllQuizzesAsync();
+
+        try
+        {
+            var quizzes = await _repository.GetAllQuizzesAsync();
+
+            _allQuizzes = quizzes
+                .Select(quiz => new QuizListItemViewModel(quiz))
+                .ToList();
+
+            FilterQuizzes();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        FilterQuizzes();
+    }
+
+    private void FilterQuizzes()
+    {
+        var search = SearchQuery.Trim();
+
+        var filteredQuizzes = string.IsNullOrWhiteSpace(search)
+            ? _allQuizzes
+            : _allQuizzes
+                .Where(quiz => quiz.Title.Contains(
+                    search,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
         Quizzes.Clear();
-        foreach (var quiz in quizzes)
-            Quizzes.Add(new QuizListItemViewModel(quiz));
-        IsLoading = false;
+
+        foreach (var quiz in filteredQuizzes)
+        {
+            Quizzes.Add(quiz);
+        }
     }
 
     [RelayCommand]
-    private async Task CreateQuizAsync()
+    private async Task OpenCreateQuizDialogAsync()
     {
-        var title = string.IsNullOrWhiteSpace(NewQuizTitle) ? "Untitled Quiz" : NewQuizTitle.Trim();
-        var quiz = await _repository.CreateQuizAsync(title);
-        NewQuizTitle = string.Empty;
+        var title = await _dialogService.ShowCreateQuizAsync();
+
+        if (string.IsNullOrWhiteSpace(title))
+            return;
+
+        await CreateQuizAsync(title);
+    }
+
+    private async Task CreateQuizAsync(string title)
+    {
+        var quiz = await _repository.CreateQuizAsync(title.Trim());
+        await LoadAsync();
         _onEdit(quiz.Id);
     }
 

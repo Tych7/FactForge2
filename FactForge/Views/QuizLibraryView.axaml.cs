@@ -1,4 +1,7 @@
+using System;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using FactForge.ViewModels;
 
 namespace FactForge.Views;
 

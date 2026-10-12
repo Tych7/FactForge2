@@ -2,31 +2,59 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
              x:Class="FactForge.Views.SettingsView"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vm:SettingsViewModel"
+             Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid Margin="32" RowDefinitions="Auto,*">
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,0,0,24">
-            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}"/>
-            <TextBlock Grid.Column="1" Text="Options" FontSize="28" FontWeight="Bold"
-                       HorizontalAlignment="Center"/>
+
+        <!-- Top Header Bar -->
+        <Grid Grid.Row="0" Margin="0,0,0,32">
+            <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,20">
+                <Grid>
+                    <!-- Centered Title -->
+                    <TextBlock Text="Options" FontSize="32" FontWeight="Bold" 
+                               Foreground="{DynamicResource PrimaryTextBrush}" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                    <!-- Back Button -->
+                    <Button HorizontalAlignment="Left" 
+                            Command="{Binding BackCommand}" 
+                            Background="{DynamicResource CardBackgroundBrush}" 
+                            Foreground="{DynamicResource AccentTealBrush}" 
+                            CornerRadius="20" Padding="6,6,16,6" FontWeight="SemiBold">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Background="{DynamicResource AccentTealBrush}" CornerRadius="15" Width="30" Height="30">
+                                <PathIcon Width="14" Height="14" Foreground="White" 
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Data="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                            </Border>
+                            <TextBlock Text="Back" VerticalAlignment="Center" FontSize="15"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
         </Grid>
 
-        <StackPanel Grid.Row="1" Spacing="20" MaxWidth="480">
-            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                    CornerRadius="8" Padding="20">
+        <!-- Options Container -->
+        <StackPanel Grid.Row="1" Spacing="16" Width="800" HorizontalAlignment="Center">
+            <!-- Full Screen Card -->
+            <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="24,18">
                 <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Grid.Column="0" Text="Full screen" FontSize="16" VerticalAlignment="Center"/>
-                    <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsFullScreen}"/>
+                    <TextBlock Grid.Column="0" Text="Full screen" FontSize="18" FontWeight="SemiBold" 
+                               Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsFullScreen}" OffContent="" OnContent=""/>
                 </Grid>
             </Border>
 
-            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                    CornerRadius="8" Padding="20">
+            <!-- Dark Mode Card -->
+            <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="24,18">
                 <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Grid.Column="0" Text="Dark mode" FontSize="16" VerticalAlignment="Center"/>
-                    <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsDarkMode}"/>
+                    <TextBlock Grid.Column="0" Text="Dark mode" FontSize="18" FontWeight="SemiBold" 
+                               Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                    <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsDarkMode}" OffContent="" OnContent=""/>
                 </Grid>
             </Border>
         </StackPanel>
+
     </Grid>
 </UserControl>

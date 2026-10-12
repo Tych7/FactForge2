@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -22,13 +23,15 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
+    
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();
 
-            var services = WebHost?.Services ?? throw new InvalidOperationException("Web host not started.");
+            var services = WebHost?.Services
+                ?? throw new InvalidOperationException("Web host not started.");
 
             var settingsService = services.GetRequiredService<ISettingsService>();
             RequestedThemeVariant = settingsService.Current.IsDarkMode
@@ -43,15 +46,37 @@ public partial class App : Application
                 services.GetRequiredService<IWindowService>(),
                 services.GetRequiredService<ISettingsService>());
 
-            var mainWindow = new MainWindow { DataContext = mainWindowViewModel };
+            var mainWindow = new MainWindow
+            {
+                DataContext = mainWindowViewModel
+            };
+
             desktop.MainWindow = mainWindow;
 
             if (settingsService.Current.IsFullScreen)
-                mainWindow.WindowState = Avalonia.Controls.WindowState.FullScreen;
+                mainWindow.WindowState =
+                    Avalonia.Controls.WindowState.FullScreen;
+
+            // Initialize the audio player without awaiting it.
+            _ = InitializeAudioInBackgroundAsync();
         }
 
         base.OnFrameworkInitializationCompleted();
     }
+
+    private static async Task InitializeAudioInBackgroundAsync()
+    {
+        try
+        {
+            await AudioPlaybackService.Shared.InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Audio initialization failed: {ex}");
+        }
+    }
+
 
     private void DisableAvaloniaDataAnnotationValidation()
     {

@@ -41,6 +41,7 @@ let myName = "";
 let selectedAnswer = null;
 let countdownHandle = null;
 let questionPoints = 0;
+let myAnswerCorrect = false;
 let currentSlideType = null;
 let musicAnswerCorrect  = false;
 let musicArtistCorrect = false;
@@ -104,6 +105,7 @@ let lastLeaderboard = [];
 function onSlideStarted(slide) {
   selectedAnswer = null;
   questionPoints = 0;
+  myAnswerCorrect = false;
   musicAnswerCorrect = false;
   musicArtistCorrect = false;
   musicTitleCorrect = false;
@@ -198,7 +200,11 @@ async function submitAnswer(text, sourceEl) {
   if (sourceEl) sourceEl.classList.add("selected");
 
   try {
-    await connection.invoke("SubmitAnswer", text);
+    const result = await connection.invoke("SubmitAnswer", text);
+    if (result) {
+      myAnswerCorrect = result.isCorrect;
+      questionPoints = result.pointsAwarded ?? 0;
+    }
   } catch (err) {
     console.error(err);
   }
@@ -325,15 +331,7 @@ function onSlideRevealed(reveal) {
   }
 
   // Normal question
-  const correctAnswer = reveal.correctAnswer;
-
-  const wasCorrect =
-    selectedAnswer !== null &&
-    correctAnswer !== null &&
-    selectedAnswer.trim().toLowerCase() ===
-      String(correctAnswer).trim().toLowerCase();
-
-  if (wasCorrect) {
+  if (myAnswerCorrect) {
     revealIcon.classList.add("correct");
     revealIcon.textContent = "✓";
   } else {

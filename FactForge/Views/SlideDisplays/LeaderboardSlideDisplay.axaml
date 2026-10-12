@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FactForge.ViewModels"
+             x:Class="FactForge.Views.SlideDisplays.LeaderboardSlideDisplay"
+             x:DataType="vm:SlideDisplay"
+             IsVisible="{Binding IsLeaderboard}">
+  <TextBlock Text="Leaderboard" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+</UserControl>

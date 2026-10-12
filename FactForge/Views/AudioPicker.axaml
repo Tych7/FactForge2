@@ -1,22 +1,103 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
+             xmlns:controls="using:FactForge.Controls"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              x:Class="FactForge.Views.AudioPicker"
              x:DataType="vm:SlideAudioEditorViewModel">
 
-  <!-- Usage inside a slide editor view:  <views:AudioPicker DataContext="{Binding Audio}"/> -->
-  <StackPanel Spacing="8">
-    <TextBlock Text="Audio" FontWeight="SemiBold" Opacity="0.7"/>
+  <StackPanel Spacing="12">
 
-    <Border Width="160" Height="90" CornerRadius="6" ClipToBounds="True"
-            Background="#22000000" HorizontalAlignment="Left"
-            IsVisible="{Binding HasAudio}">
-      <TextBlock Text="{Binding FileName}" VerticalAlignment="Center" Margin="12,0" TextTrimming="CharacterEllipsis"/>
-    </Border>
+    <!-- Container for Audio Card + Remove Button -->
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding HasAudio}">
 
-    <StackPanel Orientation="Horizontal" Spacing="6">
-      <Button Content="Choose audio…" Command="{Binding ChooseCommand}"/>
-      <Button Content="Remove" Command="{Binding RemoveCommand}" IsVisible="{Binding HasAudio}"/>
-    </StackPanel>
+      <!-- Audio Card -->
+      <Border Grid.Column="0"
+              Background="{DynamicResource CardBackgroundBrush}"
+              CornerRadius="12"
+              Padding="16"
+              ClipToBounds="True">
+
+        <StackPanel Spacing="14">
+
+          <!-- Song name -->
+          <TextBlock Text="{Binding FileName}"
+                     VerticalAlignment="Center"
+                     FontWeight="SemiBold"
+                     FontSize="15"
+                     TextTrimming="CharacterEllipsis"
+                     MaxLines="1"/>
+
+          <!-- Playback controls -->
+          <Grid ColumnDefinitions="Auto,*,Auto"
+                ColumnSpacing="12"
+                VerticalAlignment="Center">
+              
+            <Button Grid.Column="0"
+                    Command="{Binding TogglePreviewCommand}"
+                    Width="44"
+                    Height="44"
+                    MinWidth="44"
+                    Padding="0"
+                    CornerRadius="22"
+                    Background="{DynamicResource AccentTealBrush}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+
+              <svg:Svg Path="{Binding PreviewIcon}"
+                      Width="18"
+                      Height="18"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"/>
+
+            </Button>
+
+            <controls:WaveformProgressBar Grid.Column="1"
+                                          Peaks="{Binding WaveformPeaks}"
+                                          PositionSeconds="{Binding PositionSeconds}"
+                                          DurationSeconds="{Binding DurationSeconds}"
+                                          PlayedBrush="#32B8AA"
+                                          UnplayedBrush="#554FB8B0"
+                                          Height="34"
+                                          VerticalAlignment="Center"/>
+
+            <TextBlock Grid.Column="2"
+                       Text="{Binding PreviewTimeText}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"
+                       FontSize="12"
+                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+          </Grid>
+
+        </StackPanel>
+      </Border>
+
+      <!-- Remove Button (Outside the audio card on the right) -->
+      <Button Grid.Column="1"
+              Command="{Binding RemoveCommand}"
+              Background="Transparent"
+              Padding="8"
+              VerticalAlignment="Center"
+              ToolTip.Tip="Remove audio">
+        <PathIcon Width="20"
+                  Height="20"
+                  Foreground="#FF6B6B"
+                  Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </Button>
+
+    </Grid>
+
+    <!-- Choose audio -->
+    <Button Content="Choose Audio..."
+            Command="{Binding ChooseCommand}"
+            Background="{DynamicResource AccentTealBrush}"
+            Foreground="White"
+            FontWeight="SemiBold"
+            FontSize="15"
+            CornerRadius="10"
+            Padding="18,10"
+            HorizontalAlignment="Left"/>
+
   </StackPanel>
 </UserControl>

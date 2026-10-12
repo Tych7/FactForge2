@@ -37,14 +37,23 @@ public partial class MainWindowViewModel : ViewModelBase
     public void NavigateToLibrary() => CurrentPage = CreateLibraryPage();
 
     public void NavigateToEditor(int quizId) =>
-        CurrentPage = new EditorViewModel(_quizRepository, quizId, NavigateToLibrary, NavigateToPresent);
+        CurrentPage = new EditorViewModel(_quizRepository, quizId, NavigateToLibrary, NavigateToPresent, _dialogService, _windowService, NavigateToSettings);
 
     public void NavigateToPresent(int quizId) =>
         CurrentPage = new PresentViewModel(_presentationService, _qrCodeService, _quizRepository, quizId, NavigateToLibrary);
 
     public void NavigateToResults(int quizId) =>
         CurrentPage = new ResultsViewModel(_quizRepository, quizId, NavigateToLibrary);
+    
+    public void NavigateToSettings()
+    {
+        // Capture the page that was active prior to opening Settings
+        var previousPage = CurrentPage;
 
-    public void NavigateToSettings() =>
-        CurrentPage = new SettingsViewModel(_windowService, _settingsService, NavigateToLibrary);
+        CurrentPage = new SettingsViewModel(
+            _windowService, 
+            _settingsService, 
+            onBack: () => CurrentPage = previousPage
+        );
+    }
 }
