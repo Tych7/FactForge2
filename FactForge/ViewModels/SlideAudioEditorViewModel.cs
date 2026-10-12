@@ -45,8 +45,10 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
 
     public bool IsPreviewPaused => _previewPaused;
 
-    public string PreviewButtonText =>
-        IsPreviewPlaying ? "Pause" : "Play";
+    public string PreviewIcon =>
+    IsPreviewPlaying
+        ? "avares://FactForge/Assets/Pause.svg"
+        : "avares://FactForge/Assets/Play.svg";
 
     public string PreviewTimeText =>
         $"{FormatTime(PositionSeconds)} / {FormatTime(DurationSeconds)}";
@@ -108,7 +110,7 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
             IsPreviewPlaying = false;
             _previewPaused = true;
             OnPropertyChanged(nameof(IsPreviewPaused));
-            OnPropertyChanged(nameof(PreviewButtonText));
+            OnPropertyChanged(nameof(PreviewIcon));
             return;
         }
 
@@ -119,7 +121,7 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
             IsPreviewPlaying = true;
             _positionTimer.Start();
             OnPropertyChanged(nameof(IsPreviewPaused));
-            OnPropertyChanged(nameof(PreviewButtonText));
+            OnPropertyChanged(nameof(PreviewIcon));
             return;
         }
 
@@ -135,7 +137,7 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
             _positionTimer.Start();
 
             OnPropertyChanged(nameof(IsPreviewPaused));
-            OnPropertyChanged(nameof(PreviewButtonText));
+            OnPropertyChanged(nameof(PreviewIcon));
         }
         catch
         {
@@ -155,7 +157,7 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
         PositionSeconds = 0;
 
         OnPropertyChanged(nameof(IsPreviewPaused));
-        OnPropertyChanged(nameof(PreviewButtonText));
+        OnPropertyChanged(nameof(PreviewIcon));
     }
 
     private async Task RefreshWaveformAsync()
@@ -184,7 +186,7 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
             _previewPaused = false;
 
             OnPropertyChanged(nameof(IsPreviewPaused));
-            OnPropertyChanged(nameof(PreviewButtonText));
+            OnPropertyChanged(nameof(PreviewIcon));
         }
     }
 
@@ -200,8 +202,10 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
     partial void OnDurationSecondsChanged(double value) =>
         OnPropertyChanged(nameof(PreviewTimeText));
 
-    partial void OnIsPreviewPlayingChanged(bool value) =>
-        OnPropertyChanged(nameof(PreviewButtonText));
+    partial void OnIsPreviewPlayingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(PreviewIcon));
+    }
 
     public async Task DisposePreviewAsync()
     {

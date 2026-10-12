@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
              xmlns:controls="using:FactForge.Controls"
+             xmlns:svg="using:Avalonia.Svg.Skia"
              x:Class="FactForge.Views.AudioPicker"
              x:DataType="vm:SlideAudioEditorViewModel">
 
@@ -47,18 +48,24 @@
         <Grid ColumnDefinitions="Auto,*,Auto"
               ColumnSpacing="12"
               VerticalAlignment="Center">
-
+                
           <Button Grid.Column="0"
                   Command="{Binding TogglePreviewCommand}"
+                  Width="44"
+                  Height="44"
+                  MinWidth="44"
+                  Padding="0"
+                  CornerRadius="22"
                   Background="{DynamicResource AccentTealBrush}"
-                  Foreground="White"
-                  CornerRadius="8"
-                  Padding="14,8"
-                  MinWidth="76"
-                  VerticalAlignment="Center">
-            <TextBlock Text="{Binding PreviewButtonText}"
-                       FontWeight="SemiBold"
-                       TextAlignment="Center" />
+                  VerticalAlignment="Center"
+                  HorizontalAlignment="Center">
+
+            <svg:Svg Path="{Binding PreviewIcon}"
+                    Width="18"
+                    Height="18"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"/>
+
           </Button>
 
           <controls:WaveformProgressBar Grid.Column="1"
