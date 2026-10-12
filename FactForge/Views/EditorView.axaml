@@ -134,26 +134,31 @@
                     <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="6" Margin="0,12,0,0">
                         <!-- Move Up -->
                         <Button Grid.Column="0" Command="{Binding MoveSlideUpCommand}" 
-                                Background="{DynamicResource CardSecondaryBrush}" Foreground="{DynamicResource PrimaryTextBrush}" CornerRadius="6" Padding="10,6"
+                                Background="{DynamicResource CardSecondaryBrush}" 
+                                Foreground="{DynamicResource PrimaryTextBrush}" 
+                                CornerRadius="6" Padding="10,6"
                                 ToolTip.Tip="Move Slide Up">
-                            <PathIcon Width="14" Height="14" Data="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
+                            <PathIcon Width="14" Height="14" Foreground="{DynamicResource PrimaryTextBrush}" Data="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/>
                         </Button>
 
                         <!-- Move Down -->
                         <Button Grid.Column="1" Command="{Binding MoveSlideDownCommand}" 
-                                Background="{DynamicResource CardSecondaryBrush}" Foreground="{DynamicResource PrimaryTextBrush}" CornerRadius="6" Padding="10,6"
+                                Background="{DynamicResource CardSecondaryBrush}" 
+                                Foreground="{DynamicResource PrimaryTextBrush}" 
+                                CornerRadius="6" Padding="10,6"
                                 ToolTip.Tip="Move Slide Down">
-                            <PathIcon Width="14" Height="14" Data="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+                            <PathIcon Width="14" Height="14" Foreground="{DynamicResource PrimaryTextBrush}" Data="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
                         </Button>
 
                         <!-- Delete Slide -->
                         <Button Grid.Column="2" Command="{Binding DeleteSlideCommand}" 
                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                Background="{DynamicResource CardSecondaryBrush}" Foreground="#FF6B6B" CornerRadius="6" Padding="8,6"
+                                Background="{DynamicResource CardSecondaryBrush}" 
+                                Foreground="#FF6B6B" CornerRadius="6" Padding="8,6"
                                 ToolTip.Tip="Delete Selected Slide">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <PathIcon Width="14" Height="14" Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                <TextBlock Text="Delete" FontSize="13" FontWeight="SemiBold"/>
+                                <PathIcon Width="14" Height="14" Foreground="#FF6B6B" Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                <TextBlock Text="Delete" FontSize="13" FontWeight="SemiBold" Foreground="#FF6B6B"/>
                             </StackPanel>
                         </Button>
                     </Grid>

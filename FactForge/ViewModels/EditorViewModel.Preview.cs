@@ -160,7 +160,7 @@ public partial class EditorViewModel
                 Question = m.Question,
                 TimeSeconds = m.TimeSeconds,
                 SecondsRemaining = m.TimeSeconds,
-                StatusText = $"{m.TimeSeconds}s",
+                StatusText = "0/0 answered",
                 Image = image,
                 Options = m.Options
                     .Select(o => new AnswerOptionDisplay(o.Text, o.PreviewColor, o.IsCorrect))
@@ -173,7 +173,7 @@ public partial class EditorViewModel
                 Question = q.Question,
                 TimeSeconds = q.TimeSeconds,
                 SecondsRemaining = q.TimeSeconds,
-                StatusText = $"{q.TimeSeconds}s",
+                StatusText = "0/0 answered",
                 Image = image
             },
 
@@ -182,7 +182,7 @@ public partial class EditorViewModel
                 Type = SlideType.MusicQuestion,
                 TimeSeconds = mu.TimeSeconds,
                 SecondsRemaining = mu.TimeSeconds,
-                StatusText = $"{mu.TimeSeconds}s",
+                StatusText = "0/0 answered",
                 Image = image,
                 MusicTitle = mu.Title,
                 MusicArtist = string.Join(

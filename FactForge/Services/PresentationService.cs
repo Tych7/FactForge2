@@ -303,18 +303,16 @@ public class PresentationService : IAsyncDisposable
         {
             _gate.Release();
         }
-
+        
         var artistCorrect = slide.Artist?
             .Split(';', StringSplitOptions.RemoveEmptyEntries)
             .Select(a => a.Trim())
-            .Any(a => artist?.Contains(a, StringComparison.OrdinalIgnoreCase) == true)
+            .Any(a => NormalizeAnswer(artist).Contains(NormalizeAnswer(a)))
             ?? false;
 
         var titleCorrect =
-            string.Equals(
-                slide.Title?.Trim(),
-                title?.Trim(),
-                StringComparison.OrdinalIgnoreCase);
+            NormalizeAnswer(slide.Title) == NormalizeAnswer(title);
+
 
         var remainingFraction = Math.Clamp(
             1.0 - elapsedMs / (slide.TimeSeconds * 1000.0),
@@ -469,13 +467,29 @@ public class PresentationService : IAsyncDisposable
     {
         _active?.ConnectionToPlayerId.Remove(connectionId);
     }
-
+    
     private static bool IsAnswerCorrect(Slide slide, string answerText) => slide.Type switch
     {
-        SlideType.MultipleChoice => slide.Options.Any(o => o.IsCorrect && string.Equals(o.Text, answerText, StringComparison.OrdinalIgnoreCase)),
-        SlideType.OpenQuestion => string.Equals(slide.CorrectAnswer?.Trim(), answerText.Trim(), StringComparison.OrdinalIgnoreCase),
+        SlideType.MultipleChoice => slide.Options.Any(o =>
+            o.IsCorrect &&
+            NormalizeAnswer(o.Text) == NormalizeAnswer(answerText)),
+
+        SlideType.OpenQuestion =>
+            NormalizeAnswer(slide.CorrectAnswer) == NormalizeAnswer(answerText),
+
         _ => false
     };
+
+    private static string NormalizeAnswer(string? answer)
+    {
+        if (string.IsNullOrWhiteSpace(answer))
+            return string.Empty;
+
+        return new string(answer
+            .Where(char.IsLetterOrDigit)
+            .ToArray())
+            .ToLowerInvariant();
+    }
 
     private static string GenerateJoinCode()
     {
