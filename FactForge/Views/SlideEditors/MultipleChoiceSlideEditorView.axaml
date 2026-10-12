@@ -5,35 +5,92 @@
              x:Class="FactForge.Views.MultipleChoiceSlideEditorView"
              x:DataType="vm:MultipleChoiceSlideEditorViewModel">
 
+    <UserControl.Styles>
+        <!-- Pill RadioButton Style for Answer Count -->
+        <Style Selector="RadioButton.pill">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.pill:checked">
+            <Setter Property="Background" Value="{DynamicResource AccentTealBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Correct Option Indicator Style (Green checkmark vs empty circle) -->
+        <Style Selector="RadioButton.correctIndicator">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Width="28" Height="28" CornerRadius="14"
+                            Background="Transparent"
+                            BorderBrush="{DynamicResource SecondaryTextBrush}"
+                            BorderThickness="2"
+                            x:Name="borderPart"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <PathIcon Width="14" Height="14" Foreground="White"
+                                  Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+                                  IsVisible="False" x:Name="checkIcon"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.correctIndicator:checked /template/ Border#borderPart">
+            <Setter Property="Background" Value="#2ECC71"/>
+            <Setter Property="BorderBrush" Value="#2ECC71"/>
+        </Style>
+        <Style Selector="RadioButton.correctIndicator:checked /template/ PathIcon#checkIcon">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+    </UserControl.Styles>
+
     <StackPanel Spacing="16">
-        <TextBlock Text="Multiple Choice Question" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        
+        <!-- Header Section Title & Divider -->
+        <Border BorderBrush="{DynamicResource CardHeaderBorderBrush}" BorderThickness="0,0,0,2" Padding="0,0,0,12">
+            <TextBlock Text="Multiple choice question" FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+        </Border>
 
+        <!-- Question Input -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Question"/>
-            <TextBox Text="{Binding Question}" Watermark="Question text" FontSize="18"/>
+            <TextBlock Text="Question" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBox Text="{Binding Question}" Watermark="Question text"
+                     Background="White" Foreground="#121921"
+                     CornerRadius="12" Padding="12,8" FontSize="15"/>
         </StackPanel>
 
-        <StackPanel Spacing="6" Width="160">
-            <TextBlock Text="Time limit (seconds)"/>
-            <NumericUpDown Value="{Binding TimeSeconds}" Minimum="5" Maximum="300" Increment="5"/>
-        </StackPanel>
-
-        <views:ImagePicker DataContext="{Binding Image}"/>
-
+        <!-- Number of Answers Section (Pill Buttons) -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Number of answers"/>
+            <TextBlock Text="Number of answers" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <RadioButton GroupName="OptionCount" Content="2 answers"
+                <RadioButton GroupName="OptionCount" Content="2 Answers"
+                             Classes="pill"
                              IsChecked="{Binding OptionCount, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=2, Mode=OneWay}"
                              Command="{Binding UseTwoAnswersCommand}"/>
-                <RadioButton GroupName="OptionCount" Content="4 answers"
+                <RadioButton GroupName="OptionCount" Content="4 Answers"
+                             Classes="pill"
                              IsChecked="{Binding OptionCount, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=4, Mode=OneWay}"
                              Command="{Binding UseFourAnswersCommand}"/>
             </StackPanel>
         </StackPanel>
 
+        <!-- Answers Section -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Answers (select the correct one)"/>
+            <TextBlock Text="Answers" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
             <ItemsControl ItemsSource="{Binding Options}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -42,14 +99,34 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:OptionEditorViewModel">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <RadioButton Grid.Column="0" GroupName="CorrectOption"
-                                         IsChecked="{Binding IsCorrect}" VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1" Text="{Binding Text}" Watermark="Answer text" Margin="8,0,0,0"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0" Text="{Binding Text}" Watermark="Answer text"
+                                     Background="White" Foreground="#121921"
+                                     CornerRadius="12" Padding="12,8" FontSize="15"
+                                     VerticalAlignment="Center"/>
+                            <RadioButton Grid.Column="1" GroupName="CorrectOption"
+                                         Classes="correctIndicator"
+                                         IsChecked="{Binding IsCorrect}"
+                                         Margin="12,0,0,0" VerticalAlignment="Center"/>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
+
+        <!-- Time Limit Input -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Time limit (seconds)" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <NumericUpDown Value="{Binding TimeSeconds}"
+                           Minimum="5" Maximum="300" Increment="5"
+                           Width="160" HorizontalAlignment="Left"/>
+        </StackPanel>
+
+        <!-- Image Picker Section -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Image" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <views:ImagePicker DataContext="{Binding Image}"/>
+        </StackPanel>
+
     </StackPanel>
 </UserControl>

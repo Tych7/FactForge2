@@ -21,7 +21,8 @@
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
-            <UniformGrid Columns="2" Rows="2"/>
+            <!-- Removing Rows="2" lets it dynamically use 1 row for 2 items and 2 rows for 4 items -->
+            <UniformGrid Columns="2"/>
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
@@ -67,11 +68,9 @@
         </Grid>
 
         <!-- Responses Count -->
-        <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="16" Foreground="{DynamicResource SecondaryTextBrush}">
-          <TextBlock Grid.Column="1" Text="{Binding StatusText}" 
-                         Foreground="{DynamicResource SecondaryTextBrush}" 
-                         VerticalAlignment="Center" FontSize="16"/>
-        </TextBlock>
+        <TextBlock Grid.Column="2" Text="{Binding StatusText}" 
+                   Foreground="{DynamicResource SecondaryTextBrush}" 
+                   VerticalAlignment="Center" FontSize="16"/>
       </Grid>
     </Border>
 
