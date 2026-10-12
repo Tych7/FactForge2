@@ -23,7 +23,7 @@ public sealed class AudioPlaybackService : IDisposable
     private bool _isPlaying;
     private bool _disposed;
 
-    private AudioPlaybackService()
+    public  AudioPlaybackService()
     {
     }
 
