@@ -4,36 +4,76 @@
              x:Class="FactForge.Views.SlideDisplays.MultipleChoiceSlideDisplay"
              x:DataType="vm:SlideDisplay"
              IsVisible="{Binding IsMultipleChoice}">
-  <Grid RowDefinitions="Auto,Auto,*" Margin="24">
-    <Viewbox Grid.Row="0" StretchDirection="DownOnly" Margin="0,0,0,12">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+    
+    <!-- Question Header (Row 0) -->
+    <Viewbox Grid.Row="0" StretchDirection="DownOnly" Margin="0,0,0,24" Height="60">
       <TextBlock Text="{Binding Question}" FontSize="40" FontWeight="Bold"
+                 Foreground="{DynamicResource PrimaryTextBrush}"
                  HorizontalAlignment="Center" TextWrapping="NoWrap"/>
     </Viewbox>
 
-    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
-      <ProgressBar Grid.Column="0" Minimum="0" Maximum="{Binding TimeSeconds}"
-                   Value="{Binding SecondsRemaining}" Height="10"/>
-      <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusText}"/>
-    </Grid>
+    <!-- Options Card Container (Row 1) -->
+    <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" 
+            CornerRadius="20" Padding="24" Margin="0,0,0,24"
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+      <ItemsControl ItemsSource="{Binding Options}" 
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="2" Rows="2"/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AnswerOptionDisplay">
+            <Border Classes="optionTile" Classes.correct="{Binding IsCorrect}"
+                    Background="{Binding Background}"
+                    Margin="12" Padding="24" CornerRadius="14"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+              <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Text}" FontSize="42" FontWeight="Bold"
+                           Foreground="White" TextWrapping="NoWrap" TextAlignment="Center"
+                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+              </Viewbox>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
 
-    <ItemsControl Grid.Row="2" ItemsSource="{Binding Options}">
-      <ItemsControl.ItemsPanel>
-        <ItemsPanelTemplate>
-          <UniformGrid Columns="2"/>
-        </ItemsPanelTemplate>
-      </ItemsControl.ItemsPanel>
-      <ItemsControl.ItemTemplate>
-        <DataTemplate x:DataType="vm:AnswerOptionDisplay">
-          <Border Classes="optionTile" Classes.correct="{Binding IsCorrect}"
-                  Background="{Binding Background}"
-                  Margin="6" Padding="16" CornerRadius="8">
-            <Viewbox StretchDirection="DownOnly">
-              <TextBlock Text="{Binding Text}" FontSize="48" FontWeight="SemiBold"
-                         Foreground="White" TextWrapping="NoWrap" TextAlignment="Center"/>
-            </Viewbox>
-          </Border>
-        </DataTemplate>
-      </ItemsControl.ItemTemplate>
-    </ItemsControl>
+    <!-- Footer Time & Responses Bar (Row 2) -->
+    <Border Grid.Row="2" Background="{DynamicResource CardBackgroundBrush}" 
+            CornerRadius="16" Padding="20,16">
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
+        
+        <!-- Time Label -->
+        <TextBlock Grid.Column="0" Text="Time to answer:" 
+                   Foreground="{DynamicResource SecondaryTextBrush}" 
+                   VerticalAlignment="Center" FontSize="16"/>
+
+        <!-- Segmented Progress Bar -->
+        <Grid Grid.Column="1" Height="22" VerticalAlignment="Center">
+          <ProgressBar Minimum="0" Maximum="{Binding TimeSeconds}" 
+                       Value="{Binding SecondsRemaining}" Height="22" 
+                       CornerRadius="6"
+                       Foreground="{DynamicResource AccentTealBrush}"/>
+          
+          <!-- Vertical Segment Dividers at 1/4, 1/2, and 3/4 -->
+          <Grid ColumnDefinitions="*,*,*,*">
+            <Rectangle Grid.Column="0" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+            <Rectangle Grid.Column="1" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+            <Rectangle Grid.Column="2" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+          </Grid>
+        </Grid>
+
+        <!-- Responses Count -->
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="16" Foreground="{DynamicResource SecondaryTextBrush}">
+          <TextBlock Grid.Column="1" Text="{Binding StatusText}" 
+                         Foreground="{DynamicResource SecondaryTextBrush}" 
+                         VerticalAlignment="Center" FontSize="16"/>
+        </TextBlock>
+      </Grid>
+    </Border>
+
   </Grid>
 </UserControl>
