@@ -80,10 +80,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async Task InitializeAsync()
     {
-        // Initialize LibVLC while the quiz/session is loading,
-        // not when the first music slide appears.
-        await AudioPlaybackService.Shared.InitializeAsync();
-
         var quiz = await _quizRepository.GetQuizWithSlidesAsync(_quizId);
 
         if (quiz is null)

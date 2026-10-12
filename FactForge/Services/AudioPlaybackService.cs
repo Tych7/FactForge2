@@ -86,6 +86,9 @@ public sealed class AudioPlaybackService : IDisposable
 
     public async Task PlayAsync(string filePath)
     {
+        // Wait for initialization only when audio playback is actually needed.
+        await InitializeAsync();
+
         await _playLock.WaitAsync();
 
         try
@@ -181,8 +184,18 @@ public sealed class AudioPlaybackService : IDisposable
         _isPlaying = false;
     }
 
+    
     public async Task StopAsync()
     {
+        // No player means there is nothing to stop.
+        // Avoid waiting for background initialization to finish.
+        if (_mediaPlayer is null)
+        {
+            _playbackClock.Reset();
+            _isPlaying = false;
+            return;
+        }
+
         await _playLock.WaitAsync();
 
         try
@@ -203,6 +216,7 @@ public sealed class AudioPlaybackService : IDisposable
             _playLock.Release();
         }
     }
+
 
     public async Task DisposeAsync()
     {
