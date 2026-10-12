@@ -9,7 +9,7 @@
     <Grid RowDefinitions="Auto,*" Width="1200" Height="700">
       
       <!-- Header (Row 0) -->
-      <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,100,0,32">
+      <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,150,0,32">
         <TextBlock Text="{Binding Question}" FontSize="44" FontWeight="Bold" 
                    Foreground="{DynamicResource PrimaryTextBrush}" 
                    HorizontalAlignment="Center"/>

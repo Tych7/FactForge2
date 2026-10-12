@@ -1,4 +1,3 @@
-
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
@@ -9,85 +8,85 @@
 
   <StackPanel Spacing="12">
 
-    <!-- Audio card -->
-    <Border IsVisible="{Binding HasAudio}"
-            Background="{DynamicResource CardBackgroundBrush}"
-            CornerRadius="12"
-            Padding="16"
-            ClipToBounds="True">
+    <!-- Container for Audio Card + Remove Button -->
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding HasAudio}">
 
-      <StackPanel Spacing="14">
+      <!-- Audio Card -->
+      <Border Grid.Column="0"
+              Background="{DynamicResource CardBackgroundBrush}"
+              CornerRadius="12"
+              Padding="16"
+              ClipToBounds="True">
 
-        <!-- Song name and remove button -->
-        <Grid ColumnDefinitions="*,Auto"
-              ColumnSpacing="12">
+        <StackPanel Spacing="14">
 
-          <TextBlock Grid.Column="0"
-                     Text="{Binding FileName}"
+          <!-- Song name -->
+          <TextBlock Text="{Binding FileName}"
                      VerticalAlignment="Center"
                      FontWeight="SemiBold"
                      FontSize="15"
                      TextTrimming="CharacterEllipsis"
                      MaxLines="1"/>
 
-          <Button Grid.Column="1"
-                  Command="{Binding RemoveCommand}"
-                  Background="Transparent"
-                  Padding="8"
-                  VerticalAlignment="Center"
-                  ToolTip.Tip="Remove audio">
-            <PathIcon Width="20"
-                      Height="20"
-                      Foreground="#FF6B6B"
-                      Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-          </Button>
+          <!-- Playback controls -->
+          <Grid ColumnDefinitions="Auto,*,Auto"
+                ColumnSpacing="12"
+                VerticalAlignment="Center">
+              
+            <Button Grid.Column="0"
+                    Command="{Binding TogglePreviewCommand}"
+                    Width="44"
+                    Height="44"
+                    MinWidth="44"
+                    Padding="0"
+                    CornerRadius="22"
+                    Background="{DynamicResource AccentTealBrush}"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
 
-        </Grid>
+              <svg:Svg Path="{Binding PreviewIcon}"
+                      Width="18"
+                      Height="18"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"/>
 
-        <!-- Playback controls -->
-        <Grid ColumnDefinitions="Auto,*,Auto"
-              ColumnSpacing="12"
-              VerticalAlignment="Center">
-                
-          <Button Grid.Column="0"
-                  Command="{Binding TogglePreviewCommand}"
-                  Width="44"
-                  Height="44"
-                  MinWidth="44"
-                  Padding="0"
-                  CornerRadius="22"
-                  Background="{DynamicResource AccentTealBrush}"
-                  VerticalAlignment="Center"
-                  HorizontalAlignment="Center">
+            </Button>
 
-            <svg:Svg Path="{Binding PreviewIcon}"
-                    Width="18"
-                    Height="18"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"/>
+            <controls:WaveformProgressBar Grid.Column="1"
+                                          Peaks="{Binding WaveformPeaks}"
+                                          PositionSeconds="{Binding PositionSeconds}"
+                                          DurationSeconds="{Binding DurationSeconds}"
+                                          PlayedBrush="#32B8AA"
+                                          UnplayedBrush="#554FB8B0"
+                                          Height="34"
+                                          VerticalAlignment="Center"/>
 
-          </Button>
+            <TextBlock Grid.Column="2"
+                       Text="{Binding PreviewTimeText}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"
+                       FontSize="12"
+                       Foreground="{DynamicResource TextSecondaryBrush}"/>
 
-          <controls:WaveformProgressBar Grid.Column="1"
-                                        Peaks="{Binding WaveformPeaks}"
-                                        PositionSeconds="{Binding PositionSeconds}"
-                                        DurationSeconds="{Binding DurationSeconds}"
-                                        PlayedBrush="#32B8AA"
-                                        UnplayedBrush="#554FB8B0"
-                                        Height="34"
-                                        VerticalAlignment="Center"/>
+          </Grid>
 
-          <TextBlock Grid.Column="2"
-                     Text="{Binding PreviewTimeText}"
-                     VerticalAlignment="Center"
-                     HorizontalAlignment="Right"
-                     FontSize="12"
-                     Foreground="{DynamicResource TextSecondaryBrush}"/>
+        </StackPanel>
+      </Border>
 
-        </Grid>
+      <!-- Remove Button (Outside the audio card on the right) -->
+      <Button Grid.Column="1"
+              Command="{Binding RemoveCommand}"
+              Background="Transparent"
+              Padding="8"
+              VerticalAlignment="Center"
+              ToolTip.Tip="Remove audio">
+        <PathIcon Width="20"
+                  Height="20"
+                  Foreground="#FF6B6B"
+                  Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </Button>
 
-      </StackPanel>
-    </Border>
+    </Grid>
 
     <!-- Choose audio -->
     <Button Content="Choose Audio..."

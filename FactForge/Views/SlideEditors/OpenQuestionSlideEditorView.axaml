@@ -6,23 +6,42 @@
              x:DataType="vm:OpenQuestionSlideEditorViewModel">
 
     <StackPanel Spacing="16">
-        <TextBlock Text="Open Question" FontSize="14" FontWeight="SemiBold" Opacity="0.6"/>
+        
+        <!-- Header Section Title & Divider -->
+        <Border BorderBrush="{DynamicResource CardHeaderBorderBrush}" BorderThickness="0,0,0,2" Padding="0,0,0,12">
+            <TextBlock Text="Open Question" FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+        </Border>
 
+        <!-- Question Input -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Question"/>
-            <TextBox Text="{Binding Question}" Watermark="Question text" FontSize="18"/>
+            <TextBlock Text="Question" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBox Text="{Binding Question}" Watermark="Question text" 
+                     Background="White" Foreground="#121921"
+                     CornerRadius="12" Padding="12,8" FontSize="18"/>
         </StackPanel>
 
+        <!-- Correct Answer Input -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Correct answer"/>
-            <TextBox Text="{Binding CorrectAnswer}" Watermark="Expected answer (matched case-insensitively)"/>
+            <TextBlock Text="Correct answer" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <TextBox Text="{Binding CorrectAnswer}" Watermark="Expected answer (matched case-insensitively)"
+                     Background="White" Foreground="#121921"
+                     CornerRadius="12" Padding="12,8" FontSize="15"/>
         </StackPanel>
 
-        <StackPanel Spacing="6" Width="160">
-            <TextBlock Text="Time limit (seconds)"/>
-            <NumericUpDown Value="{Binding TimeSeconds}" Minimum="5" Maximum="300" Increment="5"/>
+        <!-- Time Limit Input -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Time limit (seconds)" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <NumericUpDown Value="{Binding TimeSeconds}"
+                           Minimum="5" Maximum="300" Increment="5"
+                           Width="160" HorizontalAlignment="Left"/>
         </StackPanel>
 
-        <views:ImagePicker DataContext="{Binding Image}"/>
+        <!-- Image Picker Section -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Image" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
+            <views:ImagePicker DataContext="{Binding Image}"/>
+        </StackPanel>
+
     </StackPanel>
 </UserControl>
