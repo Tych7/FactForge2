@@ -257,7 +257,9 @@ public class PresentationService : IAsyncDisposable
         var tally = new AnswerTallyDto(active.AnsweredPlayerIds.Count, active.PlayersById.Count);
         await _hub.Clients.All.SendAsync("AnswerTally", tally);
         AnswerTallyChanged?.Invoke(tally);
-        return new SubmitAnswerResultDto(true, false, 0);
+        
+        // PASS isCorrect TO THE CLIENT INSTEAD OF FALSE
+        return new SubmitAnswerResultDto(true, isCorrect, points);
     }
 
     public async Task<SubmitAnswerResultDto> SubmitMusicAnswerAsync(
@@ -474,11 +476,53 @@ public class PresentationService : IAsyncDisposable
             o.IsCorrect &&
             NormalizeAnswer(o.Text) == NormalizeAnswer(answerText)),
 
-        SlideType.OpenQuestion =>
-            NormalizeAnswer(slide.CorrectAnswer) == NormalizeAnswer(answerText),
+        SlideType.OpenQuestion => IsOpenQuestionCorrect(slide.CorrectAnswer, answerText),
 
         _ => false
     };
+
+    private static bool IsOpenQuestionCorrect(string? correctAnswer, string? playerAnswer)
+    {
+        if (string.IsNullOrWhiteSpace(correctAnswer) || string.IsNullOrWhiteSpace(playerAnswer))
+            return false;
+
+        var normCorrect = NormalizeAnswer(correctAnswer);
+        var normPlayer = NormalizeAnswer(playerAnswer);
+
+        // 1. Direct normalized match
+        if (normCorrect == normPlayer)
+            return true;
+
+        // 2. Numeric comparison (handles "1945" vs "1945")
+        if (double.TryParse(correctAnswer, out var correctNum) && double.TryParse(playerAnswer, out var playerNum))
+        {
+            if (Math.Abs(correctNum - playerNum) < 0.0001)
+                return true;
+        }
+
+        // 3. Token check: ensure all significant words/numbers in the correct answer appear in the player's answer
+        var correctTokens = GetSignificantTokens(correctAnswer);
+        var playerTokens = GetSignificantTokens(playerAnswer);
+
+        if (correctTokens.Count > 0 && correctTokens.All(t => playerTokens.Contains(t)))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static HashSet<string> GetSignificantTokens(string text)
+    {
+        // Common stop words in English and Dutch that players might prefix an answer with
+        var stopWords = new HashSet<string> { "in", "de", "het", "a", "an", "the", "van", "op", "om" };
+        
+        return text
+            .Split(new[] { ' ', '-', '_', '.', ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(NormalizeAnswer)
+            .Where(t => !string.IsNullOrEmpty(t) && !stopWords.Contains(t))
+            .ToHashSet();
+    }
 
     private static string NormalizeAnswer(string? answer)
     {
