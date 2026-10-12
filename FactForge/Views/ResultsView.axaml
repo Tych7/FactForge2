@@ -1,20 +1,29 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:d="http://schemas.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.ResultsView"
-             x:DataType="vm:ResultsViewModel">
+             x:DataType="vm:ResultsViewModel"
+             Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid Margin="24" RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,0,0,16">
-            <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}" Margin="0,0,12,0"/>
-            <TextBlock Grid.Column="1" Text="{Binding QuizTitle, StringFormat='Results — {0}'}"
-                       FontSize="22" FontWeight="Bold" VerticalAlignment="Center"/>
-        </Grid>
+        <!-- Header Section with Bottom Border -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource CardHeaderBorderBrush}" BorderThickness="0,0,0,2" Padding="0,0,0,16" Margin="0,0,0,24">
+            <Grid ColumnDefinitions="Auto,*">
+                <Button Grid.Column="0" Content="← Back" Command="{Binding BackCommand}" 
+                        Background="{DynamicResource CardSecondaryBrush}"
+                        Foreground="{DynamicResource PrimaryTextBrush}"
+                        CornerRadius="12" Padding="16,8" FontWeight="SemiBold"
+                        VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding QuizTitle, StringFormat='Results — {0}'}"
+                           FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
 
+        <!-- Sessions Scrollable List -->
         <ScrollViewer Grid.Row="1">
             <ItemsControl ItemsSource="{Binding Sessions}">
                 <ItemsControl.ItemsPanel>
@@ -24,26 +33,38 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:SessionResultViewModel">
-                        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-                                CornerRadius="8" Padding="16">
-                            <StackPanel Spacing="10">
+                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                CornerRadius="16" Padding="20">
+                            <StackPanel Spacing="16">
+                                
+                                <!-- Session Header Info -->
                                 <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="(in progress)" IsVisible="{Binding !IsComplete}" Opacity="0.6"/>
+                                    <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                    <Border Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding !IsComplete}">
+                                        <TextBlock Text="In Progress" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    </Border>
                                 </StackPanel>
-                                <ItemsControl ItemsSource="{Binding Players}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:PlayerResultViewModel">
-                                            <Grid ColumnDefinitions="200,80,120" Margin="0,2">
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding Score}" FontWeight="Bold"/>
-                                                <TextBlock Grid.Column="2"
-                                                           Text="{Binding CorrectCount, StringFormat='{}{0} correct'}"
-                                                           Opacity="0.7"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+
+                                <!-- Players List Container -->
+                                <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="16">
+                                    <ItemsControl ItemsSource="{Binding Players}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="8"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:PlayerResultViewModel">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,4">
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Medium" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Score, StringFormat='{} {0} pts'}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource AccentTealBrush}" Margin="24,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding CorrectCount, StringFormat='{}{0} correct'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                                
                             </StackPanel>
                         </Border>
                     </DataTemplate>
