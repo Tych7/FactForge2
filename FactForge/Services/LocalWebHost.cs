@@ -45,6 +45,8 @@ public class LocalWebHost : IAsyncDisposable
 
         // Presentation orchestration
         builder.Services.AddSingleton<PresentationService>();
+
+        builder.Services.AddSingleton<AnswerService>();
         builder.Services.AddSingleton<QrCodeService>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IWindowService, WindowService>();

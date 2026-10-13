@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 using FactForge.Data.Entities;
 using FactForge.Models;
 using FactForge.Services;
+using FactForge.Services.Presentation;
 
 
 namespace FactForge.ViewModels;
@@ -19,7 +20,9 @@ public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Mu
 
 public partial class PresentViewModel : ViewModelBase, IDisposable
 {
-    private readonly PresentationService _presentation;
+    private readonly PresentationService _presentationService;
+    private readonly AnswerService _answerService;
+    private readonly PlayerSessionService _playerSessionService;
     private readonly QrCodeService _qrCodeService;
     private readonly QuizRepository _quizRepository;
     private readonly int _quizId;
@@ -56,19 +59,23 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     public ObservableCollection<PlayerInfoDto> Players { get; } = new();
     public ObservableCollection<LeaderboardBarItem> Leaderboard { get; } = new();
 
-    public PresentViewModel(PresentationService presentation, QrCodeService qrCodeService, QuizRepository quizRepository, int quizId, Action onBack)
+    public PresentViewModel(PresentationService presentationService, AnswerService answerService, PlayerSessionService playerSessionService, QrCodeService qrCodeService, QuizRepository quizRepository, int quizId, Action onBack)
     {
-        _presentation = presentation;
+        _presentationService = presentationService;
+        _answerService = answerService;
+        _playerSessionService = playerSessionService;
         _qrCodeService = qrCodeService;
         _quizRepository = quizRepository;
         _quizId = quizId;
         _onBack = onBack;
 
-        _presentation.PlayerJoined += OnPlayerJoined;
-        _presentation.AnswerTallyChanged += OnAnswerTallyChanged;
-        _presentation.SlideRevealedEvent += OnSlideRevealed;
-        _presentation.LeaderboardUpdatedEvent += OnLeaderboardUpdated;
-        _presentation.SessionEndedEvent += OnSessionEnded;
+        _presentationService.SlideRevealedEvent += OnSlideRevealed;
+        _presentationService.LeaderboardUpdatedEvent += OnLeaderboardUpdated;
+        _presentationService.SessionEndedEvent += OnSessionEnded;
+
+        _answerService.AnswerTallyChanged += OnAnswerTallyChanged;
+
+        _playerSessionService.PlayerJoined += OnPlayerJoined;
 
         _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
         _countdownTimer.Tick += (_, _) => 
@@ -96,7 +103,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         QuizTitle = quiz.Title;
         TotalSlides = quiz.Slides.Count;
 
-        var (session, _) = await _presentation.StartSessionAsync(_quizId);
+        var (session, _) = await _presentationService.StartSessionAsync(_quizId);
 
         _session = session;
         JoinCode = session.JoinCode;
@@ -223,7 +230,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             if (Slide.SecondsRemaining <= 0)
             {
                 if (Phase == PresentPhase.Question)
-                    await _presentation.RevealCurrentSlideAsync();
+                    await _presentationService.RevealCurrentSlideAsync();
             }
         }
     }
@@ -237,7 +244,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         if (Phase == PresentPhase.Question ||
             Phase == PresentPhase.Music)
         {
-            await _presentation.RevealCurrentSlideAsync();
+            await _presentationService.RevealCurrentSlideAsync();
             return;
         }
 
@@ -252,11 +259,11 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
         await AudioPlaybackService.Shared.StopAsync();
 
-        var slide = await _presentation.NextSlideAsync();
+        var slide = await _presentationService.NextSlideAsync();
         if (slide is null)
         {
             Phase = PresentPhase.Finished;
-            await _presentation.EndSessionAsync();
+            await _presentationService.EndSessionAsync();
             return;
         }
 
@@ -328,8 +335,8 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private async Task EndQuizAsync()
     {
-        if (_presentation.HasActiveSession)
-            await _presentation.EndSessionAsync();
+        if (_presentationService.HasActiveSession)
+            await _presentationService.EndSessionAsync();
         
         await AudioPlaybackService.Shared.StopAsync();
         Phase = PresentPhase.Finished;
@@ -346,12 +353,12 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         _countdownTimer.Stop();
-        _presentation.PlayerJoined -= OnPlayerJoined;
-        _presentation.AnswerTallyChanged -= OnAnswerTallyChanged;
-        _presentation.SlideRevealedEvent -= OnSlideRevealed;
-        _presentation.LeaderboardUpdatedEvent -= OnLeaderboardUpdated;
-        _presentation.SessionEndedEvent -= OnSessionEnded;
-        if (_presentation.HasActiveSession)
-            _ = _presentation.EndSessionAsync();
+        _playerSessionService.PlayerJoined -= OnPlayerJoined;
+        _answerService.AnswerTallyChanged -= OnAnswerTallyChanged;
+        _presentationService.SlideRevealedEvent -= OnSlideRevealed;
+        _presentationService.LeaderboardUpdatedEvent -= OnLeaderboardUpdated;
+        _presentationService.SessionEndedEvent -= OnSessionEnded;
+        if (_presentationService.HasActiveSession)
+            _ = _presentationService.EndSessionAsync();
     }
 }

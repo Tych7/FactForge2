@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FactForge.Services;
+using FactForge.Services.Presentation;
 
 namespace FactForge.ViewModels;
 
@@ -7,6 +8,8 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly QuizRepository _quizRepository;
     private readonly PresentationService _presentationService;
+    private readonly AnswerService _answerService;
+    private readonly PlayerSessionService _playerSessionService;
     private readonly QrCodeService _qrCodeService;
     private readonly IDialogService _dialogService;
     private readonly IWindowService _windowService;
@@ -20,10 +23,14 @@ public partial class MainWindowViewModel : ViewModelBase
         QrCodeService qrCodeService, 
         IDialogService dialogService, 
         IWindowService windowService,
-        ISettingsService settingsService)
+        ISettingsService settingsService,
+        AnswerService answerService,
+        PlayerSessionService playerSessionService)
     {
         _quizRepository = quizRepository;
         _presentationService = presentationService;
+        _answerService = answerService;
+        _playerSessionService = playerSessionService;
         _qrCodeService = qrCodeService;
         _dialogService = dialogService;
         _windowService = windowService;
@@ -40,7 +47,7 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentPage = new EditorViewModel(_quizRepository, quizId, NavigateToLibrary, NavigateToPresent, _dialogService, _windowService, NavigateToSettings);
 
     public void NavigateToPresent(int quizId) =>
-        CurrentPage = new PresentViewModel(_presentationService, _qrCodeService, _quizRepository, quizId, NavigateToLibrary);
+        CurrentPage = new PresentViewModel(_presentationService, _answerService, _playerSessionService, _qrCodeService, _quizRepository, quizId, NavigateToLibrary);
 
     public void NavigateToResults(int quizId) =>
         CurrentPage = new ResultsViewModel(_dialogService, _windowService, _quizRepository, quizId, NavigateToLibrary, NavigateToSettings);

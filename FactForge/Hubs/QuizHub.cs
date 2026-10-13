@@ -9,14 +9,14 @@ namespace FactForge.Hubs;
 
 public class QuizHub : Hub
 {
-    private readonly PresentationService _presentation;
+    private readonly AnswerService _answerService;
     private readonly PlayerSessionService _playerSessionService;
 
     public QuizHub(
-        PresentationService presentation,
+        AnswerService answerService,
         PlayerSessionService playerSessionService)
     {
-        _presentation = presentation;
+        _answerService = answerService;
         _playerSessionService = playerSessionService;
     }
 
@@ -36,7 +36,7 @@ public class QuizHub : Hub
     public async Task<SubmitAnswerResultDto> SubmitAnswer(
         string answerText)
     {
-        return await _presentation.SubmitAnswerAsync(
+        return await _answerService.SubmitAnswerAsync(
             Context.ConnectionId,
             answerText ?? string.Empty);
     }
@@ -45,7 +45,7 @@ public class QuizHub : Hub
         string artist,
         string title)
     {
-        return await _presentation.SubmitMusicAnswerAsync(
+        return await _answerService.SubmitMusicAnswerAsync(
             Context.ConnectionId,
             artist ?? string.Empty,
             title ?? string.Empty);
