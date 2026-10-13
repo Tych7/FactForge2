@@ -146,7 +146,15 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     {
         Dispatcher.UIThread.Post(() =>
         {
-            if (Slide is { } slide) slide.StatusText = $"{tally.Answered} / {tally.TotalPlayers} answered";
+            if (Slide is { } slide)
+                slide.StatusText = $"{tally.Answered} / {tally.TotalPlayers} answered";
+
+            if (tally.TotalPlayers > 0 &&
+                tally.Answered >= tally.TotalPlayers &&
+                Phase is PresentPhase.Question or PresentPhase.Music)
+            {
+                _ = _presentationService.RevealCurrentSlideAsync();
+            }
         });
     }
 
@@ -206,7 +214,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private async void TickCountdown()
     {
-        if (Slide is null)
+        if (Slide is null || Phase == PresentPhase.Revealed)
             return;
 
         if (CurrentSlide?.Type == SlideType.MusicQuestion)
@@ -276,6 +284,8 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
                     slide.MusicFilePath)
                 : Array.Empty<float>();
 
+        var tally = _playerSessionService.GetCurrentAnswerTally();
+
         Slide = new SlideDisplay
         {
             Type = slide.Type,
@@ -290,7 +300,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             MusicPositionSeconds = 0,
             ReplayMusicCommand = ReplayMusicCommand,
             MusicWaveformPeaks = waveformPeaks,
-            StatusText = slide.DeadlineUtc is not null ? "0/0 answered" : string.Empty,
+            StatusText = slide.DeadlineUtc is not null ? $"{tally.Answered} / {tally.TotalPlayers} answered" : string.Empty,
             Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?
                 .Select((o, i) => new AnswerOptionDisplay(

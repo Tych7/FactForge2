@@ -103,6 +103,15 @@ public sealed class PlayerSessionService
             .ToList();
     }
 
+    public AnswerTallyDto GetCurrentAnswerTally()
+    {
+        var active = _state.Active;
+
+        return new AnswerTallyDto(
+            active?.AnsweredPlayerIds.Count ?? 0,
+            active?.PlayersById.Count ?? 0);
+    }
+
     public void PlayerDisconnected(string connectionId)
     {
         _state.Active?.ConnectionToPlayerId.Remove(connectionId);
