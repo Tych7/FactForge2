@@ -43,7 +43,7 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentPage = new PresentViewModel(_presentationService, _qrCodeService, _quizRepository, quizId, NavigateToLibrary);
 
     public void NavigateToResults(int quizId) =>
-        CurrentPage = new ResultsViewModel(_quizRepository, quizId, NavigateToLibrary);
+        CurrentPage = new ResultsViewModel(_dialogService, _windowService, _quizRepository, quizId, NavigateToLibrary, NavigateToSettings);
     
     public void NavigateToSettings()
     {

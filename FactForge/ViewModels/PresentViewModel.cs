@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -12,11 +12,10 @@ using FactForge.Data.Entities;
 using FactForge.Models;
 using FactForge.Services;
 
+
 namespace FactForge.ViewModels;
 
 public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Music, Finished }
-
-// AnswerOptionDisplay now lives in SlideDisplay.cs
 
 public partial class PresentViewModel : ViewModelBase, IDisposable
 {
@@ -26,6 +25,9 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     private readonly int _quizId;
     private readonly Action _onBack;
     private readonly DispatcherTimer _countdownTimer;
+
+    // Thread-safe queue for incoming players to prevent UI thread flooding during massive joins
+    private readonly ConcurrentQueue<PlayerInfoDto> _pendingPlayers = new();
 
     private static readonly IBrush[] AnswerColors = AnswerColorPalette.Colors;
     private static readonly IBrush DimmedAnswerColor = new SolidColorBrush(Color.Parse("#333333"));
@@ -40,17 +42,13 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [NotifyCanExecuteChangedFor(nameof(NextCommand))]
     private PresentPhase _phase = PresentPhase.Lobby;
 
-    // Wire data for the current slide (deadline, options, etc.)
     [ObservableProperty] private SlideDto? _currentSlide;
-    // What SlideCanvas renders; built from CurrentSlide in AdvanceAsync
     [ObservableProperty] private SlideDisplay? _slide;
 
     [ObservableProperty] private int _slideNumber;
     [ObservableProperty] private int _totalSlides;
     [ObservableProperty] private RevealDto? _lastReveal;
 
-    // The shared SlideCanvas is shown for text slides and for question/revealed phases.
-    // Lobby, Leaderboard and Finished keep their own presenter-only layouts.
     public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide or PresentPhase.Music;
 
     partial void OnPhaseChanged(PresentPhase value) => OnPropertyChanged(nameof(IsSlideVisible));
@@ -72,8 +70,15 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         _presentation.LeaderboardUpdatedEvent += OnLeaderboardUpdated;
         _presentation.SessionEndedEvent += OnSessionEnded;
 
-        _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(33) };
-        _countdownTimer.Tick += (_, _) => TickCountdown();
+        _countdownTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+        _countdownTimer.Tick += (_, _) => 
+        {
+            TickCountdown();
+            FlushPendingPlayers();
+        };
+        
+        // Start immediately so the lobby can process incoming players right away
+        _countdownTimer.Start();
 
         _ = InitializeAsync();
     }
@@ -91,8 +96,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         QuizTitle = quiz.Title;
         TotalSlides = quiz.Slides.Count;
 
-        var (session, _) =
-            await _presentation.StartSessionAsync(_quizId);
+        var (session, _) = await _presentation.StartSessionAsync(_quizId);
 
         _session = session;
         JoinCode = session.JoinCode;
@@ -110,10 +114,24 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     private void OnPlayerJoined(PlayerInfoDto player)
     {
+        // Safely queue from background threads without locking the network thread
+        _pendingPlayers.Enqueue(player);
+    }
+
+    private void FlushPendingPlayers()
+    {
+        if (_pendingPlayers.IsEmpty) return;
+
         Dispatcher.UIThread.Post(() =>
         {
-            if (Players.Any(p => p.Id == player.Id)) return;
-            Players.Add(player);
+            int addedCount = 0;
+            // Process up to 50 players per tick to prevent UI locking during heavy join floods
+            while (_pendingPlayers.TryDequeue(out var player) && addedCount < 50)
+            {
+                if (Players.Any(p => p.Id == player.Id)) continue;
+                Players.Add(player);
+                addedCount++;
+            }
         });
     }
 
@@ -133,7 +151,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         {
             LastReveal = reveal;
             Phase = PresentPhase.Revealed;
-            _countdownTimer.Stop();
 
             if (Slide is not { } slide) return;
 
@@ -177,7 +194,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         Dispatcher.UIThread.Post(() =>
         {
             Phase = PresentPhase.Finished;
-            _countdownTimer.Stop();
         });
     }
 
@@ -189,10 +205,8 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         if (CurrentSlide?.Type == SlideType.MusicQuestion)
         {
             Slide.MusicPositionSeconds = AudioPlaybackService.Shared.PositionSeconds;
-
             Slide.MusicDurationSeconds = AudioPlaybackService.Shared.DurationSeconds;
 
-            // Make absolutely sure the bar reaches the end.
             if (Slide.MusicDurationSeconds > 0 &&
                 Slide.MusicPositionSeconds >= Slide.MusicDurationSeconds - 0.05)
             {
@@ -208,8 +222,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
             if (Slide.SecondsRemaining <= 0)
             {
-                _countdownTimer.Stop();
-
                 if (Phase == PresentPhase.Question)
                     await _presentation.RevealCurrentSlideAsync();
             }
@@ -294,11 +306,6 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
             if (path is not null)
                 await AudioPlaybackService.Shared.PlayAsync(path);
-        }
-
-        if (slide.DeadlineUtc is not null || slide.Type == SlideType.MusicQuestion)
-        {
-            _countdownTimer.Start();
         }
     }
 

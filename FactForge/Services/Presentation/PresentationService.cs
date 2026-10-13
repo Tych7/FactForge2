@@ -7,6 +7,7 @@ using FactForge.Data;
 using FactForge.Data.Entities;
 using FactForge.Hubs;
 using FactForge.Models;
+using FactForge.Services.Presentation;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,35 +22,40 @@ public class PresentationService : IAsyncDisposable
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
     private readonly QuizRepository _quizRepository;
     private readonly IHubContext<QuizHub> _hub;
-    private readonly SemaphoreSlim _gate = new(1, 1);
+    private readonly PresentationSessionState _state;
+    private readonly PlayerSessionService _playerSessionService;
 
-    private ActiveSession? _active;
-
-    // In-process notifications for the presenter's own UI (which is not a SignalR
-    // client, just another consumer running in the same app), raised alongside the
-    // matching SignalR broadcast to phones. Handlers may run on a background
-    // thread (hub calls) so subscribers must marshal to the UI thread themselves.
     public event Action<PlayerInfoDto>? PlayerJoined;
     public event Action<AnswerTallyDto>? AnswerTallyChanged;
     public event Action<RevealDto>? SlideRevealedEvent;
     public event Action<List<LeaderboardEntryDto>>? LeaderboardUpdatedEvent;
     public event Action? SessionEndedEvent;
 
+    
     public PresentationService(
         IDbContextFactory<AppDbContext> contextFactory,
         QuizRepository quizRepository,
-        IHubContext<QuizHub> hub)
+        IHubContext<QuizHub> hub,
+        PresentationSessionState state,
+        PlayerSessionService playerSessionService)
     {
         _contextFactory = contextFactory;
         _quizRepository = quizRepository;
         _hub = hub;
+
+        _state = state;
+        _playerSessionService = playerSessionService;
+
+        _playerSessionService.PlayerJoined += dto =>
+            PlayerJoined?.Invoke(dto);
     }
 
-    public bool HasActiveSession => _active is not null;
+
+    public bool HasActiveSession => _state.Active is not null;
 
     public async Task<(QuizSession session, List<Slide> slides)> StartSessionAsync(int quizId)
     {
-        await _gate.WaitAsync();
+        await _state.Gate.WaitAsync();
         try
         {
             var quiz = await _quizRepository.GetQuizWithSlidesAsync(quizId)
@@ -65,8 +71,8 @@ public class PresentationService : IAsyncDisposable
             db.QuizSessions.Add(session);
             await db.SaveChangesAsync();
 
-            _active?.DeadlineTimer?.Dispose();
-            _active = new ActiveSession { Session = session, Slides = quiz.Slides };
+            _state.Active?.DeadlineTimer?.Dispose();
+            _state.Active = new ActiveSession { Session = session, Slides = quiz.Slides };
 
             foreach (var slide in quiz.Slides)
             {
@@ -82,62 +88,18 @@ public class PresentationService : IAsyncDisposable
         }
         finally
         {
-            _gate.Release();
+            _state.Gate.Release();
         }
-    }
-
-    public async Task<PlayerInfoDto?> JoinPlayerAsync(string joinCode, string name, string connectionId)
-    {
-        await _gate.WaitAsync();
-        try
-        {
-            var active = _active;
-            if (active is null || !string.Equals(active.Session.JoinCode, joinCode, StringComparison.OrdinalIgnoreCase))
-                return null;
-
-            await using var db = await _contextFactory.CreateDbContextAsync();
-            var player = new Player
-            {
-                SessionId = active.Session.Id,
-                Name = name,
-                JoinedAt = DateTime.UtcNow,
-                ConnectionId = connectionId
-            };
-            db.Players.Add(player);
-            await db.SaveChangesAsync();
-
-            active.ConnectionToPlayerId[connectionId] = player.Id;
-            active.PlayersById[player.Id] = player;
-
-            var dto = new PlayerInfoDto(player.Id, player.Name, player.Score);
-            await _hub.Clients.All.SendAsync("PlayerJoined", dto);
-            PlayerJoined?.Invoke(dto);
-            return dto;
-        }
-        finally
-        {
-            _gate.Release();
-        }
-    }
-
-    public List<PlayerInfoDto> GetJoinedPlayers()
-    {
-        var active = _active;
-        if (active is null) return new List<PlayerInfoDto>();
-        return active.PlayersById.Values
-            .OrderByDescending(p => p.Score)
-            .Select(p => new PlayerInfoDto(p.Id, p.Name, p.Score))
-            .ToList();
     }
 
     public async Task<SlideDto?> NextSlideAsync()
     {
-        await _gate.WaitAsync();
+        await _state.Gate.WaitAsync();
         ActiveSession active;
         int position;
         try
         {
-            active = _active ?? throw new InvalidOperationException("No active session.");
+            active = _state.Active ?? throw new InvalidOperationException("No active session.");
             active.DeadlineTimer?.Dispose();
             active.DeadlineTimer = null;
             active.AnsweredPlayerIds.Clear();
@@ -153,7 +115,7 @@ public class PresentationService : IAsyncDisposable
         }
         finally
         {
-            _gate.Release();
+            _state.Gate.Release();
         }
 
         var slide = active.Slides[position];
@@ -204,14 +166,14 @@ public class PresentationService : IAsyncDisposable
 
     public async Task<SubmitAnswerResultDto> SubmitAnswerAsync(string connectionId, string answerText)
     {
-        await _gate.WaitAsync();
+        await _state.Gate.WaitAsync();
         ActiveSession active;
         Slide slide;
         Player player;
         double elapsedMs;
         try
         {
-            active = _active ?? throw new InvalidOperationException("No active session.");
+            active = _state.Active ?? throw new InvalidOperationException("No active session.");
             if (!active.ConnectionToPlayerId.TryGetValue(connectionId, out var playerId))
                 return new SubmitAnswerResultDto(false, false, 0);
             if (active.Revealed || active.CurrentSlidePosition < 0)
@@ -227,7 +189,7 @@ public class PresentationService : IAsyncDisposable
         }
         finally
         {
-            _gate.Release();
+            _state.Gate.Release();
         }
 
         var isCorrect = IsAnswerCorrect(slide, answerText);
@@ -267,7 +229,7 @@ public class PresentationService : IAsyncDisposable
         string artist,
         string title)
     {
-        await _gate.WaitAsync();
+        await _state.Gate.WaitAsync();
 
         ActiveSession active;
         Slide slide;
@@ -276,7 +238,7 @@ public class PresentationService : IAsyncDisposable
 
         try
         {
-            active = _active ?? throw new InvalidOperationException("No active session.");
+            active = _state.Active ?? throw new InvalidOperationException("No active session.");
 
             if (!active.ConnectionToPlayerId.TryGetValue(connectionId, out var playerId))
                 return new SubmitAnswerResultDto(false, false, 0);
@@ -303,7 +265,7 @@ public class PresentationService : IAsyncDisposable
         }
         finally
         {
-            _gate.Release();
+            _state.Gate.Release();
         }
         
         var artistCorrect = slide.Artist?
@@ -365,12 +327,12 @@ public class PresentationService : IAsyncDisposable
 
     public async Task<RevealDto?> RevealCurrentSlideAsync()
     {
-        await _gate.WaitAsync();
+        await _state.Gate.WaitAsync();
         ActiveSession active;
         Slide slide;
         try
         {
-            active = _active ?? throw new InvalidOperationException("No active session.");
+            active = _state.Active ?? throw new InvalidOperationException("No active session.");
             if (active.Revealed || active.CurrentSlidePosition < 0) return null;
             active.Revealed = true;
             active.DeadlineTimer?.Dispose();
@@ -379,7 +341,7 @@ public class PresentationService : IAsyncDisposable
         }
         finally
         {
-            _gate.Release();
+            _state.Gate.Release();
         }
 
         if (slide.Type == SlideType.Text) return null;
@@ -427,7 +389,7 @@ public class PresentationService : IAsyncDisposable
 
     public async Task BroadcastLeaderboardAsync()
     {
-        var leaderboard = GetJoinedPlayers()
+        var leaderboard = _playerSessionService.GetJoinedPlayers()
             .OrderByDescending(p => p.Score)
             .Select(p => new LeaderboardEntryDto(p.Name, p.Score))
             .ToList();
@@ -437,16 +399,16 @@ public class PresentationService : IAsyncDisposable
 
     public async Task EndSessionAsync()
     {
-        await _gate.WaitAsync();
+        await _state.Gate.WaitAsync();
         ActiveSession active;
         try
         {
-            active = _active ?? throw new InvalidOperationException("No active session.");
+            active = _state.Active ?? throw new InvalidOperationException("No active session.");
             active.DeadlineTimer?.Dispose();
         }
         finally
         {
-            _gate.Release();
+            _state.Gate.Release();
         }
 
         await using (var db = await _contextFactory.CreateDbContextAsync())
@@ -459,15 +421,10 @@ public class PresentationService : IAsyncDisposable
             }
         }
 
-        var leaderboard = GetJoinedPlayers().Select(p => new LeaderboardEntryDto(p.Name, p.Score)).ToList();
+        var leaderboard = _playerSessionService.GetJoinedPlayers().Select(p => new LeaderboardEntryDto(p.Name, p.Score)).ToList();
         await _hub.Clients.All.SendAsync("SessionEnded", leaderboard);
         SessionEndedEvent?.Invoke();
-        _active = null;
-    }
-
-    public void PlayerDisconnected(string connectionId)
-    {
-        _active?.ConnectionToPlayerId.Remove(connectionId);
+        _state.Active = null;
     }
     
     private static bool IsAnswerCorrect(Slide slide, string answerText) => slide.Type switch
@@ -544,21 +501,10 @@ public class PresentationService : IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        _active?.DeadlineTimer?.Dispose();
-        _gate.Dispose();
+        _state.Active?.DeadlineTimer?.Dispose();
+        _state.Gate.Dispose();
         return ValueTask.CompletedTask;
     }
 
-    private sealed class ActiveSession
-    {
-        public required QuizSession Session { get; init; }
-        public required List<Slide> Slides { get; init; }
-        public int CurrentSlidePosition { get; set; } = -1;
-        public bool Revealed { get; set; }
-        public DateTime? CurrentSlideDeadlineUtc { get; set; }
-        public Timer? DeadlineTimer { get; set; }
-        public Dictionary<string, int> ConnectionToPlayerId { get; } = new();
-        public Dictionary<int, Player> PlayersById { get; } = new();
-        public HashSet<int> AnsweredPlayerIds { get; } = new();
-    }
+    
 }
