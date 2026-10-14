@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FactForge.Models;
 using FactForge.Services;
@@ -50,12 +51,27 @@ public class QuizHub : Hub
             artist ?? string.Empty,
             title ?? string.Empty);
     }
-
-    public override Task OnDisconnectedAsync(Exception? exception)
+    
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        _playerSessionService.PlayerDisconnected(
+        await _playerSessionService.PlayerDisconnectedAsync(
             Context.ConnectionId);
 
-        return base.OnDisconnectedAsync(exception);
+        await base.OnDisconnectedAsync(exception);
     }
+
+    public Task<List<PlayerInfoDto>> GetDisconnectedPlayers(string joinCode)
+    {
+        return _playerSessionService.GetDisconnectedPlayersAsync(
+            joinCode.Trim());
+    }
+
+    public Task<RejoinSessionDto?> RejoinSession(string joinCode, int playerId)
+    {
+        return _playerSessionService.RejoinPlayerAsync(
+            joinCode.Trim(),
+            playerId,
+            Context.ConnectionId);
+    }
+
 }

@@ -28,6 +28,9 @@ export const elements = {
   playerNameInput: document.getElementById("playerName"),
   joinBtn: document.getElementById("joinBtn"),
   joinError: document.getElementById("joinError"),
+  rejoinOptions: document.getElementById("rejoinOptions"),
+  rejoinPlayers: document.getElementById("rejoinPlayers"),
+  joinAsNewBtn: document.getElementById("joinAsNewBtn"),
 
   questionText: document.getElementById("questionText"),
   choices: document.getElementById("choices"),

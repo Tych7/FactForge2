@@ -1,0 +1,77 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FactForge.ViewModels.Presentation"
+        x:Class="FactForge.Views.Dialogs.RejoinQrDialog"
+        x:DataType="vm:PresentViewModel"
+        SystemDecorations="None"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        WindowStartupLocation="CenterOwner"
+        Width="460"
+        Height="620">
+
+    <Grid Background="{DynamicResource DialogOverlayBrush}"
+          PointerPressed="OnBackgroundPressed">
+
+        <Border Background="{DynamicResource DialogBackgroundBrush}"
+                BorderBrush="#1E88E5"
+                BorderThickness="2"
+                CornerRadius="12"
+                Padding="28"
+                Width="420"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                BoxShadow="0 8 24 0 #60000000">
+
+            <StackPanel Spacing="16"
+                        HorizontalAlignment="Center">
+
+                <TextBlock Text="Rejoin the quiz"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource DialogTitleBrush}"
+                           HorizontalAlignment="Center"/>
+
+                <TextBlock Text="Scan this QR code to join the quiz again."
+                           FontSize="16"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           Foreground="{DynamicResource DialogTextBrush}"
+                           MaxWidth="320"/>
+
+                <Border Background="White"
+                        CornerRadius="8"
+                        Padding="10"
+                        HorizontalAlignment="Center">
+                    <Image Source="{Binding QrImage}"
+                           Width="260"
+                           Height="260"
+                           Stretch="Uniform"/>
+                </Border>
+
+                <TextBlock Text="{Binding JoinUrl}"
+                           FontSize="13"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           Foreground="{DynamicResource DialogTextBrush}"
+                           MaxWidth="320"/>
+
+                <TextBlock Text="{Binding JoinCode}"
+                           FontSize="40"
+                           FontWeight="Bold"
+                           LetterSpacing="3"
+                           Foreground="{DynamicResource DialogTitleBrush}"
+                           HorizontalAlignment="Center"/>
+
+                <Button Content="Close"
+                        FontSize="15"
+                        Padding="24,10"
+                        HorizontalAlignment="Center"
+                        Classes="accent"
+                        Click="OnClose"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

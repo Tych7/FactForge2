@@ -9,6 +9,8 @@ using FactForge.Services.Presentation;
 
 namespace FactForge.ViewModels.Presentation;
 
+//Players
+
 public partial class PresentViewModel
 {
     // Thread-safe queue for incoming players to prevent UI thread flooding during massive joins
@@ -18,6 +20,26 @@ public partial class PresentViewModel
     {
         // Safely queue from background threads without locking the network thread
         _pendingPlayers.Enqueue(player);
+    }
+
+    private void OnPlayerDisconnected(PlayerInfoDto player)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            var index = -1;
+
+            for (var i = 0; i < Players.Count; i++)
+            {
+                if (Players[i].Id == player.Id)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index >= 0)
+                Players[index] = player;
+        });
     }
 
     private void FlushPendingPlayers()
@@ -30,8 +52,22 @@ public partial class PresentViewModel
             // Process up to 50 players per tick to prevent UI locking during heavy join floods
             while (_pendingPlayers.TryDequeue(out var player) && addedCount < 50)
             {
-                if (Players.Any(p => p.Id == player.Id)) continue;
-                Players.Add(player);
+                var index = -1;
+
+                for (var i = 0; i < Players.Count; i++)
+                {
+                    if (Players[i].Id == player.Id)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index >= 0)
+                    Players[index] = player;
+                else
+                    Players.Add(player);
+
                 addedCount++;
             }
         });

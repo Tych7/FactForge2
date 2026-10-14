@@ -96,6 +96,7 @@ public class PresentationService : IAsyncDisposable
             active = _state.Active ?? throw new InvalidOperationException("No active session.");
             active.DeadlineTimer?.Dispose();
             active.DeadlineTimer = null;
+            active.CurrentSlideDeadlineUtc = null;
             active.AnsweredPlayerIds.Clear();
             active.Revealed = false;
             active.CurrentSlidePosition++;

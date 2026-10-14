@@ -221,3 +221,26 @@ button:disabled { opacity: 0.5; cursor: default; }
 .player-header.hidden {
   display: none;
 }
+
+.rejoin-options {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e9f0;
+}
+
+.rejoin-player-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  text-align: left;
+  background: #eceeff;
+  color: var(--text);
+}
+
+.rejoin-player-score {
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
