@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FactForge.Data;
 using FactForge.Hubs;
+using FactForge.Services.Presentation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +36,17 @@ public class LocalWebHost : IAsyncDisposable
         builder.Services.AddDbContextFactory<AppDbContext>(options =>
             options.UseSqlite(DbPath.GetConnectionString()));
         builder.Services.AddSingleton<QuizRepository>();
+
+        // Shared state for the active presentation session
+        builder.Services.AddSingleton<PresentationSessionState>();
+
+        // Player management
+        builder.Services.AddSingleton<PlayerSessionService>();
+
+        // Presentation orchestration
         builder.Services.AddSingleton<PresentationService>();
+
+        builder.Services.AddSingleton<AnswerService>();
         builder.Services.AddSingleton<QrCodeService>();
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IWindowService, WindowService>();

@@ -1,4 +1,4 @@
-namespace FactForge.Models;
+namespace FactForge.Data;
 
 public enum SlideType
 {

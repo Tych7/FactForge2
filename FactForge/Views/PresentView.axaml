@@ -1,6 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:FactForge.ViewModels"
+             xmlns:vm="using:FactForge.ViewModels.Presentation"
              xmlns:views="using:FactForge.Views"
              xmlns:models="using:FactForge.Models"
              xmlns:slideDisplay="using:FactForge.Views.SlideDisplays"

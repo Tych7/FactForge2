@@ -9,6 +9,11 @@
 <body>
   <main id="app">
 
+    <header id="player-header" class="player-header hidden">
+      <div id="player-avatar" class="player-avatar"></div>
+      <span id="player-display-name"></span>
+    </header>
+
     <section id="screen-join" class="screen">
       <img src="assets/bigLogo.svg" alt="FactForge" class="big-logo" />
       <label for="joinCode">Game code</label>
@@ -89,7 +94,11 @@
 
   </main>
 
-  <script src="signalr.min.js"></script>
-  <script src="app.js"></script>
+  <script src="src/signalr.min.js"></script>
+  <script>
+    console.log("SignalR loaded:", typeof signalR);
+  </script>
+  <script type="module" src="src/app.js"></script>
+
 </body>
 </html>

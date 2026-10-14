@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FactForge.Data.Entities;
 using FactForge.Services;
+using FactForge.Views;
 
 namespace FactForge.ViewModels;
 
@@ -46,20 +47,33 @@ public class SessionResultViewModel
 
 public partial class ResultsViewModel : ViewModelBase
 {
+    private readonly IDialogService _dialogService;
+    private readonly IWindowService _windowService;
+
     private readonly QuizRepository _repository;
     private readonly int _quizId;
     private readonly Action _onBack;
+    private readonly Action _onSettings;
 
     [ObservableProperty] private string _quizTitle = string.Empty;
     [ObservableProperty] private bool _isLoading;
 
     public ObservableCollection<SessionResultViewModel> Sessions { get; } = new();
 
-    public ResultsViewModel(QuizRepository repository, int quizId, Action onBack)
+    public ResultsViewModel(
+        IDialogService dialogService, 
+        IWindowService windowService, 
+        QuizRepository repository, 
+        int quizId, 
+        Action onBack,
+        Action onSettings)
     {
+        _dialogService = dialogService;
+        _windowService = windowService;
         _repository = repository;
         _quizId = quizId;
         _onBack = onBack;
+        _onSettings = onSettings;
         _ = LoadAsync();
     }
 
@@ -74,6 +88,21 @@ public partial class ResultsViewModel : ViewModelBase
         foreach (var session in sessions)
             Sessions.Add(new SessionResultViewModel(session));
         IsLoading = false;
+    }
+
+    [RelayCommand]
+    private async Task OpenMenuAsync()
+    {
+        var result = await _dialogService.ShowMenuAsync();
+        switch (result)
+        {
+            case AppMenuResult.Options:
+                _onSettings();
+                break;
+            case AppMenuResult.Exit:
+                _windowService.Exit();
+                break;
+        }
     }
 
     [RelayCommand]

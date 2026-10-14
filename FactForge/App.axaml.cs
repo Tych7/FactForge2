@@ -7,6 +7,7 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using FactForge.Services;
+using FactForge.Services.Presentation;
 using FactForge.ViewModels;
 using FactForge.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +45,9 @@ public partial class App : Application
                 services.GetRequiredService<QrCodeService>(),
                 services.GetRequiredService<IDialogService>(),
                 services.GetRequiredService<IWindowService>(),
-                services.GetRequiredService<ISettingsService>());
+                services.GetRequiredService<ISettingsService>(),
+                services.GetRequiredService<AnswerService>(),
+                services.GetRequiredService<PlayerSessionService>());
 
             var mainWindow = new MainWindow
             {

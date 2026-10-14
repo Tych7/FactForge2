@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FactForge.Data;
 using FactForge.Models;
 using FactForge.Services;
 
