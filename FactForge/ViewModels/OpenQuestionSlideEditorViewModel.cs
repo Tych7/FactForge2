@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using FactForge.Data;
 using FactForge.Data.Entities;
 using FactForge.Models;
 

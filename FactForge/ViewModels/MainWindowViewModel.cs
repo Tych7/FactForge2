@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FactForge.Services;
 using FactForge.Services.Presentation;
+using FactForge.ViewModels.Presentation;
 
 namespace FactForge.ViewModels;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,13 +9,14 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FactForge.Data;
 using FactForge.Data.Entities;
 using FactForge.Models;
 using FactForge.Services;
 using FactForge.Services.Presentation;
 
 
-namespace FactForge.ViewModels;
+namespace FactForge.ViewModels.Presentation;
 
 public enum PresentPhase { Lobby, Question, Revealed, Leaderboard, TextSlide, Music, Finished }
 
@@ -28,14 +30,8 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     private readonly int _quizId;
     private readonly Action _onBack;
     private readonly DispatcherTimer _countdownTimer;
-
-    // Thread-safe queue for incoming players to prevent UI thread flooding during massive joins
-    private readonly ConcurrentQueue<PlayerInfoDto> _pendingPlayers = new();
-
     private static readonly IBrush[] AnswerColors = AnswerColorPalette.Colors;
     private static readonly IBrush DimmedAnswerColor = new SolidColorBrush(Color.Parse("#333333"));
-
-    private QuizSession? _session;
 
     [ObservableProperty] private string _quizTitle = string.Empty;
     [ObservableProperty] private string _joinUrl = string.Empty;
@@ -87,160 +83,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         // Start immediately so the lobby can process incoming players right away
         _countdownTimer.Start();
 
-        _ = InitializeAsync();
-    }
-
-    private async Task InitializeAsync()
-    {
-        var quiz = await _quizRepository.GetQuizWithSlidesAsync(_quizId);
-
-        if (quiz is null)
-        {
-            _onBack();
-            return;
-        }
-
-        QuizTitle = quiz.Title;
-        TotalSlides = quiz.Slides.Count;
-
-        var (session, _) = await _presentationService.StartSessionAsync(_quizId);
-
-        _session = session;
-        JoinCode = session.JoinCode;
-
-        var ip = TryGetLocalIp();
-        JoinUrl = $"http://{ip}:{LocalWebHost.Port}/?code={session.JoinCode}";
-        QrImage = _qrCodeService.GenerateQrCode(JoinUrl);
-    }
-
-    private string TryGetLocalIp()
-    {
-        try { return _qrCodeService.GetLocalIpAddress(); }
-        catch { return "localhost"; }
-    }
-
-    private void OnPlayerJoined(PlayerInfoDto player)
-    {
-        // Safely queue from background threads without locking the network thread
-        _pendingPlayers.Enqueue(player);
-    }
-
-    private void FlushPendingPlayers()
-    {
-        if (_pendingPlayers.IsEmpty) return;
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            int addedCount = 0;
-            // Process up to 50 players per tick to prevent UI locking during heavy join floods
-            while (_pendingPlayers.TryDequeue(out var player) && addedCount < 50)
-            {
-                if (Players.Any(p => p.Id == player.Id)) continue;
-                Players.Add(player);
-                addedCount++;
-            }
-        });
-    }
-
-    private void OnAnswerTallyChanged(AnswerTallyDto tally)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            if (Slide is { } slide)
-                slide.StatusText = $"{tally.Answered} / {tally.TotalPlayers} answered";
-
-            if (tally.TotalPlayers > 0 &&
-                tally.Answered >= tally.TotalPlayers &&
-                Phase is PresentPhase.Question or PresentPhase.Music)
-            {
-                _ = _presentationService.RevealCurrentSlideAsync();
-            }
-        });
-    }
-
-    private async void OnSlideRevealed(RevealDto reveal)
-    {
-        await AudioPlaybackService.Shared.StopAsync();
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            LastReveal = reveal;
-            Phase = PresentPhase.Revealed;
-
-            if (Slide is not { } slide) return;
-
-            var correct = reveal.CorrectAnswer;
-            slide.CorrectAnswer = correct;
-
-            if (CurrentSlide?.Type == SlideType.MusicQuestion)
-            {
-                slide.IsMusicRevealed = true;
-            }
-
-            if (CurrentSlide?.Options is { } options && correct is not null)
-            {
-                slide.Options = options
-                    .Select((o, i) =>
-                    {
-                        var isCorrect = string.Equals(o.Trim(), correct.Trim(), StringComparison.OrdinalIgnoreCase);
-                        return new AnswerOptionDisplay(
-                            o,
-                            isCorrect ? AnswerColors[i % AnswerColors.Length] : DimmedAnswerColor,
-                            isCorrect);
-                    })
-                    .ToList();
-            }
-        });
-    }
-
-    private void OnLeaderboardUpdated(System.Collections.Generic.List<LeaderboardEntryDto> leaderboard)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Leaderboard.Clear();
-            var maxScore = leaderboard.Count == 0 ? 0 : leaderboard.Max(e => e.Score);
-            for (var i = 0; i < leaderboard.Count; i++)
-                Leaderboard.Add(new LeaderboardBarItem(leaderboard[i], maxScore, i));
-        });
-    }
-
-    private void OnSessionEnded()
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Phase = PresentPhase.Finished;
-        });
-    }
-
-    private async void TickCountdown()
-    {
-        if (Slide is null || Phase == PresentPhase.Revealed)
-            return;
-
-        if (CurrentSlide?.Type == SlideType.MusicQuestion)
-        {
-            Slide.MusicPositionSeconds = AudioPlaybackService.Shared.PositionSeconds;
-            Slide.MusicDurationSeconds = AudioPlaybackService.Shared.DurationSeconds;
-
-            if (Slide.MusicDurationSeconds > 0 &&
-                Slide.MusicPositionSeconds >= Slide.MusicDurationSeconds - 0.05)
-            {
-                Slide.MusicPositionSeconds = Slide.MusicDurationSeconds;
-            }
-        }
-
-        if (CurrentSlide?.DeadlineUtc is { } deadline)
-        {
-            Slide.SecondsRemaining = Math.Max(
-                0,
-                (deadline - DateTime.UtcNow).TotalSeconds);
-
-            if (Slide.SecondsRemaining <= 0)
-            {
-                if (Phase == PresentPhase.Question)
-                    await _presentationService.RevealCurrentSlideAsync();
-            }
-        }
+        _ = InitializeSessionAsync();
     }
 
     [RelayCommand]
@@ -268,25 +111,35 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         await AudioPlaybackService.Shared.StopAsync();
 
         var slide = await _presentationService.NextSlideAsync();
+
         if (slide is null)
         {
-            Phase = PresentPhase.Finished;
-            await _presentationService.EndSessionAsync();
+            await FinishQuizAsync();
             return;
         }
 
         CurrentSlide = slide;
         SlideNumber++;
 
-        var waveformPeaks =
-            slide.Type == SlideType.MusicQuestion
-                ? await AudioWaveformService.Shared.GetPeaksAsync(
-                    slide.MusicFilePath)
-                : Array.Empty<float>();
+        Slide = await CreateSlideDisplayAsync(slide);
+        Phase = GetPhase(slide.Type);
+
+        if (slide.Type == SlideType.MusicQuestion) await StartMusicAsync(slide);
+    }
+
+    private async Task FinishQuizAsync()
+    {
+        Phase = PresentPhase.Finished;
+        await _presentationService.EndSessionAsync();
+    }
+
+    private async Task<SlideDisplay> CreateSlideDisplayAsync(SlideDto slide)
+    {
+        var waveformPeaks = await GetWaveformPeaksAsync(slide);
 
         var tally = _playerSessionService.GetCurrentAnswerTally();
 
-        Slide = new SlideDisplay
+        return new SlideDisplay
         {
             Type = slide.Type,
             Header = slide.Header,
@@ -300,30 +153,41 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
             MusicPositionSeconds = 0,
             ReplayMusicCommand = ReplayMusicCommand,
             MusicWaveformPeaks = waveformPeaks,
-            StatusText = slide.DeadlineUtc is not null ? $"{tally.Answered} / {tally.TotalPlayers} answered" : string.Empty,
+            StatusText = slide.DeadlineUtc is not null
+                ? $"{tally.Answered} / {tally.TotalPlayers} answered"
+                : string.Empty,
             Image = SlideImageService.Shared.Load(slide.ImagePath),
             Options = slide.Options?
-                .Select((o, i) => new AnswerOptionDisplay(
-                    o,
-                    AnswerColors[i % AnswerColors.Length]))
+                .Select((option, index) => new AnswerOptionDisplay(
+                    option,
+                    AnswerColors[index % AnswerColors.Length]))
                 .ToList()
         };
+    }
 
-        Phase = slide.Type switch
-        {
-            SlideType.Text => PresentPhase.TextSlide,
-            SlideType.Leaderboard => PresentPhase.Leaderboard,
-            SlideType.MusicQuestion => PresentPhase.Music,
-            _ => PresentPhase.Question
-        };
+    private static async Task<IReadOnlyList<float>> GetWaveformPeaksAsync(SlideDto slide)
+    {
+        if (slide.Type != SlideType.MusicQuestion)
+            return Array.Empty<float>();
 
-        if (slide.Type == SlideType.MusicQuestion)
-        {
-            var path = SlideAudioService.Shared.GetPath(slide.MusicFilePath);
+        return await AudioWaveformService.Shared.GetPeaksAsync(
+            slide.MusicFilePath);
+    }
 
-            if (path is not null)
-                await AudioPlaybackService.Shared.PlayAsync(path);
-        }
+    private static PresentPhase GetPhase(SlideType type) => type switch
+    {
+        SlideType.Text => PresentPhase.TextSlide,
+        SlideType.Leaderboard => PresentPhase.Leaderboard,
+        SlideType.MusicQuestion => PresentPhase.Music,
+        _ => PresentPhase.Question
+    };
+
+    private static async Task StartMusicAsync(SlideDto slide)
+    {
+        var path = SlideAudioService.Shared.GetPath(slide.MusicFilePath);
+
+        if (path is not null)
+            await AudioPlaybackService.Shared.PlayAsync(path);
     }
 
     [RelayCommand]

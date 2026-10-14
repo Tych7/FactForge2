@@ -89,7 +89,11 @@
 
   </main>
 
-  <script src="signalr.min.js"></script>
-  <script src="app.js"></script>
+  <script src="src/signalr.min.js"></script>
+  <script>
+    console.log("SignalR loaded:", typeof signalR);
+  </script>
+  <script type="module" src="src/app.js"></script>
+
 </body>
 </html>
