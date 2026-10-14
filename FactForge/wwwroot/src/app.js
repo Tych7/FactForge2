@@ -5,6 +5,7 @@ import {
   initializeQuiz,
   quizHandlers,
 } from "./quiz.js";
+import { showPlayerAvatar } from "./playerAvatar.js";
 
 const {
   joinCodeInput,
@@ -65,6 +66,7 @@ async function joinGame() {
       return;
     }
 
+    showPlayerAvatar(name);
     showScreen("waiting");
   } catch (error) {
     console.error(error);
