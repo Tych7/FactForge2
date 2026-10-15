@@ -83,6 +83,34 @@ namespace FactForge.Data.Migrations
                     b.ToTable("PlayerAnswers");
                 });
 
+            modelBuilder.Entity("FactForge.Data.Entities.PlayerScoreSnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuestionNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SlideId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SlideId");
+
+                    b.HasIndex("PlayerId", "SlideId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerScoreSnapshots");
+                });
+
             modelBuilder.Entity("FactForge.Data.Entities.Quiz", b =>
                 {
                     b.Property<int>("Id")
@@ -228,6 +256,25 @@ namespace FactForge.Data.Migrations
                 {
                     b.HasOne("FactForge.Data.Entities.Player", "Player")
                         .WithMany("Answers")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FactForge.Data.Entities.Slide", "Slide")
+                        .WithMany()
+                        .HasForeignKey("SlideId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Slide");
+                });
+
+            modelBuilder.Entity("FactForge.Data.Entities.PlayerScoreSnapshot", b =>
+                {
+                    b.HasOne("FactForge.Data.Entities.Player", "Player")
+                        .WithMany()
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

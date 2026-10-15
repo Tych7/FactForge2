@@ -219,6 +219,7 @@ public class QuizRepository
         return await db.QuizSessions
             .Where(s => s.QuizId == quizId)
             .Include(s => s.Players).ThenInclude(p => p.Answers)
+            .Include(s => s.Players).ThenInclude(p => p.ScoreSnapshots)
             .OrderByDescending(s => s.StartedAt)
             .ToListAsync();
     }

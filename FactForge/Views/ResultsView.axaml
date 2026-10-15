@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.com/expression/blend/2008"
              xmlns:svg="using:Avalonia.Svg.Skia"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="using:FactForge.Controls"
              mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
              x:Class="FactForge.Views.ResultsView"
              x:DataType="vm:ResultsViewModel"
@@ -73,6 +74,22 @@
                                         <TextBlock Text="In Progress" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     </Border>
                                 </StackPanel>
+
+                                <!-- Score History Graph -->
+                                <Border Background="{DynamicResource CardSecondaryBrush}"
+                                        CornerRadius="12"
+                                        Padding="16"
+                                        IsVisible="{Binding ScoreHistory.Count}">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="Score Progress"
+                                                FontSize="18"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource PrimaryTextBrush}" />
+                                        <controls:ScoreHistoryChart
+                                            Series="{Binding ScoreHistory}"
+                                            Height="280" />
+                                    </StackPanel>
+                                </Border>
 
                                 <!-- Players List Container -->
                                 <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="16">

@@ -33,6 +33,7 @@ public class SessionResultViewModel
     public DateTime? EndedAt { get; }
     public bool IsComplete => EndedAt is not null;
     public List<PlayerResultViewModel> Players { get; }
+    public List<ScoreChartSeries> ScoreHistory { get; }
 
     public SessionResultViewModel(QuizSession session)
     {
@@ -42,8 +43,49 @@ public class SessionResultViewModel
             .OrderByDescending(p => p.Score)
             .Select(p => new PlayerResultViewModel(p))
             .ToList();
-    }
+
+        var snapshots = session.Players
+            .SelectMany(p => p.ScoreSnapshots)
+            .ToList();
+
+        var questionNumbers = snapshots
+            .Select(s => s.QuestionNumber)
+            .Distinct()
+            .OrderBy(n => n)
+            .ToList();
+
+        ScoreHistory = session.Players
+            .Select(player =>
+            {
+                var playerSnapshots = player.ScoreSnapshots
+                    .ToDictionary(s => s.QuestionNumber, s => s.Score);
+
+                var currentScore = 0;
+                var scores = questionNumbers.Select(question =>
+                {
+                    if (playerSnapshots.TryGetValue(question, out var score))
+                        currentScore = score;
+
+                    return currentScore;
+                }).ToList();
+
+                return new ScoreChartSeries
+                {
+                    Name = player.Name,
+                    Scores = scores
+                };
+            })
+            .ToList();
+            }
 }
+
+
+public class ScoreChartSeries
+{
+    public string Name { get; init; } = string.Empty;
+    public IReadOnlyList<int> Scores { get; init; } = Array.Empty<int>();
+}
+
 
 public partial class ResultsViewModel : ViewModelBase
 {
