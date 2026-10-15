@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using FactForge.ViewModels;
+using FactForge.Helpers;
 
 namespace FactForge.Controls;
 
@@ -22,16 +23,6 @@ public class ScoreHistoryChart : Control
         get => GetValue(SeriesProperty);
         set => SetValue(SeriesProperty, value);
     }
-
-    private static readonly Color[] Colors =
-    {
-        Color.Parse("#20B8AA"),
-        Color.Parse("#6488F5"),
-        Color.Parse("#F2A65A"),
-        Color.Parse("#D977B5"),
-        Color.Parse("#8BC56B"),
-        Color.Parse("#A78BFA")
-    };
 
     static ScoreHistoryChart()
     {
@@ -118,8 +109,7 @@ public class ScoreHistoryChart : Control
         for (var s = 0; s < series.Count; s++)
         {
             var item = series[s];
-            var color = Colors[s % Colors.Length];
-            var brush = new SolidColorBrush(color);
+            var brush = PlayerColorHelper.GetColorForName(item.Name);
             var pen = new Pen(brush, 2.5);
 
             var geometry = new StreamGeometry();
