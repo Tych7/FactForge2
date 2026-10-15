@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<QuizSession> QuizSessions => Set<QuizSession>();
     public DbSet<Player> Players => Set<Player>();
     public DbSet<PlayerAnswer> PlayerAnswers => Set<PlayerAnswer>();
+    public DbSet<PlayerScoreSnapshot> PlayerScoreSnapshots => Set<PlayerScoreSnapshot>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -59,5 +60,21 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<QuizSession>()
             .HasIndex(s => s.JoinCode);
+
+        modelBuilder.Entity<PlayerScoreSnapshot>()
+            .HasOne(s => s.Player)
+            .WithMany()
+            .HasForeignKey(s => s.PlayerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PlayerScoreSnapshot>()
+            .HasOne(s => s.Player)
+            .WithMany(p => p.ScoreSnapshots)
+            .HasForeignKey(s => s.PlayerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PlayerScoreSnapshot>()
+            .HasIndex(s => new { s.PlayerId, s.SlideId })
+            .IsUnique();
     }
 }

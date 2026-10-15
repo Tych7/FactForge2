@@ -1,50 +1,69 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
-             xmlns:d="http://schemas.com/expression/blend/2008"
-             xmlns:svg="using:Avalonia.Svg.Skia"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+             xmlns:controls="using:FactForge.Controls"
+             mc:Ignorable="d"
+             d:DesignWidth="1280"
+             d:DesignHeight="800"
              x:Class="FactForge.Views.ResultsView"
              x:DataType="vm:ResultsViewModel"
              Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid Margin="24" RowDefinitions="Auto,*">
 
-        <!-- Header Bar -->
+        <!-- Header -->
         <Grid Grid.Row="0" Margin="0,0,0,24">
-            <Border BorderBrush="{DynamicResource HeaderBorderBrush}" BorderThickness="0,0,0,5" Padding="0,0,0,20">
+            <Border BorderBrush="{DynamicResource HeaderBorderBrush}"
+                    BorderThickness="0,0,0,5"
+                    Padding="0,0,0,20">
                 <Grid>
-                    <!-- Title in the absolute center across full header width -->
-                    <TextBlock Text="{Binding QuizTitle, StringFormat='Results — {0}'}" 
-                               FontSize="32" 
-                               FontWeight="Bold" 
-                               Foreground="{DynamicResource PrimaryTextBrush}" 
-                               HorizontalAlignment="Center" 
+                    <TextBlock Text="{Binding QuizTitle, StringFormat='Results — {0}'}"
+                               FontSize="32"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
 
-                    <!-- Left and Right Controls -->
                     <Grid ColumnDefinitions="Auto,*,Auto">
-                        <!-- Back Button -->
-                        <Button Grid.Column="0" Command="{Binding BackCommand}" 
-                                Background="{DynamicResource CardBackgroundBrush}" 
-                                Foreground="{DynamicResource AccentTealBrush}" 
-                                CornerRadius="20" Padding="6,6,16,6" FontWeight="SemiBold">
+
+                        <!-- Back -->
+                        <Button Grid.Column="0"
+                                Command="{Binding BackCommand}"
+                                Background="{DynamicResource CardBackgroundBrush}"
+                                Foreground="{DynamicResource AccentTealBrush}"
+                                CornerRadius="20"
+                                Padding="6,6,16,6"
+                                FontWeight="SemiBold">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <!-- Teal Circular Icon Container -->
-                                <Border Background="{DynamicResource AccentTealBrush}" CornerRadius="15" Width="30" Height="30">
-                                    <PathIcon Width="14" Height="14" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                <Border Background="{DynamicResource AccentTealBrush}"
+                                        CornerRadius="15"
+                                        Width="30"
+                                        Height="30">
+                                    <PathIcon Width="14"
+                                              Height="14"
+                                              Foreground="White"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
                                               Data="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                                 </Border>
 
-                                <TextBlock Text="Back" VerticalAlignment="Center" FontSize="15"/>
+                                <TextBlock Text="Back"
+                                           VerticalAlignment="Center"
+                                           FontSize="15"/>
                             </StackPanel>
                         </Button>
 
-                        <!-- Menu Button -->
-                        <Button Grid.Column="2" Background="Transparent" Padding="8" 
-                                Command="{Binding OpenMenuCommand}" ToolTip.Tip="Menu">
-                            <PathIcon Width="40" Height="40" Foreground="{DynamicResource PrimaryTextBrush}" 
+                        <!-- Menu -->
+                        <Button Grid.Column="2"
+                                Background="Transparent"
+                                Padding="8"
+                                Command="{Binding OpenMenuCommand}"
+                                ToolTip.Tip="Menu">
+                            <PathIcon Width="40"
+                                      Height="40"
+                                      Foreground="{DynamicResource PrimaryTextBrush}"
                                       Data="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/>
                         </Button>
                     </Grid>
@@ -52,7 +71,7 @@
             </Border>
         </Grid>
 
-        <!-- Sessions Scrollable List -->
+        <!-- Sessions -->
         <ScrollViewer Grid.Row="1">
             <ItemsControl ItemsSource="{Binding Sessions}">
                 <ItemsControl.ItemsPanel>
@@ -60,42 +79,155 @@
                         <StackPanel Spacing="16"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:SessionResultViewModel">
-                        <Border Background="{DynamicResource CardBackgroundBrush}"
-                                CornerRadius="16" Padding="20">
-                            <StackPanel Spacing="16">
-                                
-                                <!-- Session Header Info -->
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                                    <Border Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding !IsComplete}">
-                                        <TextBlock Text="In Progress" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    </Border>
-                                </StackPanel>
 
-                                <!-- Players List Container -->
-                                <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="16">
-                                    <ItemsControl ItemsSource="{Binding Players}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Spacing="8"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:PlayerResultViewModel">
-                                                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,4">
-                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Medium" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding Score, StringFormat='{} {0} pts'}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource AccentTealBrush}" Margin="24,0" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding CorrectCount, StringFormat='{}{0} correct'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="12">
+
+                            <!-- Session Card -->
+                            <Border Grid.Column="0"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="16"
+                                    Padding="20">
+
+                                <StackPanel Spacing="16">
+
+                                    <!-- Session Header -->
+                                    <StackPanel Orientation="Horizontal"
+                                                Spacing="12">
+                                        <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}"
+                                                   FontWeight="Bold"
+                                                   FontSize="16"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   VerticalAlignment="Center"/>
+
+                                        <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                CornerRadius="10"
+                                                Padding="8,2"
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding !IsComplete}">
+                                            <TextBlock Text="In Progress"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- Collapsible Score History -->
+                                    <Border Background="{DynamicResource CardSecondaryBrush}"
+                                            CornerRadius="12"
+                                            Padding="16"
+                                            IsVisible="{Binding ScoreHistory.Count}">
+
+                                        <StackPanel Spacing="12">
+
+                                            <!-- Clickable Graph Header -->
+                                            <Button Command="{Binding ToggleScoreHistoryCommand}"
+                                                    Background="Transparent"
+                                                    Padding="0"
+                                                    HorizontalContentAlignment="Stretch">
+
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBlock Grid.Column="0"
+                                                            Text="Score Progress Graph"
+                                                            FontSize="18"
+                                                            FontWeight="SemiBold"
+                                                            Foreground="{DynamicResource PrimaryTextBrush}"
+                                                            VerticalAlignment="Center"/>
+
+                                                    <!-- Chevron at the far right -->
+                                                    <PathIcon Grid.Column="1"
+                                                            Width="18"
+                                                            Height="18"
+                                                            Margin="12,0,0,0"
+                                                            Foreground="{DynamicResource SecondaryTextBrush}"
+                                                            VerticalAlignment="Center"
+                                                            IsVisible="{Binding !IsScoreHistoryExpanded}"
+                                                            Data="M9 18l6-6-6-6"/>
+
+                                                    <PathIcon Grid.Column="1"
+                                                            Width="18"
+                                                            Height="18"
+                                                            Margin="12,0,0,0"
+                                                            Foreground="{DynamicResource SecondaryTextBrush}"
+                                                            VerticalAlignment="Center"
+                                                            IsVisible="{Binding IsScoreHistoryExpanded}"
+                                                            Data="M6 15l6-6 6 6"/>
                                                 </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Border>
-                                
-                            </StackPanel>
-                        </Border>
+                                            </Button>
+
+                                            <!-- Graph -->
+                                            <controls:ScoreHistoryChart
+                                                Series="{Binding ScoreHistory}"
+                                                Height="280"
+                                                IsVisible="{Binding IsScoreHistoryExpanded}"/>
+
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Players -->
+                                    <Border Background="{DynamicResource CardSecondaryBrush}"
+                                            CornerRadius="12"
+                                            Padding="16">
+
+                                        <ItemsControl ItemsSource="{Binding Players}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Spacing="8"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:PlayerResultViewModel">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto"
+                                                          Margin="0,4">
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding Name}"
+                                                                   FontWeight="Medium"
+                                                                   FontSize="15"
+                                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                                   VerticalAlignment="Center"/>
+
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding Score, StringFormat='{}{0} pts'}"
+                                                                   FontWeight="Bold"
+                                                                   FontSize="15"
+                                                                   Foreground="{DynamicResource AccentTealBrush}"
+                                                                   Margin="24,0"
+                                                                   VerticalAlignment="Center"/>
+
+                                                        <TextBlock Grid.Column="2"
+                                                                   Text="{Binding CorrectCount, StringFormat='{}{0} correct'}"
+                                                                   FontSize="14"
+                                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Delete Session -->
+                            <Button Grid.Column="1"
+                                    Command="{Binding RemoveCommand}"
+                                    Background="Transparent"
+                                    Padding="8"
+                                    VerticalAlignment="Center"
+                                    ToolTip.Tip="Delete session results">
+
+                                <PathIcon Width="20"
+                                          Height="20"
+                                          Foreground="#FF6B6B"
+                                          Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </Button>
+
+                        </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -16,4 +16,5 @@ public class Player
     public string? ConnectionId { get; set; }
 
     public List<PlayerAnswer> Answers { get; set; } = new();
+    public List<PlayerScoreSnapshot> ScoreSnapshots { get; set; } = new();
 }

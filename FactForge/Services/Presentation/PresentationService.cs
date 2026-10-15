@@ -180,6 +180,8 @@ public class PresentationService : IAsyncDisposable
 
         if (slide.Type == SlideType.Text) return null;
 
+        await SaveScoreSnapshotsAsync(active, slide);
+
         await using var db = await _contextFactory.CreateDbContextAsync();
         var answers = await db.PlayerAnswers.Where(a => a.SlideId == slide.Id).ToListAsync();
 
@@ -229,6 +231,43 @@ public class PresentationService : IAsyncDisposable
             .ToList();
         await _hub.Clients.All.SendAsync("LeaderboardUpdated", leaderboard);
         LeaderboardUpdatedEvent?.Invoke(leaderboard);
+    }
+
+    private async Task SaveScoreSnapshotsAsync(ActiveSession active, Slide slide)
+    {
+        if (slide.Type is SlideType.Text or SlideType.Leaderboard)
+            return;
+
+        var questionNumber = active.Slides
+            .Take(active.CurrentSlidePosition + 1)
+            .Count(s => s.Type is not SlideType.Text
+                and not SlideType.Leaderboard);
+
+        await using var db = await _contextFactory.CreateDbContextAsync();
+
+        var players = await db.Players
+            .Where(p => p.SessionId == active.Session.Id)
+            .ToListAsync();
+
+        foreach (var player in players)
+        {
+            var exists = await db.PlayerScoreSnapshots.AnyAsync(s =>
+                s.PlayerId == player.Id &&
+                s.SlideId == slide.Id);
+
+            if (exists)
+                continue;
+
+            db.PlayerScoreSnapshots.Add(new PlayerScoreSnapshot
+            {
+                PlayerId = player.Id,
+                SlideId = slide.Id,
+                QuestionNumber = questionNumber,
+                Score = player.Score
+            });
+        }
+
+        await db.SaveChangesAsync();
     }
 
     public async Task EndSessionAsync()
