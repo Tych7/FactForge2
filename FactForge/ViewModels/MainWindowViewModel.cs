@@ -12,6 +12,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly AnswerService _answerService;
     private readonly PlayerSessionService _playerSessionService;
     private readonly QrCodeService _qrCodeService;
+    private readonly QuizImportExportService _importExportService;
     private readonly IDialogService _dialogService;
     private readonly IWindowService _windowService;
     private readonly ISettingsService _settingsService;
@@ -21,7 +22,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(
         QuizRepository quizRepository,
         PresentationService presentationService, 
-        QrCodeService qrCodeService, 
+        QrCodeService qrCodeService,
+        QuizImportExportService importExportService,
         IDialogService dialogService, 
         IWindowService windowService,
         ISettingsService settingsService,
@@ -33,6 +35,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _answerService = answerService;
         _playerSessionService = playerSessionService;
         _qrCodeService = qrCodeService;
+        _importExportService = importExportService;
         _dialogService = dialogService;
         _windowService = windowService;
         _settingsService = settingsService;
@@ -40,7 +43,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     private QuizLibraryViewModel CreateLibraryPage() =>
-        new(_quizRepository, _dialogService, _windowService, NavigateToEditor, NavigateToPresent, NavigateToResults, NavigateToSettings);
+        new(_quizRepository, _dialogService, _windowService, _importExportService, NavigateToEditor, NavigateToPresent, NavigateToResults, NavigateToSettings);
 
     public void NavigateToLibrary() => CurrentPage = CreateLibraryPage();
 

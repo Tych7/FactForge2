@@ -43,38 +43,56 @@
             </Border>
         </Grid>
 
+        
         <!-- Search & Action Bar -->
-        <Border Grid.Row="1" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="12" Padding="16" Margin="0,0,0,24">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+        <Grid Grid.Row="1"
+            ColumnDefinitions="*,Auto,Auto"
+            ColumnSpacing="12"
+            VerticalAlignment="Top"
+            Margin="0,0,0,16">
 
-                <!-- Search Input with Icon -->
-                <TextBox Grid.Column="0" 
-                        Watermark="Search quiz..."
-                        Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                        Background="White"
-                        Foreground="#121921"
-                        CornerRadius="8"
-                        Padding="10,8"
-                        FontSize="15">
-                    <TextBox.InnerLeftContent>
-                        <PathIcon Width="16" Height="16" Margin="10,0,4,0" 
-                                Foreground="#666666"
-                                Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                    </TextBox.InnerLeftContent>
-                </TextBox>
+            <!-- Search Input with Icon -->
+            <TextBox Grid.Column="0" 
+                    Watermark="Search quiz..."
+                    Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                    Background="White"
+                    Foreground="#121921"
+                    CornerRadius="8"
+                    Padding="10,8"
+                    FontSize="15">
+                <TextBox.InnerLeftContent>
+                    <PathIcon Width="16" Height="16" Margin="10,0,4,0" 
+                            Foreground="#666666"
+                            Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </TextBox.InnerLeftContent>
+            </TextBox>
 
-                <!-- Create Quiz Button -->
-                <Button Grid.Column="1" 
-                        Content="Create Quiz"
-                        Command="{Binding OpenCreateQuizDialogCommand}"
-                        Background="{DynamicResource AccentTealBrush}"
-                        Foreground="White"
-                        FontWeight="Bold"
-                        FontSize="15"
-                        CornerRadius="10"
-                        Padding="24,10"/>
-            </Grid>
-        </Border>
+            <!-- Import Quiz -->
+            <Button Grid.Column="1"
+                    Content="Import Quiz"
+                    Command="{Binding ImportQuizCommand}"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource CardSecondaryBrush}"
+                    Foreground="{DynamicResource PrimaryTextBrush}"
+                    FontWeight="Bold"
+                    FontSize="15"
+                    CornerRadius="10"
+                    Padding="20,10"/>
+
+            <!-- Create Quiz -->
+            <Button Grid.Column="2"
+                    Content="Create Quiz"
+                    Command="{Binding OpenCreateQuizDialogCommand}"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource AccentTealBrush}"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    FontSize="15"
+                    CornerRadius="10"
+                    Padding="24,10"/>
+
+        </Grid>
+
 
         <!-- Quiz List -->
         <ScrollViewer Grid.Row="2">
@@ -123,6 +141,21 @@
                                                 CommandParameter="{Binding}">
                                             <PathIcon Width="20" Height="20" Foreground="{DynamicResource SecondaryTextBrush}"
                                                       Data="M5 21h3V10H5v11zM10.5 21h3V3h-3v18zM16 21h3v-7h-3v7z"/>
+                                        </Button>
+
+                                        <!-- Export -->
+                                        <Button Background="Transparent"
+                                                Padding="8"
+                                                ToolTip.Tip="Export to JSON"
+                                                Command="{Binding $parent[ItemsControl].((vm:QuizLibraryViewModel)DataContext).ExportQuizCommand}"
+                                                CommandParameter="{Binding}">
+                                            <Viewbox Width="20" Height="20">
+                                                <Path Data="M5.25021713,20.5 L18.2502171,20.5037635 C18.6644307,20.5038835 19,20.8397671 19,21.2539806 C19,21.6336764 18.7176637,21.9473899 18.3515577,21.9969463 L18.2497829,22.0037635 L5.24978287,22 C4.83556933,21.9998801 4.5,21.6639964 4.5,21.2497829 C4.5,20.8700871 4.78233634,20.5563736 5.1484423,20.5068172 L5.25021713,20.5 Z M6.21972471,7.21846694 L11.21737,2.22185426 C11.4835159,1.95576328 11.8999028,1.93145946 12.1934928,2.14902198 L12.2776129,2.2215468 L17.2810585,7.21815948 C17.5741518,7.5108525 17.5744763,7.98572612 17.2817833,8.2788194 C17.0156987,8.54526784 16.5990517,8.56975859 16.3052914,8.35210481 L16.2211234,8.27954415 L12.5,4.56423913 L12.5,18.2488622 C12.5,18.6285579 12.2178461,18.9423531 11.8517706,18.9920156 L11.75,18.9988622 C11.3703042,18.9988622 11.056509,18.7167083 11.0068466,18.3506327 L11,18.2488622 L11,4.55923913 L7.28027529,8.27923669 C7.01398122,8.54547574 6.59731504,8.56963874 6.30372605,8.35175395 L6.21961512,8.27912711 C5.95337607,8.01283303 5.92921307,7.59616685 6.14709787,7.30257787 L6.21972471,7.21846694 L11.21737,2.22185426 L6.21972471,7.21846694 Z"
+                                                    Fill="{DynamicResource SecondaryTextBrush}"
+                                                    Stroke="{DynamicResource SecondaryTextBrush}"
+                                                    StrokeThickness="1.5"
+                                                    StrokeJoin="Round" />
+                                            </Viewbox>
                                         </Button>
 
                                         <!-- Delete -->

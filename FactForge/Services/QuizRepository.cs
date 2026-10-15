@@ -46,6 +46,51 @@ public class QuizRepository
         return quiz;
     }
 
+    public async Task<Quiz> ImportQuizAsync(string title, List<Slide> slides)
+    {
+        await using var db = await _contextFactory.CreateDbContextAsync();
+
+        var now = DateTime.UtcNow;
+
+        var quiz = new Quiz
+        {
+            Title = title,
+            CreatedAt = now,
+            UpdatedAt = now,
+            Slides = slides
+                .OrderBy(s => s.OrderIndex)
+                .Select((slide, index) => new Slide
+                {
+                    OrderIndex = index,
+                    Type = slide.Type,
+                    Header = slide.Header,
+                    SubText = slide.SubText,
+                    Question = slide.Question,
+                    CorrectAnswer = slide.CorrectAnswer,
+                    TimeSeconds = slide.TimeSeconds,
+                    ImagePath = slide.ImagePath,
+                    MusicFilePath = slide.MusicFilePath,
+                    Title = slide.Title,
+                    Artist = slide.Artist,
+                    Options = slide.Options
+                        .OrderBy(o => o.OrderIndex)
+                        .Select((option, optionIndex) => new SlideOption
+                        {
+                            OrderIndex = optionIndex,
+                            Text = option.Text,
+                            IsCorrect = option.IsCorrect
+                        })
+                        .ToList()
+                })
+                .ToList()
+        };
+
+        db.Quizzes.Add(quiz);
+        await db.SaveChangesAsync();
+
+        return quiz;
+    }
+
     public async Task RenameQuizAsync(int quizId, string title)
     {
         await using var db = await _contextFactory.CreateDbContextAsync();

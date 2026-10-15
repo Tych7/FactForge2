@@ -88,13 +88,18 @@ public sealed class SlideAudioService
     /// </summary>
     public string? GetPath(string? fileName)
     {
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrWhiteSpace(fileName))
             return null;
 
-        // Never allow path traversal.
-        fileName = Path.GetFileName(fileName);
+        // Imported quizzes may store an absolute path.
+        if (Path.IsPathRooted(fileName))
+        {
+            var fullPath = Path.GetFullPath(fileName);
+            return File.Exists(fullPath) ? fullPath : null;
+        }
 
-        var path = Path.Combine(_folder, fileName);
+        // Existing quizzes store only the filename.
+        var path = Path.Combine(_folder, Path.GetFileName(fileName));
 
         return File.Exists(path) ? path : null;
     }
