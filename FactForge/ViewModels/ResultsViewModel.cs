@@ -27,18 +27,26 @@ public class PlayerResultViewModel
     }
 }
 
-public class SessionResultViewModel
+public partial class SessionResultViewModel
 {
+    private readonly Func<SessionResultViewModel, Task> _remove;
+    public int Id { get; }
     public DateTime StartedAt { get; }
     public DateTime? EndedAt { get; }
     public bool IsComplete => EndedAt is not null;
     public List<PlayerResultViewModel> Players { get; }
     public List<ScoreChartSeries> ScoreHistory { get; }
 
-    public SessionResultViewModel(QuizSession session)
+    public SessionResultViewModel(
+        QuizSession session,
+        Func<SessionResultViewModel, Task> remove)
     {
+        Id = session.Id;
+        _remove = remove;
+
         StartedAt = session.StartedAt;
         EndedAt = session.EndedAt;
+
         Players = session.Players
             .OrderByDescending(p => p.Score)
             .Select(p => new PlayerResultViewModel(p))
@@ -54,29 +62,30 @@ public class SessionResultViewModel
             .OrderBy(n => n)
             .ToList();
 
-        ScoreHistory = session.Players
-            .Select(player =>
+        ScoreHistory = session.Players.Select(player =>
+        {
+            var playerSnapshots = player.ScoreSnapshots
+                .ToDictionary(s => s.QuestionNumber, s => s.Score);
+
+            var currentScore = 0;
+            var scores = questionNumbers.Select(question =>
             {
-                var playerSnapshots = player.ScoreSnapshots
-                    .ToDictionary(s => s.QuestionNumber, s => s.Score);
+                if (playerSnapshots.TryGetValue(question, out var score))
+                    currentScore = score;
 
-                var currentScore = 0;
-                var scores = questionNumbers.Select(question =>
-                {
-                    if (playerSnapshots.TryGetValue(question, out var score))
-                        currentScore = score;
+                return currentScore;
+            }).ToList();
 
-                    return currentScore;
-                }).ToList();
+            return new ScoreChartSeries
+            {
+                Name = player.Name,
+                Scores = scores
+            };
+        }).ToList();
+    }
 
-                return new ScoreChartSeries
-                {
-                    Name = player.Name,
-                    Scores = scores
-                };
-            })
-            .ToList();
-            }
+    [RelayCommand]
+    private Task RemoveAsync() => _remove(this);
 }
 
 
@@ -128,8 +137,16 @@ public partial class ResultsViewModel : ViewModelBase
         var sessions = await _repository.GetSessionsForQuizAsync(_quizId);
         Sessions.Clear();
         foreach (var session in sessions)
-            Sessions.Add(new SessionResultViewModel(session));
+        {
+            Sessions.Add(new SessionResultViewModel(session, RemoveSessionAsync));
+        }
         IsLoading = false;
+    }
+
+    private async Task RemoveSessionAsync(SessionResultViewModel session)
+    {
+        await _repository.DeleteSessionAsync(session.Id);
+        Sessions.Remove(session);
     }
 
     [RelayCommand]

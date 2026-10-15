@@ -110,6 +110,20 @@ public class QuizRepository
         await db.SaveChangesAsync();
     }
 
+    public async Task DeleteSessionAsync(int sessionId)
+    {
+        await using var db = await _contextFactory.CreateDbContextAsync();
+
+        var session = await db.QuizSessions
+            .FirstOrDefaultAsync(s => s.Id == sessionId);
+
+        if (session is null)
+            return;
+
+        db.QuizSessions.Remove(session);
+        await db.SaveChangesAsync();
+    }
+
     public async Task<Slide> AddSlideAsync(int quizId, SlideType type, int? insertAtIndex = null)
     {
         await using var db = await _contextFactory.CreateDbContextAsync();

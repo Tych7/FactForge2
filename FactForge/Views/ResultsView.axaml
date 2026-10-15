@@ -63,56 +63,72 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:SessionResultViewModel">
-                        <Border Background="{DynamicResource CardBackgroundBrush}"
-                                CornerRadius="16" Padding="20">
-                            <StackPanel Spacing="16">
-                                
-                                <!-- Session Header Info -->
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                                    <Border Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding !IsComplete}">
-                                        <TextBlock Text="In Progress" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
-                                    </Border>
-                                </StackPanel>
-
-                                <!-- Score History Graph -->
-                                <Border Background="{DynamicResource CardSecondaryBrush}"
-                                        CornerRadius="12"
-                                        Padding="16"
-                                        IsVisible="{Binding ScoreHistory.Count}">
-                                    <StackPanel Spacing="10">
-                                        <TextBlock Text="Score Progress"
-                                                FontSize="18"
-                                                FontWeight="SemiBold"
-                                                Foreground="{DynamicResource PrimaryTextBrush}" />
-                                        <controls:ScoreHistoryChart
-                                            Series="{Binding ScoreHistory}"
-                                            Height="280" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                    CornerRadius="16" Padding="20">
+                                <StackPanel Spacing="16">
+                                    
+                                    <!-- Session Header Info -->
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:g}'}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                        <Border Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="10" Padding="8,2" VerticalAlignment="Center" IsVisible="{Binding !IsComplete}">
+                                            <TextBlock Text="In Progress" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                        </Border>
                                     </StackPanel>
-                                </Border>
 
-                                <!-- Players List Container -->
-                                <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="16">
-                                    <ItemsControl ItemsSource="{Binding Players}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Spacing="8"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:PlayerResultViewModel">
-                                                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,4">
-                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Medium" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding Score, StringFormat='{} {0} pts'}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource AccentTealBrush}" Margin="24,0" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding CorrectCount, StringFormat='{}{0} correct'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Border>
-                                
-                            </StackPanel>
-                        </Border>
+                                    <!-- Score History Graph -->
+                                    <Border Background="{DynamicResource CardSecondaryBrush}"
+                                            CornerRadius="12"
+                                            Padding="16"
+                                            IsVisible="{Binding ScoreHistory.Count}">
+                                        <StackPanel Spacing="10">
+                                            <TextBlock Text="Score Progress"
+                                                    FontSize="18"
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource PrimaryTextBrush}" />
+                                            <controls:ScoreHistoryChart
+                                                Series="{Binding ScoreHistory}"
+                                                Height="280" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Players List Container -->
+                                    <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="12" Padding="16">
+                                        <ItemsControl ItemsSource="{Binding Players}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Spacing="8"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:PlayerResultViewModel">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,4">
+                                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Medium" FontSize="15" Foreground="{DynamicResource PrimaryTextBrush}" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Score, StringFormat='{} {0} pts'}" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource AccentTealBrush}" Margin="24,0" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding CorrectCount, StringFormat='{}{0} correct'}" FontSize="14" Foreground="{DynamicResource SecondaryTextBrush}" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+                                    
+                                </StackPanel>
+                            </Border>
+
+                            <Button Grid.Column="1"
+                                    Command="{Binding RemoveCommand}"
+                                    Background="Transparent"
+                                    Padding="8"
+                                    VerticalAlignment="Center"
+                                    ToolTip.Tip="Delete session results">
+                                <PathIcon Width="20"
+                                        Height="20"
+                                        Foreground="#FF6B6B"
+                                        Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                            </Button>
+
+
+                        </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
