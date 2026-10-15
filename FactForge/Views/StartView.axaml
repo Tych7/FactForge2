@@ -11,6 +11,7 @@
 
     <Viewbox Stretch="Uniform" Margin="60">
         <StackPanel HorizontalAlignment="Center" Spacing="40">
+
             <!-- Big Logo -->
             <Image MaxHeight="500" Stretch="Uniform">
                 <Image.Source>
@@ -19,15 +20,22 @@
             </Image>
 
             <!-- Play Button -->
-            <Button Content="Play ►" 
+            <Button Content="Play ►"
                     HorizontalAlignment="Center"
-                    FontSize="18" 
+                    FontSize="18"
                     FontWeight="SemiBold"
                     Foreground="White"
                     Background="{DynamicResource AccentTealBrush}"
                     CornerRadius="20"
-                    Padding="36,10" 
+                    Padding="36,10"
                     Command="{Binding PlayCommand}"/>
+
+            <!-- Version -->
+            <TextBlock Text="v1.0.0"
+                       FontSize="12"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       HorizontalAlignment="Center"
+                       Opacity="0.7"/>
         </StackPanel>
     </Viewbox>
 </UserControl>
