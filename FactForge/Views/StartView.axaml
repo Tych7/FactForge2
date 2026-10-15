@@ -31,7 +31,7 @@
                     Command="{Binding PlayCommand}"/>
 
             <!-- Version -->
-            <TextBlock Text="v1.0.0"
+            <TextBlock Text="v1.0.1"
                        FontSize="12"
                        Foreground="{DynamicResource SecondaryTextBrush}"
                        HorizontalAlignment="Center"
