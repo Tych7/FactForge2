@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -14,6 +17,7 @@ using FactForge.Data.Entities;
 using FactForge.Models;
 using FactForge.Services;
 using FactForge.Services.Presentation;
+using FactForge.Views.Dialogs;
 
 
 namespace FactForge.ViewModels.Presentation;
@@ -25,6 +29,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     private readonly PresentationService _presentationService;
     private readonly AnswerService _answerService;
     private readonly PlayerSessionService _playerSessionService;
+    private readonly IDialogService _dialogService;
     private readonly QrCodeService _qrCodeService;
     private readonly QuizRepository _quizRepository;
     private readonly int _quizId;
@@ -47,6 +52,8 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     [ObservableProperty] private int _slideNumber;
     [ObservableProperty] private int _totalSlides;
     [ObservableProperty] private RevealDto? _lastReveal;
+    [ObservableProperty]
+    private bool _isRejoinQrVisible;
 
     public bool IsSlideVisible => Phase is PresentPhase.Question or PresentPhase.Revealed or PresentPhase.TextSlide or PresentPhase.Music;
 
@@ -55,9 +62,18 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     public ObservableCollection<PlayerInfoDto> Players { get; } = new();
     public ObservableCollection<LeaderboardBarItem> Leaderboard { get; } = new();
 
-    public PresentViewModel(PresentationService presentationService, AnswerService answerService, PlayerSessionService playerSessionService, QrCodeService qrCodeService, QuizRepository quizRepository, int quizId, Action onBack)
+    public PresentViewModel(
+        PresentationService presentationService,
+        IDialogService dialogService,  
+        AnswerService answerService, 
+        PlayerSessionService playerSessionService, 
+        QrCodeService qrCodeService, 
+        QuizRepository quizRepository, 
+        int quizId, 
+        Action onBack)
     {
         _presentationService = presentationService;
+        _dialogService = dialogService;
         _answerService = answerService;
         _playerSessionService = playerSessionService;
         _qrCodeService = qrCodeService;
@@ -68,6 +84,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
         _presentationService.SlideRevealedEvent += OnSlideRevealed;
         _presentationService.LeaderboardUpdatedEvent += OnLeaderboardUpdated;
         _presentationService.SessionEndedEvent += OnSessionEnded;
+        _playerSessionService.PlayerDisconnected += OnPlayerDisconnected;
 
         _answerService.AnswerTallyChanged += OnAnswerTallyChanged;
 
@@ -88,6 +105,12 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private async Task StartQuizAsync() => await AdvanceAsync();
+
+    [RelayCommand]
+    private async Task ShowRejoinQrAsync()
+    {
+        await _dialogService.ShowRejoinQrAsync(this);
+    }
 
     [RelayCommand(CanExecute = nameof(CanAdvance))]
     private async Task NextAsync()
@@ -228,6 +251,7 @@ public partial class PresentViewModel : ViewModelBase, IDisposable
     {
         _countdownTimer.Stop();
         _playerSessionService.PlayerJoined -= OnPlayerJoined;
+        _playerSessionService.PlayerDisconnected -= OnPlayerDisconnected;
         _answerService.AnswerTallyChanged -= OnAnswerTallyChanged;
         _presentationService.SlideRevealedEvent -= OnSlideRevealed;
         _presentationService.LeaderboardUpdatedEvent -= OnLeaderboardUpdated;

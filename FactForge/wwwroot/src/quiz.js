@@ -71,7 +71,7 @@ function startMusicQuestion(slide) {
   showScreen("musicQuestion");
 
   if (slide.deadlineUtc && slide.timeSeconds > 0) {
-    startMusicCountdown(slide.timeSeconds, musicTimerBar);
+    startMusicCountdown(getRemainingSeconds(slide), musicTimerBar);
   }
 }
 
@@ -129,7 +129,7 @@ function startNormalQuestion(slide) {
   showScreen("question");
 
   if (slide.deadlineUtc && slide.timeSeconds > 0) {
-    startTimerCountdown(slide.timeSeconds, timerBar);
+    startTimerCountdown(getRemainingSeconds(slide), timerBar);
   }
 }
 
@@ -292,6 +292,50 @@ export function onSessionEnded(leaderboard) {
 
 export function initializeQuiz() {
   elements.musicSubmitBtn.addEventListener("click", submitMusicAnswer);
+}
+
+export function restoreRejoinedSession(state) {
+  if (!state?.currentSlide) {
+    showScreen("waiting");
+    return;
+  }
+
+  // Rebuild the current question or slide first.
+  onSlideStarted(state.currentSlide);
+
+  questionPoints = state.questionPoints ?? 0;
+
+  if (state.isRevealed) {
+    stopCountdown();
+
+    // We don't have the returning player's original correctness result
+    // in this DTO, so don't incorrectly show a red cross or green tick.
+    elements.revealIcon.classList.add("hidden");
+    elements.musicRevealResults.classList.add("hidden");
+
+    elements.revealRank.textContent = state.hasAnswered
+      ? `+${questionPoints} points`
+      : "This round has been revealed";
+
+    showScreen("reveal");
+    return;
+  }
+
+  if (state.hasAnswered) {
+    stopCountdown();
+    showScreen("locked");
+  }
+}
+
+function getRemainingSeconds(slide) {
+  if (!slide.deadlineUtc) {
+    return slide.timeSeconds;
+  }
+
+  return Math.max(
+    0,
+    (new Date(slide.deadlineUtc).getTime() - Date.now()) / 1000
+  );
 }
 
 export const quizHandlers = {

@@ -8,6 +8,8 @@ using FactForge.Services.Presentation;
 
 namespace FactForge.ViewModels.Presentation;
 
+//Session
+
 public partial class PresentViewModel
 {
     private QuizSession? _session;

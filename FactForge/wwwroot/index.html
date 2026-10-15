@@ -22,6 +22,16 @@
       <input id="playerName" maxlength="24" autocomplete="off" placeholder="Your name" />
       <button id="joinBtn">Join</button>
       <p id="joinError" class="error"></p>
+      <div id="rejoinOptions" class="rejoin-options hidden">
+        <h2>Rejoin your game</h2>
+        <p class="muted">
+          Select your previous player to keep your score and answers.
+        </p>
+        <div id="rejoinPlayers"></div>
+        <button id="joinAsNewBtn" type="button">
+          Join as a new player
+        </button>
+      </div>
     </section>
 
     <section id="screen-waiting" class="screen hidden">

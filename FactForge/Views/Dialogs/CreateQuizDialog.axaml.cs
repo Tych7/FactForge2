@@ -10,8 +10,7 @@ public partial class CreateQuizDialog : Window
     {
         InitializeComponent();
 
-
-            Opened += (_, _) => QuizTitleTextBox.Focus();
+        Opened += (_, _) => QuizTitleTextBox.Focus();
     }
 
     private void OnCreate(object? sender, RoutedEventArgs e)

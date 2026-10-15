@@ -48,7 +48,7 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentPage = new EditorViewModel(_quizRepository, quizId, NavigateToLibrary, NavigateToPresent, _dialogService, _windowService, NavigateToSettings);
 
     public void NavigateToPresent(int quizId) =>
-        CurrentPage = new PresentViewModel(_presentationService, _answerService, _playerSessionService, _qrCodeService, _quizRepository, quizId, NavigateToLibrary);
+        CurrentPage = new PresentViewModel(_presentationService, _dialogService, _answerService, _playerSessionService, _qrCodeService, _quizRepository, quizId, NavigateToLibrary);
 
     public void NavigateToResults(int quizId) =>
         CurrentPage = new ResultsViewModel(_dialogService, _windowService, _quizRepository, quizId, NavigateToLibrary, NavigateToSettings);

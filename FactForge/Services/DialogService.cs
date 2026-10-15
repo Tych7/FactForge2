@@ -2,7 +2,9 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using FactForge.ViewModels.Presentation;
 using FactForge.Views;
+using FactForge.Views.Dialogs;
 
 public interface IDialogService
 {
@@ -10,6 +12,7 @@ public interface IDialogService
     Task<AppMenuResult> ShowMenuAsync();
     Task<string?> ShowCreateQuizAsync();
     Task<string?> ShowRenameQuizAsync(string currentTitle);
+    Task ShowRejoinQrAsync(PresentViewModel viewModel);
 }
 
 public class DialogService : IDialogService
@@ -56,6 +59,17 @@ public class DialogService : IDialogService
         SizeToOwner(dialog, owner);
 
         return await dialog.ShowDialog<string?>(owner);
+    }
+
+    public async Task ShowRejoinQrAsync(PresentViewModel viewModel)
+    {
+        var owner = GetMainWindow();
+        if (owner is null) return;
+
+        var dialog = new RejoinQrDialog(viewModel);
+        SizeToOwner(dialog, owner);
+
+        await dialog.ShowDialog(owner);
     }
 
     private static Window? GetMainWindow()
