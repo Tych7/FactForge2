@@ -43,6 +43,7 @@ public partial class App : Application
                 services.GetRequiredService<QuizRepository>(),
                 services.GetRequiredService<PresentationService>(),
                 services.GetRequiredService<QrCodeService>(),
+                services.GetRequiredService<QuizImportExportService>(),
                 services.GetRequiredService<IDialogService>(),
                 services.GetRequiredService<IWindowService>(),
                 services.GetRequiredService<ISettingsService>(),

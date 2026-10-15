@@ -27,12 +27,33 @@ public sealed class AudioWaveformService
         var path = SlideAudioService.Shared.GetPath(fileName);
 
         if (path is null)
+        {
             return Task.FromResult<IReadOnlyList<float>>(
                 Array.Empty<float>());
+        }
 
-        return _cache.GetOrAdd(
+        return GetOrGeneratePeaksAsync(path);
+    }
+
+    private async Task<IReadOnlyList<float>> GetOrGeneratePeaksAsync(
+        string path)
+    {
+        var task = _cache.GetOrAdd(
             path,
             p => Task.Run(() => GeneratePeaks(p)));
+
+        try
+        {
+            return await task;
+        }
+        catch
+        {
+            _cache.TryRemove(
+                new KeyValuePair<string, Task<IReadOnlyList<float>>>(
+                    path, task));
+
+            throw;
+        }
     }
 
     private static IReadOnlyList<float> GeneratePeaks(string path)

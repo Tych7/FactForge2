@@ -52,24 +52,39 @@ public sealed class SlideImageService
 
     public Bitmap? Load(string? fileName)
     {
-        if (string.IsNullOrEmpty(fileName)) return null;
-        fileName = Path.GetFileName(fileName);   // never allow path traversal
+        if (string.IsNullOrWhiteSpace(fileName))
+            return null;
 
-        if (_cache.TryGetValue(fileName, out var cached)) return cached;
+        // Support imported quizzes that store an absolute media path.
+        // Continue supporting existing quizzes that store only a filename.
+        var path = Path.IsPathRooted(fileName)
+            ? fileName
+            : Path.Combine(_folder, Path.GetFileName(fileName));
 
-        var path = Path.Combine(_folder, fileName);
-        if (!File.Exists(path)) return null;
+        if (!File.Exists(path))
+            return null;
+
+        // Cache by resolved path so different files with the same filename
+        // in different imported quiz folders cannot collide.
+        path = Path.GetFullPath(path);
+
+        if (_cache.TryGetValue(path, out var cached))
+            return cached;
 
         try
         {
             using var stream = File.OpenRead(path);
-            var bitmap = Bitmap.DecodeToWidth(stream, 1024, BitmapInterpolationMode.HighQuality);
-            _cache[fileName] = bitmap;
+            var bitmap = Bitmap.DecodeToWidth(
+                stream,
+                1024,
+                BitmapInterpolationMode.HighQuality);
+
+            _cache[path] = bitmap;
             return bitmap;
         }
         catch
         {
-            return null;   // corrupt/unsupported file: slide just renders without an image
+            return null;
         }
     }
 }

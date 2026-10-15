@@ -15,6 +15,7 @@ public partial class QuizLibraryViewModel : ViewModelBase
     private readonly QuizRepository _repository;
     private readonly IDialogService _dialogService;
     private readonly IWindowService _windowService;
+    private readonly QuizImportExportService _importExportService;
     private readonly Action<int> _onEdit;
     private readonly Action<int> _onPresent;
     private readonly Action<int> _onResults;
@@ -32,6 +33,7 @@ public partial class QuizLibraryViewModel : ViewModelBase
         QuizRepository repository, 
         IDialogService dialogService, 
         IWindowService windowService, 
+        QuizImportExportService importExportService,
         Action<int> onEdit, 
         Action<int> onPresent, 
         Action<int> onResults,
@@ -44,6 +46,7 @@ public partial class QuizLibraryViewModel : ViewModelBase
         _onPresent = onPresent;
         _onResults = onResults;
         _onSettings = onSettings;
+        _importExportService = importExportService;
         _ = LoadAsync();
     }
 
@@ -155,6 +158,49 @@ public partial class QuizLibraryViewModel : ViewModelBase
             case AppMenuResult.Exit:
                 _windowService.Exit();
                 break;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportQuizAsync(QuizListItemViewModel? item)
+    {
+        if (item is null) return;
+
+        var path = await _dialogService.ShowExportQuizFileAsync(item.Title);
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        try
+        {
+            await _importExportService.ExportAsync(item.Id, path);
+        }
+        catch (Exception ex)
+        {
+            // Replace with your application's normal error notification.
+            await _dialogService.ConfirmAsync(
+                "Export failed",
+                $"The quiz could not be exported.\n\n{ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task ImportQuizAsync()
+    {
+        var path = await _dialogService.ShowImportQuizFileAsync();
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        try
+        {
+            var quiz = await _importExportService.ImportAsync(path);
+            await LoadAsync();
+
+            // Optionally open the imported quiz immediately.
+            _onEdit(quiz.Id);
+        }
+        catch (Exception ex)
+        {
+            await _dialogService.ConfirmAsync(
+                "Import failed",
+                $"The quiz could not be imported.\n\n{ex.Message}");
         }
     }
 

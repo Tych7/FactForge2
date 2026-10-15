@@ -1,7 +1,9 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using FactForge.ViewModels.Presentation;
 using FactForge.Views;
 using FactForge.Views.Dialogs;
@@ -13,6 +15,8 @@ public interface IDialogService
     Task<string?> ShowCreateQuizAsync();
     Task<string?> ShowRenameQuizAsync(string currentTitle);
     Task ShowRejoinQrAsync(PresentViewModel viewModel);
+    Task<string?> ShowImportQuizFileAsync();
+    Task<string?> ShowExportQuizFileAsync(string suggestedFileName);
 }
 
 public class DialogService : IDialogService
@@ -70,6 +74,51 @@ public class DialogService : IDialogService
         SizeToOwner(dialog, owner);
 
         await dialog.ShowDialog(owner);
+    }
+
+    public async Task<string?> ShowImportQuizFileAsync()
+    {
+        var owner = GetMainWindow();
+        if (owner is null) return null;
+
+        var files = await owner.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title = "Import quiz",
+                AllowMultiple = false,
+                FileTypeFilter = new[]
+                {
+                    new FilePickerFileType("FactForge quiz archive")
+                    {
+                        Patterns = new[] { "*.zip" }
+                    }
+                }
+            });
+
+        return files.FirstOrDefault()?.Path.LocalPath;
+    }
+
+    public async Task<string?> ShowExportQuizFileAsync(string suggestedFileName)
+    {
+        var owner = GetMainWindow();
+        if (owner is null) return null;
+
+        var file = await owner.StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "Export quiz",
+                SuggestedFileName = $"{suggestedFileName}.zip",
+                DefaultExtension = "zip",
+                FileTypeChoices = new[]
+                {
+                    new FilePickerFileType("ZIP archive")
+                    {
+                        Patterns = new[] { "*.zip" }
+                    }
+                }
+            });
+
+        return file?.Path.LocalPath;
     }
 
     private static Window? GetMainWindow()
