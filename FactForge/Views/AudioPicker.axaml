@@ -56,7 +56,7 @@
                                           Peaks="{Binding WaveformPeaks}"
                                           PositionSeconds="{Binding PositionSeconds}"
                                           DurationSeconds="{Binding DurationSeconds}"
-                                          PlayedBrush="#32B8AA"
+                                          PlayedBrush="{DynamicResource AccentTealBrush}"
                                           UnplayedBrush="#554FB8B0"
                                           Height="34"
                                           VerticalAlignment="Center"/>
