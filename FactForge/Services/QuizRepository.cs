@@ -67,6 +67,7 @@ public class QuizRepository
                     SubText = slide.SubText,
                     Question = slide.Question,
                     CorrectAnswer = slide.CorrectAnswer,
+                    NumbersOnly = slide.NumbersOnly,
                     TimeSeconds = slide.TimeSeconds,
                     ImagePath = slide.ImagePath,
                     MusicFilePath = slide.MusicFilePath,

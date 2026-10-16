@@ -12,6 +12,7 @@ public sealed class SlideExportDto
     public string? SubText { get; set; }
     public string? Question { get; set; }
     public string? CorrectAnswer { get; set; }
+    public bool NumbersOnly { get; set; }
     public int TimeSeconds { get; set; }
     public string? ImagePath { get; set; }
     public string? MusicFilePath { get; set; }
