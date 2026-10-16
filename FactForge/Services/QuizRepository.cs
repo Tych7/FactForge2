@@ -143,7 +143,7 @@ public class QuizRepository
             SubText = type == SlideType.Text ? string.Empty : null,
             Question = type is SlideType.MultipleChoice or SlideType.OpenQuestion ? string.Empty : null,
             CorrectAnswer = type is SlideType.MultipleChoice or SlideType.OpenQuestion ? string.Empty : null,
-            TimeSeconds = 20
+            TimeSeconds = 30
         };
 
         if (type == SlideType.MultipleChoice)

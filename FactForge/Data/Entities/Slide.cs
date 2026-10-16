@@ -20,7 +20,7 @@ public class Slide
     public string? Question { get; set; }
     public string? CorrectAnswer { get; set; }
     public bool NumbersOnly { get; set; }
-    public int TimeSeconds { get; set; } = 20;
+    public int TimeSeconds { get; set; } = 30;
     public string? ImagePath { get; set; }
 
     // MusicQuestion slides
