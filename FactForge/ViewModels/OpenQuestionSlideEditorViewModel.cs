@@ -1,3 +1,4 @@
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FactForge.Data;
 using FactForge.Data.Entities;
@@ -35,4 +36,51 @@ public partial class OpenQuestionSlideEditorViewModel : ViewModelBase, IHasSlide
         NumbersOnly = NumbersOnly,
         ImagePath = Image.FileName,
     };
+
+    private bool _filteringInvalidCharacters;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCorrectAnswerError))]
+    private string? _correctAnswerError;
+
+    public bool HasCorrectAnswerError =>
+        !string.IsNullOrEmpty(CorrectAnswerError);
+
+    partial void OnNumbersOnlyChanged(bool value)
+    {
+        CorrectAnswerError = null;
+
+        if (value && CorrectAnswer.Any(c => !char.IsDigit(c)))
+        {
+            _filteringInvalidCharacters = true;
+
+            CorrectAnswer = new string(
+                CorrectAnswer.Where(char.IsDigit).ToArray());
+
+            _filteringInvalidCharacters = false;
+        }
+    }
+
+    partial void OnCorrectAnswerChanged(string value)
+    {
+        if (_filteringInvalidCharacters)
+            return;
+
+        if (NumbersOnly && value.Any(c => !char.IsDigit(c)))
+        {
+            CorrectAnswerError =
+                "With Numbers Only enabled, you can only enter numbers.";
+
+            _filteringInvalidCharacters = true;
+
+            CorrectAnswer = new string(
+                value.Where(char.IsDigit).ToArray());
+
+            _filteringInvalidCharacters = false;
+
+            return;
+        }
+
+        CorrectAnswerError = null;
+    }
 }
