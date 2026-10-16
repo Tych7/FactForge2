@@ -1,3 +1,4 @@
+
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FactForge.ViewModels"
@@ -5,88 +6,159 @@
              x:Class="FactForge.Views.SlideDisplays.OpenQuestionSlideDisplay"
              x:DataType="vm:SlideDisplay"
              IsVisible="{Binding IsOpenQuestion}">
-  <Viewbox Stretch="Uniform" StretchDirection="Both" Margin="24">
-    <Grid RowDefinitions="Auto,*" Width="1200" Height="700">
-      
-      <!-- Header (Row 0) -->
+
+  <Viewbox Stretch="Uniform"
+           StretchDirection="Both"
+           Margin="24">
+
+    <Grid RowDefinitions="300,*"
+          Width="1200"
+          Height="700">
+
+      <!-- Question header: fixed height -->
       <Viewbox Grid.Row="0"
-              VerticalAlignment="Center"
-              HorizontalAlignment="Center"
-              Margin="0,150,0,32"
-              Stretch="Uniform"
-              StretchDirection="DownOnly">
-          <TextBlock Text="{Binding Question}"
-                    FontSize="100"
-                    FontWeight="Bold"
-                    Foreground="{DynamicResource PrimaryTextBrush}"
-                    HorizontalAlignment="Center"/>
+               Margin="24,20,24,20"
+               Stretch="Uniform"
+               StretchDirection="DownOnly">
+
+        <TextBlock Text="{Binding Question}"
+                   Width="2000"
+                   FontSize="100"
+                   FontWeight="Bold"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   TextWrapping="Wrap"
+                   TextAlignment="Center"
+                   HorizontalAlignment="Center"/>
+
       </Viewbox>
 
-      <!-- Content Area (Row 1 - Both the Revealed Card and Question Card share this exact spot) -->
-      <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1100">
-        
-        <!-- Revealed State Card (Appears when CorrectAnswer is present/not empty) -->
-        <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+      <!-- Content area -->
+      <Grid Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Width="1100">
+
+        <!-- Revealed state card -->
+        <StackPanel Spacing="16"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
                     IsVisible="{Binding CorrectAnswer, Converter={x:Static convb:StringConverters.IsNotNullOrEmpty}}">
-          
-          <!-- Correct Answer Pill Badge -->
-          <Border Background="Transparent" BorderBrush="{DynamicResource CorrectAnswerBrush}" BorderThickness="1.5" 
-                  CornerRadius="16" Padding="16,6" HorizontalAlignment="Center">
+
+          <!-- Correct answer badge -->
+          <Border Background="Transparent"
+                  BorderBrush="{DynamicResource CorrectAnswerBrush}"
+                  BorderThickness="1.5"
+                  CornerRadius="16"
+                  Padding="16,6"
+                  HorizontalAlignment="Center">
+
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <Border Background="{DynamicResource CorrectAnswerBrush}" CornerRadius="10" Width="20" Height="20">
-                <PathIcon Width="10" Height="10" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+
+              <Border Background="{DynamicResource CorrectAnswerBrush}"
+                      CornerRadius="10"
+                      Width="20"
+                      Height="20">
+
+                <PathIcon Width="10"
+                          Height="10"
+                          Foreground="White"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
                           Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+
               </Border>
-              <TextBlock Text="Correct Answer" Foreground="{DynamicResource CorrectAnswerBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+
+              <TextBlock Text="Correct Answer"
+                         Foreground="{DynamicResource CorrectAnswerBrush}"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         VerticalAlignment="Center"/>
+
             </StackPanel>
           </Border>
 
-          <!-- Main Answer Card with Green Border -->
-          <Border Background="{DynamicResource CardBackgroundBrush}" 
-                  BorderBrush="{DynamicResource CorrectAnswerBrush}" 
-                  BorderThickness="2" CornerRadius="20" Padding="48,40"
+          <!-- Main answer card -->
+          <Border Background="{DynamicResource CardBackgroundBrush}"
+                  BorderBrush="{DynamicResource CorrectAnswerBrush}"
+                  BorderThickness="2"
+                  CornerRadius="20"
+                  Padding="48,40"
                   HorizontalAlignment="Center">
-            <StackPanel Spacing="12" HorizontalAlignment="Center">
-              <TextBlock Text="{Binding CorrectAnswer}" FontSize="48" FontWeight="Bold" 
-                         Foreground="{DynamicResource PrimaryTextBrush}" 
-                         HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="950" TextAlignment="Center"/>
+
+            <StackPanel Spacing="12"
+                        HorizontalAlignment="Center">
+
+              <TextBlock Text="{Binding CorrectAnswer}"
+                         FontSize="48"
+                         FontWeight="Bold"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         HorizontalAlignment="Center"
+                         TextWrapping="Wrap"
+                         MaxWidth="950"
+                         TextAlignment="Center"/>
+
             </StackPanel>
           </Border>
-          
         </StackPanel>
 
-        <!-- Active Question Card (Disappears when CorrectAnswer is present) -->
-        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="20" Padding="36" Width="1100"
+        <!-- Active question card -->
+        <Border Background="{DynamicResource CardBackgroundBrush}"
+                CornerRadius="20"
+                Padding="36"
+                Width="1100"
                 IsVisible="{Binding CorrectAnswer, Converter={x:Static convb:StringConverters.IsNullOrEmpty}}">
+
           <StackPanel Spacing="24">
-            
-            <!-- Time to Answer & Responses Labels -->
+
+            <!-- Timer and response status -->
             <Grid ColumnDefinitions="*,Auto">
-              <TextBlock Grid.Column="0" Text="Time to answer:" 
-                         Foreground="{DynamicResource SecondaryTextBrush}" 
-                         VerticalAlignment="Center" FontSize="16"/>
-              <TextBlock Grid.Column="1" Text="{Binding StatusText}" 
-                         Foreground="{DynamicResource SecondaryTextBrush}" 
-                         VerticalAlignment="Center" FontSize="16"/>
+
+              <TextBlock Grid.Column="0"
+                         Text="Time to answer:"
+                         Foreground="{DynamicResource SecondaryTextBrush}"
+                         VerticalAlignment="Center"
+                         FontSize="16"/>
+
+              <TextBlock Grid.Column="1"
+                         Text="{Binding StatusText}"
+                         Foreground="{DynamicResource SecondaryTextBrush}"
+                         VerticalAlignment="Center"
+                         FontSize="16"/>
+
             </Grid>
 
-            <!-- Thicker Segmented Time to Answer Progress Bar -->
+            <!-- Segmented progress bar -->
             <Grid Height="22">
-              <ProgressBar Minimum="0" Maximum="{Binding TimeSeconds}" 
-                           Value="{Binding SecondsRemaining}" Height="22" 
+
+              <ProgressBar Minimum="0"
+                           Maximum="{Binding TimeSeconds}"
+                           Value="{Binding SecondsRemaining}"
+                           Height="22"
                            CornerRadius="6"
                            Foreground="{DynamicResource AccentTealBrush}"/>
-              
-              <!-- Vertical Segment Dividers at 1/4, 1/2, and 3/4 -->
+
+              <!-- Quarter dividers -->
               <Grid ColumnDefinitions="*,*,*,*">
-                <Rectangle Grid.Column="0" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
-                <Rectangle Grid.Column="1" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
-                <Rectangle Grid.Column="2" Width="2" HorizontalAlignment="Right" Fill="{DynamicResource CardBackgroundBrush}" />
+
+                <Rectangle Grid.Column="0"
+                           Width="2"
+                           HorizontalAlignment="Right"
+                           Fill="{DynamicResource CardBackgroundBrush}"/>
+
+                <Rectangle Grid.Column="1"
+                           Width="2"
+                           HorizontalAlignment="Right"
+                           Fill="{DynamicResource CardBackgroundBrush}"/>
+
+                <Rectangle Grid.Column="2"
+                           Width="2"
+                           HorizontalAlignment="Right"
+                           Fill="{DynamicResource CardBackgroundBrush}"/>
+
               </Grid>
-            </Grid> 
+            </Grid>
           </StackPanel>
         </Border>
-
       </Grid>
     </Grid>
   </Viewbox>
