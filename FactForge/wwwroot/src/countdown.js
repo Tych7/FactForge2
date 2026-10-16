@@ -1,4 +1,7 @@
-let countdownHandle = null;
+let animationFrame = null;
+let countdownStartedAt = 0;
+let countdownDuration = 0;
+let activeProgressBar = null;
 
 export function startTimerCountdown(totalSeconds, progressBar) {
   startCountdown(totalSeconds, progressBar);
@@ -11,33 +14,38 @@ export function startMusicCountdown(totalSeconds, progressBar) {
 function startCountdown(totalSeconds, progressBar) {
   stopCountdown();
 
-  const totalMs = totalSeconds * 1000;
-  const startedAt = Date.now();
+  countdownDuration = Math.max(0, totalSeconds * 1000);
+  countdownStartedAt = performance.now();
+  activeProgressBar = progressBar;
 
-  const update = () => {
-    const remainingMs = Math.max(
-      0,
-      totalMs - (Date.now() - startedAt)
-    );
+  const update = (now) => {
+    if (!activeProgressBar) return;
 
-    const percentage = totalMs > 0
-      ? Math.min(100, (remainingMs / totalMs) * 100)
+    const elapsed = now - countdownStartedAt;
+    const remaining = Math.max(0, countdownDuration - elapsed);
+
+    const percentage = countdownDuration > 0
+      ? (remaining / countdownDuration) * 100
       : 0;
 
-    progressBar.style.width = `${percentage}%`;
+    activeProgressBar.style.width = `${percentage}%`;
 
-    if (remainingMs <= 0) {
-      stopCountdown();
+    if (remaining > 0) {
+      animationFrame = requestAnimationFrame(update);
+    } else {
+      animationFrame = null;
+      activeProgressBar = null;
     }
   };
 
-  update();
-  countdownHandle = setInterval(update, 200);
+  animationFrame = requestAnimationFrame(update);
 }
 
 export function stopCountdown() {
-  if (countdownHandle !== null) {
-    clearInterval(countdownHandle);
-    countdownHandle = null;
+  if (animationFrame !== null) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = null;
   }
+
+  activeProgressBar = null;
 }
