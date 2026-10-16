@@ -44,5 +44,6 @@
     <PackageReference Include="NetCoreAudio" Version="2.0.1" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="SkiaSharp" Version="3.119.0" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 </Project>

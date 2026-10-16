@@ -54,41 +54,13 @@ public sealed class AudioPlaybackService : IDisposable
         }
     }
 
-    private async Task SetDurationSeconds(string filePath)
+    private Task SetDurationSeconds(string filePath)
     {
-        _durationSeconds = await Task.Run(() =>
-            {
-                var start = new ProcessStartInfo
-                {
-                    FileName = "ffprobe",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
+        _durationSeconds = TagLib.File.Create(filePath)
+            .Properties.Duration
+            .TotalSeconds;
 
-                start.ArgumentList.Add("-v");
-                start.ArgumentList.Add("error");
-                start.ArgumentList.Add("-show_entries");
-                start.ArgumentList.Add("format=duration");
-                start.ArgumentList.Add("-of");
-                start.ArgumentList.Add("default=noprint_wrappers=1:nokey=1");
-                start.ArgumentList.Add(filePath);
-
-                using var process = Process.Start(start)
-                    ?? throw new InvalidOperationException("Could not start FFprobe.");
-
-                var output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-
-                return double.TryParse(
-                    output.Trim(),
-                    System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    out var duration)
-                    ? duration
-                    : 0;
-            });
+        return Task.CompletedTask;
     }
 
     public async Task PlayAsync(string filePath)
