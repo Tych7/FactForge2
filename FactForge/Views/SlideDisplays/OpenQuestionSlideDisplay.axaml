@@ -9,10 +9,17 @@
     <Grid RowDefinitions="Auto,*" Width="1200" Height="700">
       
       <!-- Header (Row 0) -->
-      <Viewbox Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,150,0,32">
-        <TextBlock Text="{Binding Question}" FontSize="44" FontWeight="Bold" 
-                   Foreground="{DynamicResource PrimaryTextBrush}" 
-                   HorizontalAlignment="Center"/>
+      <Viewbox Grid.Row="0"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Center"
+              Margin="0,150,0,32"
+              Stretch="Uniform"
+              StretchDirection="DownOnly">
+          <TextBlock Text="{Binding Question}"
+                    FontSize="100"
+                    FontWeight="Bold"
+                    Foreground="{DynamicResource PrimaryTextBrush}"
+                    HorizontalAlignment="Center"/>
       </Viewbox>
 
       <!-- Content Area (Row 1 - Both the Revealed Card and Question Card share this exact spot) -->
