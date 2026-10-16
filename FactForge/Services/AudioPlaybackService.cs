@@ -1,9 +1,9 @@
-
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using LibVLCSharp.Shared;
+using NetCoreAudio;
 
 namespace FactForge.Services;
 
@@ -14,37 +14,29 @@ namespace FactForge.Services;
 public sealed class AudioPlaybackService : IDisposable
 {
     public static AudioPlaybackService Shared { get; } = new();
-    private LibVLC? _libVlc;
 
     private readonly SemaphoreSlim _playLock = new(1, 1);
     private readonly Stopwatch _playbackClock = new();
 
-    private MediaPlayer? _mediaPlayer;
-    private bool _isPlaying;
+    private Player? _player;
     private bool _disposed;
+    private double _durationSeconds;
+    private string? _currentFilePath;
 
-    public  AudioPlaybackService()
-    {
-    }
+    public bool IsPlaying => _player?.Playing ?? false;
 
-    public bool IsPlaying => _isPlaying;
+    public bool IsPaused => _player?.Paused ?? false;
+    
 
-    public bool IsPaused =>
-        _mediaPlayer is not null &&
-        !_mediaPlayer.IsPlaying &&
-        !_isPlaying;
+    // NetCoreAudio does not provide a reliable playback position
+    // or duration across all supported player backends.
+    public double PositionSeconds => _playbackClock.Elapsed.TotalSeconds;
 
-    public double PositionSeconds =>
-        _playbackClock.Elapsed.TotalSeconds;
-
-    public double DurationSeconds =>
-        _mediaPlayer?.Length is long length && length > 0
-            ? length / 1000.0
-            : 0;
+    public double DurationSeconds => _durationSeconds;
 
     /// <summary>
-    /// Creates the native player before it is needed.
-    /// Call this while entering the lobby, not when the music slide appears.
+    /// Creates the audio player before it is needed.
+    /// Call this while entering the lobby.
     /// </summary>
     public async Task InitializeAsync()
     {
@@ -54,29 +46,7 @@ public sealed class AudioPlaybackService : IDisposable
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            if (_mediaPlayer is not null)
-                return;
-
-            await Task.Run(() =>
-            {
-                Core.Initialize();
-
-                var libVlc = new LibVLC();
-
-                try
-                {
-                    var mediaPlayer = new MediaPlayer(libVlc);
-                    mediaPlayer.EndReached += OnEndReached;
-
-                    _libVlc = libVlc;
-                    _mediaPlayer = mediaPlayer;
-                }
-                catch
-                {
-                    libVlc.Dispose();
-                    throw;
-                }
-            });
+            _player ??= new Player();
         }
         finally
         {
@@ -84,40 +54,70 @@ public sealed class AudioPlaybackService : IDisposable
         }
     }
 
+    private async Task SetDurationSeconds(string filePath)
+    {
+        _durationSeconds = await Task.Run(() =>
+            {
+                var start = new ProcessStartInfo
+                {
+                    FileName = "ffprobe",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                start.ArgumentList.Add("-v");
+                start.ArgumentList.Add("error");
+                start.ArgumentList.Add("-show_entries");
+                start.ArgumentList.Add("format=duration");
+                start.ArgumentList.Add("-of");
+                start.ArgumentList.Add("default=noprint_wrappers=1:nokey=1");
+                start.ArgumentList.Add(filePath);
+
+                using var process = Process.Start(start)
+                    ?? throw new InvalidOperationException("Could not start FFprobe.");
+
+                var output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                return double.TryParse(
+                    output.Trim(),
+                    System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out var duration)
+                    ? duration
+                    : 0;
+            });
+    }
+
     public async Task PlayAsync(string filePath)
     {
-        // Wait for initialization only when audio playback is actually needed.
-        await InitializeAsync();
+        if (!File.Exists(filePath))
+        {
+            throw new FileNotFoundException(
+                "The audio file could not be found.",
+                filePath);
+        }
 
+        await SetDurationSeconds(filePath);
+
+        await InitializeAsync();
         await _playLock.WaitAsync();
 
         try
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            var libVlc = _libVlc
+            var player = _player
                 ?? throw new InvalidOperationException(
-                    "LibVLC has not been initialized.");
+                    "The audio player has not been initialized.");
 
-            var player = _mediaPlayer
-                ?? throw new InvalidOperationException(
-                    "The media player has not been initialized.");
+            await player.Stop();
+            await player.Play(filePath);
 
-            await Task.Run(() =>
-            {
-                player.Stop();
-
-                using var media = new Media(
-                    libVlc,
-                    filePath,
-                    FromType.FromPath);
-
-                player.Media = media;
-                player.Play();
-            });
-
+            _currentFilePath = filePath;
             _playbackClock.Restart();
-            _isPlaying = true;
         }
         finally
         {
@@ -125,28 +125,46 @@ public sealed class AudioPlaybackService : IDisposable
         }
     }
 
-    public void Pause()
+    public async Task PauseAsync()
     {
-        var player = _mediaPlayer;
+        await _playLock.WaitAsync();
 
-        if (player is null || !_isPlaying)
-            return;
+        try
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-        player.Pause();
-        _playbackClock.Stop();
-        _isPlaying = false;
+            if (_player is null || !_player.Playing || _player.Paused)
+                return;
+
+            await _player.Pause();
+
+            _playbackClock.Stop();
+        }
+        finally
+        {
+            _playLock.Release();
+        }
     }
 
-    public void Resume()
+    public async Task ResumeAsync()
     {
-        var player = _mediaPlayer;
+        await _playLock.WaitAsync();
 
-        if (player is null || _isPlaying)
-            return;
+        try
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
 
-        player.Play();
-        _playbackClock.Start();
-        _isPlaying = true;
+            if (_player is null || !_player.Paused)
+                return;
+
+            await _player.Resume();
+
+            _playbackClock.Start();
+        }
+        finally
+        {
+            _playLock.Release();
+        }
     }
 
     public async Task ReplayAsync()
@@ -157,59 +175,22 @@ public sealed class AudioPlaybackService : IDisposable
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
 
-            if (_mediaPlayer?.Media is null)
-                return;
-
-            var player = _mediaPlayer;
-
-            await Task.Run(() =>
-            {
-                player.Stop();
-                player.Time = 0;
-                player.Play();
-            });
-
-            _playbackClock.Restart();
-            _isPlaying = true;
-        }
-        finally
-        {
-            _playLock.Release();
-        }
-    }
-
-    private void OnEndReached(object? sender, EventArgs e)
-    {
-        _playbackClock.Stop();
-        _isPlaying = false;
-    }
-
-    
-    public async Task StopAsync()
-    {
-        // No player means there is nothing to stop.
-        // Avoid waiting for background initialization to finish.
-        if (_mediaPlayer is null)
-        {
-            _playbackClock.Reset();
-            _isPlaying = false;
-            return;
-        }
-
-        await _playLock.WaitAsync();
-
-        try
-        {
-            var player = _mediaPlayer;
-
-            _playbackClock.Stop();
-            _playbackClock.Reset();
-            _isPlaying = false;
+            var player = _player;
 
             if (player is null)
                 return;
 
-            await Task.Run(() => player.Stop());
+            // Stop and start again using the current track.
+            await player.Stop();
+
+            // NetCoreAudio requires the file path for playback.
+            // Keep the current path to make replay possible.
+            if (string.IsNullOrWhiteSpace(_currentFilePath))
+                return;
+
+            await player.Play(_currentFilePath);
+
+            _playbackClock.Restart();
         }
         finally
         {
@@ -217,6 +198,23 @@ public sealed class AudioPlaybackService : IDisposable
         }
     }
 
+    public async Task StopAsync()
+    {
+        await _playLock.WaitAsync();
+
+        try
+        {
+            if (_player is not null)
+                await _player.Stop();
+
+            _playbackClock.Reset();
+            _currentFilePath = null;
+        }
+        finally
+        {
+            _playLock.Release();
+        }
+    }
 
     public async Task DisposeAsync()
     {
@@ -227,23 +225,18 @@ public sealed class AudioPlaybackService : IDisposable
 
         try
         {
+            if (_disposed)
+                return;
+
             _disposed = true;
 
-            var player = _mediaPlayer;
-            _mediaPlayer = null;
-
-            if (player is not null)
+            if (_player is not null)
             {
-                player.EndReached -= OnEndReached;
-                await Task.Run(() =>
-                {
-                    player.Stop();
-                    player.Dispose();
-                });
+                await _player.Stop();
+                _player = null;
             }
 
-            _libVlc?.Dispose();
-            _libVlc = null;
+            _playbackClock.Reset();
         }
         finally
         {

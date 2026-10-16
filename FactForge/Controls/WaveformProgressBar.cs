@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace FactForge.Controls;
 
@@ -57,6 +58,18 @@ public sealed class WaveformProgressBar : Control
     {
         get => GetValue(UnplayedBrushProperty);
         set => SetValue(UnplayedBrushProperty, value);
+    }
+    
+    private readonly DispatcherTimer _renderTimer =
+    new(DispatcherPriority.Render)
+    {
+        Interval = TimeSpan.FromMilliseconds(33)
+    };
+
+    public WaveformProgressBar()
+    {
+        _renderTimer.Tick += (_, _) => InvalidateVisual();
+        _renderTimer.Start();
     }
 
     static WaveformProgressBar()
