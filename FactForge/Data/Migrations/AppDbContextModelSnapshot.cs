@@ -187,6 +187,9 @@ namespace FactForge.Data.Migrations
                     b.Property<string>("MusicFilePath")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("NumbersOnly")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("OrderIndex")
                         .HasColumnType("INTEGER");
 
@@ -274,7 +277,7 @@ namespace FactForge.Data.Migrations
             modelBuilder.Entity("FactForge.Data.Entities.PlayerScoreSnapshot", b =>
                 {
                     b.HasOne("FactForge.Data.Entities.Player", "Player")
-                        .WithMany()
+                        .WithMany("ScoreSnapshots")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -326,6 +329,8 @@ namespace FactForge.Data.Migrations
             modelBuilder.Entity("FactForge.Data.Entities.Player", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("ScoreSnapshots");
                 });
 
             modelBuilder.Entity("FactForge.Data.Entities.Quiz", b =>

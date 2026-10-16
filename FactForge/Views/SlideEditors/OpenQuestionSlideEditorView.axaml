@@ -29,6 +29,16 @@
                      CornerRadius="12" Padding="12,8" FontSize="15"/>
         </StackPanel>
 
+        <!-- Numbers Only Toggle -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Answer format"
+                    FontSize="14"
+                    Foreground="{DynamicResource PrimaryTextBrush}"/>
+
+            <CheckBox Content="Numbers only"
+                    IsChecked="{Binding NumbersOnly}"/>
+        </StackPanel>
+
         <!-- Time Limit Input -->
         <StackPanel Spacing="6">
             <TextBlock Text="Time limit (seconds)" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>

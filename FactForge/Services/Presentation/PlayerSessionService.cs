@@ -244,7 +244,8 @@ public sealed class PlayerSessionService
                     slide.MusicFilePath,
                     slide.Title,
                     slide.Artist,
-                    slide.ImagePath);
+                    slide.ImagePath,
+                    slide.NumbersOnly);
 
                 hasAnswered = active.AnsweredPlayerIds.Contains(player.Id);
 

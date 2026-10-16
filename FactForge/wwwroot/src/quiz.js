@@ -105,7 +105,15 @@ function startNormalQuestion(slide) {
 
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "Type your answer";
+    input.placeholder = slide.numbersOnly
+      ? "Enter a number"
+      : "Type your answer";
+    input.autocomplete = "off";
+
+    if (slide.numbersOnly) {
+      input.inputMode = "numeric";
+      input.pattern = "[0-9]*";
+    }
 
     const submit = document.createElement("button");
     submit.type = "submit";
@@ -118,9 +126,13 @@ function startNormalQuestion(slide) {
 
       const answer = input.value.trim();
 
-      if (answer) {
-        submitAnswer(answer, submit);
+      if (!answer) return;
+
+      if (slide.numbersOnly && !/^\d+$/.test(answer)) {
+        return;
       }
+
+      submitAnswer(answer, submit);
     });
 
     choices.appendChild(form);

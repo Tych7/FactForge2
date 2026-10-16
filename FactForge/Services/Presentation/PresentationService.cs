@@ -149,7 +149,8 @@ public class PresentationService : IAsyncDisposable
             slide.MusicFilePath,
             slide.Title,
             slide.Artist,
-            slide.ImagePath);
+            slide.ImagePath,
+            slide.NumbersOnly);
 
         await _hub.Clients.All.SendAsync("SlideStarted", dto);
 
