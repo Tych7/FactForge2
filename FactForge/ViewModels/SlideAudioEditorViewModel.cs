@@ -104,29 +104,34 @@ public partial class SlideAudioEditorViewModel : ViewModelBase
         if (!HasAudio || string.IsNullOrWhiteSpace(AudioPath))
             return;
 
-        if (IsPreviewPlaying)
-        {
-            _previewPlayer.Pause();
-            IsPreviewPlaying = false;
-            _previewPaused = true;
-            OnPropertyChanged(nameof(IsPreviewPaused));
-            OnPropertyChanged(nameof(PreviewIcon));
-            return;
-        }
-
-        if (_previewPaused)
-        {
-            _previewPlayer.Resume();
-            _previewPaused = false;
-            IsPreviewPlaying = true;
-            _positionTimer.Start();
-            OnPropertyChanged(nameof(IsPreviewPaused));
-            OnPropertyChanged(nameof(PreviewIcon));
-            return;
-        }
-
         try
         {
+            if (IsPreviewPlaying)
+            {
+                await _previewPlayer.PauseAsync();
+
+                IsPreviewPlaying = false;
+                _previewPaused = true;
+                _positionTimer.Stop();
+
+                OnPropertyChanged(nameof(IsPreviewPaused));
+                OnPropertyChanged(nameof(PreviewIcon));
+                return;
+            }
+
+            if (_previewPaused)
+            {
+                await _previewPlayer.ResumeAsync();
+
+                _previewPaused = false;
+                IsPreviewPlaying = true;
+                _positionTimer.Start();
+
+                OnPropertyChanged(nameof(IsPreviewPaused));
+                OnPropertyChanged(nameof(PreviewIcon));
+                return;
+            }
+
             await _previewPlayer.PlayAsync(AudioPath);
 
             PositionSeconds = _previewPlayer.PositionSeconds;
