@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FactForge.Data;
 using FactForge.Data.Entities;
-using FactForge.Models;
 
 namespace FactForge.ViewModels;
 
@@ -14,6 +13,7 @@ public partial class OpenQuestionSlideEditorViewModel : ViewModelBase, IHasSlide
     [ObservableProperty] private string _question;
     [ObservableProperty] private string _correctAnswer;
     [ObservableProperty] private int _timeSeconds;
+    [ObservableProperty] private bool _numbersOnly;
 
     public OpenQuestionSlideEditorViewModel(Slide slide)
     {
@@ -22,6 +22,7 @@ public partial class OpenQuestionSlideEditorViewModel : ViewModelBase, IHasSlide
         _question = slide.Question ?? string.Empty;
         _correctAnswer = slide.CorrectAnswer ?? string.Empty;
         _timeSeconds = slide.TimeSeconds;
+        _numbersOnly = slide.NumbersOnly;
     }
 
     public Slide ToEntity() => new()
@@ -31,6 +32,7 @@ public partial class OpenQuestionSlideEditorViewModel : ViewModelBase, IHasSlide
         Question = Question,
         CorrectAnswer = CorrectAnswer,
         TimeSeconds = TimeSeconds,
+        NumbersOnly = NumbersOnly,
         ImagePath = Image.FileName,
     };
 }

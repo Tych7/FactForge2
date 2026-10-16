@@ -19,6 +19,7 @@ public class Slide
     // Question slides (MultipleChoice / OpenQuestion)
     public string? Question { get; set; }
     public string? CorrectAnswer { get; set; }
+    public bool NumbersOnly { get; set; }
     public int TimeSeconds { get; set; } = 20;
     public string? ImagePath { get; set; }
 

@@ -210,6 +210,7 @@ public class QuizRepository
         existing.SubText = slide.SubText;
         existing.Question = slide.Question;
         existing.CorrectAnswer = slide.CorrectAnswer;
+        existing.NumbersOnly = slide.NumbersOnly;
         existing.TimeSeconds = slide.TimeSeconds;
         existing.ImagePath = slide.ImagePath;
         existing.MusicFilePath = slide.MusicFilePath;
