@@ -23,10 +23,35 @@
 
         <!-- Correct Answer Input -->
         <StackPanel Spacing="6">
-            <TextBlock Text="Correct answer" FontSize="14" Foreground="{DynamicResource PrimaryTextBrush}"/>
-            <TextBox Text="{Binding CorrectAnswer}" Watermark="Expected answer (matched case-insensitively)"
-                     Background="White" Foreground="#121921"
-                     CornerRadius="12" Padding="12,8" FontSize="15"/>
+            <TextBlock Text="Correct answer"
+                    FontSize="14"
+                    Foreground="{DynamicResource PrimaryTextBrush}"/>
+
+            <TextBox Text="{Binding CorrectAnswer, UpdateSourceTrigger=PropertyChanged}"
+                    Watermark="Expected answer"
+                    Background="White"
+                    Foreground="#121921"
+                    CornerRadius="12"
+                    Padding="12,8"
+                    FontSize="15"
+                    Classes.error="{Binding HasCorrectAnswerError}">
+
+                <TextBox.Styles>
+                    <Style Selector="TextBox">
+                        <Setter Property="BorderBrush" Value="#D1D5DB"/>
+                    </Style>
+                    <Style Selector="TextBox.error">
+                        <Setter Property="BorderBrush" Value="#DC2626"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                    </Style>
+                </TextBox.Styles>
+            </TextBox>
+
+            <TextBlock Text="{Binding CorrectAnswerError}"
+                    Foreground="#DC2626"
+                    FontSize="12"
+                    IsVisible="{Binding HasCorrectAnswerError}"
+                    TextWrapping="Wrap"/>
         </StackPanel>
 
         <!-- Numbers Only Toggle -->
